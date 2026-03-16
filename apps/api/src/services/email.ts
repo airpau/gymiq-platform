@@ -184,6 +184,13 @@ Visit: https://gymiq.ai
     error?: string
   ): Promise<void> {
     try {
+      // Get the lead to find gymId and contact info
+      const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+      if (!lead) {
+        console.warn(`[Email Service] Lead ${leadId} not found, skipping log`);
+        return;
+      }
+
       // Find or create conversation for this lead
       let conversation = await prisma.conversation.findFirst({
         where: { leadId },
@@ -193,7 +200,9 @@ Visit: https://gymiq.ai
         // Create a conversation if it doesn't exist
         conversation = await prisma.conversation.create({
           data: {
+            gymId: lead.gymId,
             leadId,
+            phone: lead.phone || to,
             status: 'active',
             channel: 'email',
           },
