@@ -180,13 +180,13 @@ export default function SettingsPage() {
     setConfig(prev => ({
       ...prev!,
       [section]: {
-        ...prev![section],
+        ...(prev![section] as Record<string, unknown>),
         [subsection]: {
-          ...(prev![section] as any)[subsection],
+          ...((prev![section] as any)?.[subsection] ?? {}),
           ...updates,
         },
       },
-    }));
+    }) as GymConfig);
   };
 
   const addFAQ = () => {
