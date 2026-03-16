@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Stage-specific colors */
+.stage-new { @apply bg-blue-100 border-blue-300 text-blue-800; }
+.stage-contacted { @apply bg-purple-100 border-purple-300 text-purple-800; }
+.stage-engaged { @apply bg-amber-100 border-amber-300 text-amber-800; }
+.stage-booked { @apply bg-green-100 border-green-300 text-green-800; }
+.stage-visited { @apply bg-cyan-100 border-cyan-300 text-cyan-800; }
+.stage-converting { @apply bg-indigo-100 border-indigo-300 text-indigo-800; }
+.stage-converted { @apply bg-emerald-100 border-emerald-300 text-emerald-800; }
+.stage-lost { @apply bg-red-100 border-red-300 text-red-800; }
+.stage-nurturing { @apply bg-gray-100 border-gray-300 text-gray-800; }

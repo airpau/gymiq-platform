@@ -1,0 +1,11 @@
+name,email,phone,membership_type,join_date,last_visit,status
+John Smith,john@example.com,+447712345678,Premium,2024-01-15,2024-03-10,active
+Sarah Johnson,sarah@example.com,+447723456789,Basic,2024-02-01,2024-02-20,active
+Mike Davis,mike@example.com,+447734567890,Standard,2023-12-10,2024-01-15,active
+Emma Wilson,emma@example.com,+447745678901,Premium,2024-01-20,2024-03-12,active
+Tom Brown,tom@example.com,+447756789012,Basic,2023-11-05,2023-12-01,active
+Lisa Taylor,lisa@example.com,+447767890123,Standard,2024-02-15,2024-02-16,active
+James Lee,james@example.com,+447778901234,Premium,2023-10-20,2024-01-05,active
+Anna Clark,anna@example.com,+447789012345,Basic,2024-01-01,2024-03-11,active
+David White,david@example.com,+447790123456,Standard,2023-09-15,2023-11-20,active
+Sophie Martin,sophie@example.com,+447701234567,Premium,2024-02-10,2024-03-13,active

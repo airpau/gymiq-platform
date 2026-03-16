@@ -1,0 +1,460 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Gym {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique
+
+  // CRM integration (legacy tier classification)
+  crmType String? // 'glofox', 'mindbody', 'clubright', etc.
+  crmTier String? // 'A', 'B', 'C'
+
+  // Universal connector
+  connectorType   String? // 'api' | 'browser' | 'email' | 'upload' | 'manual'
+  connectorConfig Json?   // Provider credentials — encrypt at rest in production
+  syncSchedule    String? // Cron expression e.g. '0 */1 * * *' (hourly)
+  lastSyncAt      DateTime?
+  lastSyncStatus  String? // 'success' | 'failed' | 'partial' | 'running'
+
+  // WhatsApp/Twilio config
+  whatsappNumber String?
+  twilioSid      String?
+
+  // Settings & knowledge base
+  settings      Json @default("{}")
+  knowledgeBase Json @default("{}")
+
+  // Relations
+  members           Member[]
+  leads             Lead[]
+  conversations     Conversation[]
+  workflows         Workflow[]
+  calls             Call[]
+  syncLogs          SyncLog[]
+  bookings          Booking[]
+  cancelSaveAttempts CancelSaveAttempt[]
+  messageTemplates  MessageTemplate[]
+  staffTasks        StaffTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gyms")
+}
+
+model Member {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  // CRM data
+  crmId String?
+  name  String
+  email String?
+  phone String?
+
+  // Membership
+  joinDate       DateTime?
+  status         String    @default("active") // 'active', 'overdue', 'paused', 'cancelled', 'sleeper'
+  membershipTier String?
+  nextPayment    DateTime?
+
+  // Engagement tracking
+  lastVisit     DateTime?
+  visitCount30d Int       @default(0)
+  lifetimeValue Decimal   @default(0) @db.Decimal(10, 2)
+
+  // Retention
+  riskScore   Int  @default(0) // 0-100
+  riskFactors Json @default("[]")
+
+  // Preferences
+  preferences Json @default("{}")
+
+  // Relations
+  conversations      Conversation[]
+  calls              Call[]
+  cancelSaveAttempts CancelSaveAttempt[]
+  staffTasks         StaffTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, status])
+  @@index([gymId, riskScore])
+  @@map("members")
+}
+
+model Lead {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  // Source tracking
+  source       String // 'abandoned_cart', 'web_form', 'walk_in', 'call', 'referral'
+  sourceDetail String?
+
+  // Contact info
+  name  String?
+  email String?
+  phone String?
+
+  // Status & Pipeline
+  enquiryDate   DateTime?
+  currentStage  String    @default("new") // 'new', 'contacted', 'engaged', 'booked', 'visited', 'converting', 'converted', 'lost', 'nurturing'
+  score         Int       @default(0) // 0-100 lead quality
+
+  // Contact tracking
+  lastContactAt      DateTime?
+  lastContactChannel String?   // 'whatsapp', 'email', 'sms', 'call'
+  contactAttempts    Int       @default(0)
+  preferredChannel   String?   // 'whatsapp', 'email', 'sms', 'call'
+
+  // Assigned to (staff member name/id)
+  assignedTo String?
+
+  // Conversion tracking
+  convertedAt DateTime?
+  lostReason  String?
+
+  // Metadata
+  metadata Json @default("{}")
+
+  // Relations
+  conversations Conversation[]
+  calls         Call[]
+  journeySteps  LeadJourney[]
+  bookings      Booking[]
+  staffTasks    StaffTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, currentStage])
+  @@index([gymId, source])
+  @@map("leads")
+}
+
+model LeadJourney {
+  id     String @id @default(uuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  // Stage transition
+  stage     String  // Current stage after this transition
+  fromStage String? // Previous stage (null for initial entry)
+
+  // Action details
+  channel String? // 'whatsapp', 'email', 'sms', 'call', 'manual', 'system'
+  action  String  // 'outreach', 'response', 'booking', 'visit', 'follow_up', 'stage_change'
+  message String? // Message sent or action taken
+
+  // Metadata
+  metadata Json @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+  @@map("lead_journey")
+}
+
+model Booking {
+  id     String @id @default(uuid())
+  gymId  String
+  gym    Gym    @relation(fields: [gymId], references: [id])
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  // Booking details
+  date     DateTime
+  timeSlot String   // e.g., '10:00-11:00', '14:30-15:30'
+  type     String   @default("tour") // 'tour', 'trial_class', 'consultation'
+  status   String   @default("scheduled") // 'scheduled', 'confirmed', 'attended', 'no_show', 'cancelled'
+
+  // Tracking
+  confirmedAt DateTime?
+  remindedAt  DateTime?
+  attendedAt  DateTime?
+
+  // Staff notes
+  notes String?
+
+  // Metadata
+  metadata Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, date])
+  @@index([gymId, leadId])
+  @@index([gymId, status])
+  @@map("bookings")
+}
+
+model Conversation {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  // Participant — either a member or a lead
+  memberId String?
+  member   Member? @relation(fields: [memberId], references: [id])
+  leadId   String?
+  lead     Lead?   @relation(fields: [leadId], references: [id])
+
+  phone   String
+  channel String // 'whatsapp', 'sms', 'voice'
+
+  // Status
+  status String @default("active") // 'active', 'closed', 'waiting_human'
+
+  // AI conversation context/memory
+  context Json @default("{}")
+
+  // Relations
+  messages Message[]
+
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([gymId, phone])
+  @@index([gymId, status])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  // Content
+  direction   String // 'inbound', 'outbound'
+  content     String
+  contentType String @default("text") // 'text', 'template', 'voice'
+
+  // AI tracking
+  intent           String?
+  intentConfidence Float?
+  aiModel          String? // Which model generated this
+  aiCost           Decimal? @db.Decimal(10, 6) // Cost per message
+
+  // Delivery tracking
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  // Metadata
+  metadata Json @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model Workflow {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  name          String
+  type          String // 'lead_followup', 'retention', 'payment_recovery', 'win_back'
+  trigger       String // 'abandoned_cart', 'no_visit_14d', 'payment_failed', etc.
+  triggerConfig Json   @default("{}")
+
+  // Array of {delay_minutes, message_template, channel} steps
+  steps Json
+
+  status  String @default("draft") // 'active', 'paused', 'draft'
+  metrics Json   @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, type])
+  @@index([gymId, status])
+  @@map("workflows")
+}
+
+model Call {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  // Twilio data
+  twilioSid  String? @unique
+  fromNumber String
+  toNumber   String
+  direction  String // 'inbound', 'outbound'
+
+  // Call status
+  status          String // 'queued', 'ringing', 'in_progress', 'completed', 'missed', 'voicemail'
+  durationSeconds Int?
+
+  // Recording & transcription
+  recordingUrl String?
+  transcript   String?
+  aiSummary    String?
+
+  // Outcome classification
+  outcome String? // 'booking', 'question', 'complaint', 'spam', etc.
+
+  // Relations
+  memberId String?
+  member   Member? @relation(fields: [memberId], references: [id])
+  leadId   String?
+  lead     Lead?   @relation(fields: [leadId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, status])
+  @@index([gymId, createdAt])
+  @@map("calls")
+}
+
+// ─── Sync audit log ───────────────────────────────────────────────────────────
+
+model SyncLog {
+  id    String @id @default(uuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id])
+
+  connectorType String  // 'api' | 'browser' | 'email' | 'upload' | 'manual'
+  startedAt     DateTime
+  completedAt   DateTime?
+  status        String    // 'running' | 'success' | 'failed' | 'partial'
+
+  // Member sync counts
+  membersCreated Int @default(0)
+  membersUpdated Int @default(0)
+  membersSkipped Int @default(0)
+  membersErrors  Int @default(0)
+
+  // Lead sync counts
+  leadsCreated   Int @default(0)
+  leadsUpdated   Int @default(0)
+  leadsSkipped   Int @default(0)
+  leadsErrors    Int @default(0)
+  followupQueued Int @default(0)
+
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+
+  @@index([gymId, createdAt])
+  @@map("sync_logs")
+}
+
+// ─── Cancel-Save AI Engine ───────────────────────────────────────────────────
+
+model CancelSaveAttempt {
+  id       String @id @default(uuid())
+  gymId    String
+  gym      Gym    @relation(fields: [gymId], references: [id])
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  reason         String?   // why they want to cancel
+  reasonCategory String?   // too_expensive, not_using, moving, injury, unhappy, other
+  offerMade      String?   // what we offered
+  offerType      String?   // downgrade, freeze, discount, free_session, pt_session
+  outcome        String    @default("in_progress") // in_progress, saved, lost, escalated
+  savedAt        DateTime?
+  lostAt         DateTime?
+
+  conversationLog Json @default("[]") // full conversation history
+  metadata        Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, outcome])
+  @@index([memberId])
+  @@map("cancel_save_attempts")
+}
+
+// ─── Message Templates + A/B Testing ─────────────────────────────────────────
+
+model MessageTemplate {
+  id    String  @id @default(uuid())
+  gymId String?
+  gym   Gym?    @relation(fields: [gymId], references: [id])
+
+  name     String
+  category String // welcome, booking, retention, payment, cancel_save
+  channel  String // whatsapp, email, sms
+
+  variants Json // [{id, content, variables[], active}]
+
+  // Performance tracking
+  totalSent      Int @default(0)
+  totalOpened    Int @default(0)
+  totalReplied   Int @default(0)
+  totalConverted Int @default(0)
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId, category])
+  @@index([category, isActive])
+  @@map("message_templates")
+}
+
+// ─── Staff Action Queue ──────────────────────────────────────────────────────
+
+model StaffTask {
+  id        String   @id @default(uuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id])
+
+  // Task details
+  title       String
+  description String?
+  category    String    // cancellation, freeze, retention, lead_followup, payment, manual_call, general
+  priority    String    @default("medium") // urgent, high, medium, low
+  status      String    @default("pending") // pending, in_progress, completed, dismissed
+
+  // Related entities
+  memberId    String?
+  member      Member?   @relation(fields: [memberId], references: [id])
+  leadId      String?
+  lead        Lead?     @relation(fields: [leadId], references: [id])
+  cancelSaveId String?
+
+  // Assignment
+  assignedTo  String?   // staff member name
+  createdBy   String    @default("system") // system, ai, staff_name
+
+  // Resolution
+  completedAt   DateTime?
+  completedBy   String?
+  resolution    String?   // what action was taken
+  resolutionNotes String? // free text notes from staff
+
+  // Scheduling
+  dueDate     DateTime?
+  reminderAt  DateTime?
+
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([gymId, status, priority])
+  @@index([gymId, category])
+  @@index([memberId])
+  @@index([leadId])
+  @@index([dueDate])
+  @@map("staff_tasks")
+}

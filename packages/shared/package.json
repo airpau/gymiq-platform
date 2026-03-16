@@ -1,0 +1,14 @@
+{
+  "name": "@gymiq/shared",
+  "version": "0.1.0",
+  "description": "GymIQ shared types and utilities",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.11.0"
+  }
+}

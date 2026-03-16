@@ -1,0 +1,29 @@
+{
+  "name": "@gymiq/connectors",
+  "version": "0.1.0",
+  "description": "Universal data connector system — API, browser, email, upload, manual",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@gymiq/database": "*",
+    "@gymiq/shared": "*",
+    "bullmq": "^5.1.6",
+    "playwright": "^1.42.0",
+    "imapflow": "^1.0.162",
+    "mailparser": "^3.7.1",
+    "node-cron": "^3.0.3",
+    "zod": "^3.22.4",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.11.0",
+    "@types/mailparser": "^3.4.4",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.7.0"
+  }
+}

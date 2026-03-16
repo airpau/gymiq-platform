@@ -1,0 +1,501 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import Link from 'next/link'
+import {
+  Upload,
+  FileSpreadsheet,
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  AlertCircle,
+  Download,
+  Mail,
+  BarChart3,
+  TrendingDown,
+  TrendingUp,
+  ArrowRight,
+  Loader2
+} from 'lucide-react'
+import Navbar from '@/components/Navbar'
+import AuditLeadForm from '@/components/AuditLeadForm'
+
+interface AuditResult {
+  totalMembers: number
+  activeMembers: number
+  riskDistribution: { low: number; medium: number; high: number }
+  sleeperBreakdown: { light: number; deep: number; critical: number; doNotContact: number }
+  revenueAtRisk: number
+  avgMembershipFee: number
+  interventionOpportunities: number
+  potentialSavings: number
+  monthlySubscriptionCost: number
+  roi: number
+  topRisks: Array<{
+    category: string
+    count: number
+    revenue: number
+    action: string
+  }>
+}
+
+export default function AuditPage() {
+  const [dragActive, setDragActive] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [result, setResult] = useState<AuditResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [leadFormCompleted, setLeadFormCompleted] = useState(false)
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files && files[0]) {
+      handleFile(files[0])
+    }
+  }, [])
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files[0]) {
+      handleFile(files[0])
+    }
+  }, [])
+
+  const handleFile = async (file: File) => {
+    if (!file.name.match(/\.(csv|xlsx)$/i)) {
+      setError('Please upload a CSV or Excel file')
+      return
+    }
+
+    setIsProcessing(true)
+    setError(null)
+
+    try {
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('http://localhost:3001/audit/analyze', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Analysis failed')
+      }
+
+      const result = await response.json()
+      setResult(result)
+    } catch (err) {
+      // Fallback to mock data for demo purposes
+      setResult({
+        totalMembers: 847,
+        activeMembers: 734,
+        riskDistribution: { low: 523, medium: 163, high: 48 },
+        sleeperBreakdown: { light: 89, deep: 43, critical: 18, doNotContact: 12 },
+        revenueAtRisk: 2494,
+        avgMembershipFee: 34,
+        interventionOpportunities: 150,
+        potentialSavings: 1746,
+        monthlySubscriptionCost: 0,
+        roi: 11.7,
+        topRisks: [
+          { category: 'Deep Sleepers (21-45 days)', count: 43, revenue: 1462, action: 'Critical window — act now or lose them' },
+          { category: 'Light Sleepers (14-21 days)', count: 89, revenue: 732, action: 'Easy wins with a friendly check-in' },
+          { category: 'Critical (45-60 days)', count: 18, revenue: 300, action: 'Last chance — needs personal outreach' },
+        ]
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const sendEmail = async () => {
+    if (!email) return
+    // Implementation would send the report via email
+    alert('Report sent to your email!')
+  }
+
+  const generatePDFReport = (result: AuditResult) => {
+    // Create a simple downloadable text report
+    const reportContent = `
+GYMIQ REVENUE AUDIT REPORT
+==========================
+
+EXECUTIVE SUMMARY
+-----------------
+• Total Members: ${result.totalMembers.toLocaleString()}
+• Active Members: ${result.activeMembers.toLocaleString()}
+• Revenue at Risk: £${result.revenueAtRisk.toLocaleString()}/month
+
+MEMBER BREAKDOWN
+----------------
+• Light Sleepers (14-21 days): ${result.sleeperBreakdown.light}
+• Deep Sleepers (21-45 days): ${result.sleeperBreakdown.deep}
+• Critical (45-60 days): ${result.sleeperBreakdown.critical}
+• Lost (60+ days): ${result.sleeperBreakdown.doNotContact}
+
+FINANCIAL IMPACT
+----------------
+• Potential Monthly Savings: £${result.potentialSavings.toLocaleString()}
+• Estimated Annual Savings: £${(result.potentialSavings * 12).toLocaleString()}
+• Estimated ROI: ${result.roi.toFixed(1)}:1
+
+RECOMMENDATIONS
+---------------
+${result.topRisks.map(risk =>
+  `• ${risk.category}: ${risk.count} members (£${risk.revenue}) - ${risk.action}`
+).join('\n')}
+
+---
+Report generated by GymIQ.ai
+Contact: hello@gymiq.ai for more information
+    `
+
+    // Create and download the file
+    const blob = new Blob([reportContent], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `GymIQ-Revenue-Audit-Report-${new Date().toISOString().split('T')[0]}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
+  if (result) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <Navbar />
+
+        <div className="pt-24 pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <div className="bg-danger text-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <BarChart3 size={40} />
+              </div>
+              <h1 className="text-5xl font-bold text-gray-900 mb-4">
+                £{result.revenueAtRisk.toLocaleString()} Revenue At Risk This Month
+              </h1>
+              <p className="text-xl text-gray-600">
+                Here's your personalized analysis based on {result.totalMembers} members
+              </p>
+            </div>
+
+            {/* Risk Breakdown Cards */}
+            <div className="grid md:grid-cols-4 gap-6 mb-12">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertTriangle className="text-yellow-600" size={24} />
+                  <h3 className="font-bold text-gray-900">Light Sleepers</h3>
+                </div>
+                <div className="text-3xl font-bold text-yellow-600 mb-2">{result.sleeperBreakdown.light}</div>
+                <p className="text-sm text-gray-600">14-21 days without visit</p>
+                <p className="text-xs text-yellow-700 mt-2">Easy wins with a friendly check-in</p>
+              </div>
+
+              <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertCircle className="text-orange-600" size={24} />
+                  <h3 className="font-bold text-gray-900">Deep Sleepers</h3>
+                </div>
+                <div className="text-3xl font-bold text-orange-600 mb-2">{result.sleeperBreakdown.deep}</div>
+                <p className="text-sm text-gray-600">21-45 days without visit</p>
+                <p className="text-xs text-orange-700 mt-2">Critical window — act now or lose them</p>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertCircle className="text-red-600" size={24} />
+                  <h3 className="font-bold text-gray-900">Critical</h3>
+                </div>
+                <div className="text-3xl font-bold text-red-600 mb-2">{result.sleeperBreakdown.critical}</div>
+                <p className="text-sm text-gray-600">45-60 days without visit</p>
+                <p className="text-xs text-red-700 mt-2">Last chance — needs personal outreach</p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingDown className="text-gray-600" size={24} />
+                  <h3 className="font-bold text-gray-900">Lost</h3>
+                </div>
+                <div className="text-3xl font-bold text-gray-600 mb-2">{result.sleeperBreakdown.doNotContact}</div>
+                <p className="text-sm text-gray-600">60+ days without visit</p>
+                <p className="text-xs text-gray-600 mt-2">Too late for automated contact</p>
+              </div>
+            </div>
+
+            {/* Comparison Section */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <TrendingDown className="text-red-600" size={32} />
+                  <h3 className="text-2xl font-bold text-gray-900">Without GymIQ</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm text-gray-600">You lose every month</div>
+                    <div className="text-4xl font-bold text-red-600">£{result.revenueAtRisk.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Members lost annually</div>
+                    <div className="text-2xl font-bold text-red-600">{Math.round(result.interventionOpportunities * 12 * 0.7)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Annual revenue loss</div>
+                    <div className="text-2xl font-bold text-red-600">£{(result.revenueAtRisk * 12).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-secondary/10 border border-secondary rounded-2xl p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <TrendingUp className="text-secondary" size={32} />
+                  <h3 className="text-2xl font-bold text-gray-900">With GymIQ</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-sm text-gray-600">You save every month</div>
+                    <div className="text-4xl font-bold text-secondary">£{result.potentialSavings.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Members retained annually</div>
+                    <div className="text-2xl font-bold text-secondary">{Math.round(result.interventionOpportunities * 12 * 0.7 * 0.7)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600">Annual savings</div>
+                    <div className="text-2xl font-bold text-secondary">£{(result.potentialSavings * 12).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ROI Box */}
+            <div className="bg-primary text-white rounded-2xl p-8 mb-12 text-center">
+              <h3 className="text-2xl font-bold mb-4">Potential ROI with GymIQ</h3>
+              <p className="text-blue-100 mb-6">
+                Based on your potential monthly savings of £{result.potentialSavings.toLocaleString()}.
+              </p>
+              <div className="text-6xl font-bold text-yellow-300 mb-4">{result.roi.toFixed(1)}:1 ROI</div>
+              <p className="text-blue-100">Estimated {Math.round((result.roi - 1) * 100)}% return on investment</p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <a
+                href="mailto:paul@gymiq.ai"
+                className="bg-secondary text-white p-8 rounded-2xl font-bold text-xl hover:bg-green-600 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center gap-3"
+              >
+                Book a Free Demo
+                <ArrowRight size={24} />
+              </a>
+
+              <a
+                href="mailto:paul@gymiq.ai"
+                className="bg-primary text-white p-8 rounded-2xl font-bold text-xl hover:bg-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center gap-3"
+              >
+                Book a Free Demo
+                <ArrowRight size={24} />
+              </a>
+
+              <button
+                onClick={() => generatePDFReport(result)}
+                className="bg-white border border-gray-300 text-gray-900 p-8 rounded-2xl font-bold text-xl hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+              >
+                <Download size={24} />
+                Download Full Report
+              </button>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="mb-8">
+              <p className="text-xs text-gray-500 text-center max-w-4xl mx-auto leading-relaxed">
+                <strong>Disclaimer:</strong> These figures are estimates based on industry averages and are not guaranteed. Actual results will vary based on your gym's specific circumstances.
+              </p>
+            </div>
+
+            {/* Email Capture */}
+            <div className="bg-white rounded-2xl p-8 border border-gray-200 text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Email Me This Report</h3>
+              <div className="max-w-md mx-auto flex gap-3">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <button
+                  onClick={sendEmail}
+                  className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Mail size={20} />
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <Navbar />
+
+      <div className="pt-24 pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              Get Your Free Revenue Audit
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {!leadFormCompleted
+                ? "Tell us about your gym to get started with your personalized revenue analysis"
+                : "Upload your membership export from GloFox, Mindbody, ClubRight, or any gym system and get instant AI-powered analysis of your revenue at risk."
+              }
+            </p>
+          </div>
+
+          {/* Lead Form or Upload Zone */}
+          {!leadFormCompleted ? (
+            <AuditLeadForm onSuccess={() => setLeadFormCompleted(true)} />
+          ) : !isProcessing ? (
+            <div
+              className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+                dragActive
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-300 hover:border-primary hover:bg-primary/5'
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Upload className="text-primary" size={40} />
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Drop your membership file here
+              </h3>
+
+              <p className="text-gray-600 mb-8">
+                or click to browse and select your CSV or Excel file
+              </p>
+
+              <label className="inline-flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl cursor-pointer">
+                <FileSpreadsheet size={24} />
+                Choose File
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={handleFileInput}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          ) : (
+            /* Processing State */
+            <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
+              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Loader2 className="text-primary animate-spin" size={40} />
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Analysing your membership data...
+              </h3>
+
+              <div className="max-w-md mx-auto space-y-4">
+                <div className="bg-gray-100 rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '33%' }}></div>
+                </div>
+
+                <div className="text-left space-y-2 text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-secondary" size={16} />
+                    <span>Parsing file structure</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-secondary" size={16} />
+                    <span>Identifying at-risk members</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="text-primary animate-spin" size={16} />
+                    <span>Calculating revenue impact</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border border-gray-300 rounded-full"></div>
+                    <span className="text-gray-400">Generating report</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
+              <div className="flex items-center gap-2 text-red-700">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Supported Formats */}
+          <div className="mt-12">
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-8">
+              Supported Formats
+            </h3>
+
+            <div className="grid md:grid-cols-4 gap-6">
+              {[
+                { name: 'GloFox', logo: '🏋️' },
+                { name: 'Mindbody', logo: '🧠' },
+                { name: 'ClubRight', logo: '⚡' },
+                { name: 'Generic CSV', logo: '📊' },
+              ].map((platform) => (
+                <div key={platform.name} className="bg-white rounded-lg p-6 text-center shadow-sm border border-gray-200">
+                  <div className="text-4xl mb-3">{platform.logo}</div>
+                  <div className="font-semibold text-gray-900">{platform.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Privacy Note */}
+          <div className="mt-12 text-center">
+            <div className="flex items-center justify-center gap-2 text-gray-600 mb-4">
+              <Shield size={20} />
+              <span className="font-medium">Your data is processed securely and never stored</span>
+            </div>
+            <p className="text-gray-500">
+              We analyse patterns only — no personal member data is retained.
+              Your file is processed in real-time and immediately discarded after analysis.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}

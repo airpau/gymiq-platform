@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "paths": {
+      "@gymiq/database": ["../../packages/database/src"],
+      "@gymiq/ai-gateway": ["../../packages/ai-gateway/src"],
+      "@gymiq/shared": ["../../packages/shared/src"],
+      "@gymiq/connectors": ["../../packages/connectors/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
