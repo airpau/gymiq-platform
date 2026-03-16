@@ -168,7 +168,7 @@ export default function SettingsPage() {
     setConfig(prev => ({
       ...prev!,
       [section]: {
-        ...prev![section],
+        ...(prev![section] as Record<string, any>),
         ...updates,
       },
     }));
