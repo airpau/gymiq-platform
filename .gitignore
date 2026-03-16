@@ -38,3 +38,4 @@ packages/database/prisma/migrations/**/migration_lock.toml
 # Data files
 *.csv
 !test-members.csv
+.vercel

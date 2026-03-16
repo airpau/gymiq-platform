@@ -117,13 +117,14 @@ export class EmailService {
       console.error(`[Email Service] Failed to send email to ${options.to}:`, error);
 
       // Log failed email
+      const err = error as Error;
       if (options.leadId) {
-        await this.logEmail(options.leadId, options.to, options.subject, options.htmlBody, 'failed', undefined, error.message);
+        await this.logEmail(options.leadId, options.to, options.subject, options.htmlBody, 'failed', undefined, err.message);
       }
 
       return {
         success: false,
-        error: error.message || 'Unknown email sending error',
+        error: err.message || 'Unknown email sending error',
       };
     }
   }
@@ -195,7 +196,6 @@ Visit: https://gymiq.ai
             leadId,
             status: 'active',
             channel: 'email',
-            lastActivity: new Date(),
           },
         });
       }
@@ -219,10 +219,10 @@ Visit: https://gymiq.ai
         },
       });
 
-      // Update conversation last activity
+      // Update conversation timestamp
       await prisma.conversation.update({
         where: { id: conversation.id },
-        data: { lastActivity: new Date() },
+        data: { updatedAt: new Date() },
       });
 
     } catch (error) {
