@@ -74,8 +74,6 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
     const lead = await prisma.lead.create({
       data: {
         gymId: gymId,
-      data: {
-        gymId: gym.id,
         source: 'audit_page',
         sourceDetail: 'Pre-upload audit form',
         name,
