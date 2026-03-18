@@ -91,7 +91,7 @@ export default function AuditPage() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('http://localhost:3001/audit/analyze', {
+      const response = await fetch('https://gymiq-api-production.up.railway.app/audit/analyze', {
         method: 'POST',
         body: formData,
       })

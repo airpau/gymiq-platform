@@ -94,8 +94,8 @@ export default function Home() {
     try {
       setLoading(true);
       const [statsResponse, tasksResponse] = await Promise.all([
-        fetch(`http://localhost:3001/stats/overview?gymId=${gymId}`),
-        fetch(`http://localhost:3001/tasks/today?gymId=${gymId}`)
+        fetch(`https://gymiq-api-production.up.railway.app/stats/overview?gymId=${gymId}`),
+        fetch(`https://gymiq-api-production.up.railway.app/tasks/today?gymId=${gymId}`)
       ]);
 
       if (!statsResponse.ok) {
@@ -122,7 +122,7 @@ export default function Home() {
 
   const completeTask = async (taskId: string, resolution: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/tasks/${taskId}/complete`, {
+      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks/${taskId}/complete`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resolution }),

@@ -401,7 +401,7 @@ function WaitlistSection() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/leads', {
+      const response = await fetch('https://gymiq-api-production.up.railway.app/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

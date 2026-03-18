@@ -55,7 +55,7 @@ export default function AuditLeadForm({ onSuccess }: AuditLeadFormProps) {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('http://localhost:3001/leads/audit-signup', {
+      const response = await fetch('https://gymiq-api-production.up.railway.app/leads/audit-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

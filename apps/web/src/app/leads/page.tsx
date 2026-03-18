@@ -117,7 +117,7 @@ export default function LeadsPage() {
     try {
       setLoading(true);
       // Fetch from real API endpoint
-      const response = await fetch(`http://localhost:3001/leads?gymId=${gymId}&source=${sourceFilter}&dateRange=${dateRange}`);
+      const response = await fetch(`https://gymiq-api-production.up.railway.app/leads?gymId=${gymId}&source=${sourceFilter}&dateRange=${dateRange}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -315,7 +315,7 @@ export default function LeadsPage() {
 
   const createTask = async (leadId: string, title: string, category: string, priority: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/tasks`, {
+      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

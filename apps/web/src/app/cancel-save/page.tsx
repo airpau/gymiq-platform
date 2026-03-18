@@ -82,7 +82,7 @@ export default function CancelSavePage() {
 
       // Try fetching from real API first
       try {
-        const response = await fetch(`http://localhost:3001/cancel-save?gymId=${gymId}&timeRange=${timeRange}`);
+        const response = await fetch(`https://gymiq-api-production.up.railway.app/cancel-save?gymId=${gymId}&timeRange=${timeRange}`);
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -259,7 +259,7 @@ export default function CancelSavePage() {
 
   const createUrgentTask = async (attempt: CancelSaveAttempt) => {
     try {
-      const response = await fetch(`http://localhost:3001/tasks`, {
+      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
