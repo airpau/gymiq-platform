@@ -3,3 +3,16 @@ node_modules
 dist
 .vercel
 .turbo
+*.log
+.env
+.env.local
+.env.*
+coverage
+.nyc_output
+.DS_Store
+*.tsbuildinfo
+apps/*/node_modules
+packages/*/node_modules
+apps/*/.next
+apps/*/dist
+packages/*/dist
