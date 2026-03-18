@@ -37,13 +37,27 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
 
     const { name, email, phone, gymName, memberCount } = parsed.data;
 
-    // Create lead with audit-specific source and metadata
-    // Use the default gym ID for now (in production, this could be a system gym)
-    const defaultGymId = 'f4068507-4c6b-4fea-8ec4-4095a37827b0';
+    // Find or create a gym for this audit lead
+    // First try to find by name, then create if not exists
+    let gym = await prisma.gym.findFirst({
+      where: { slug: 'audit-leads' }
+    });
+
+    if (!gym) {
+      gym = await prisma.gym.create({
+        data: {
+          name: 'Audit Leads',
+          slug: 'audit-leads',
+          settings: {},
+          knowledgeBase: {},
+        }
+      });
+      console.log('[Audit Signup] Created system gym for audit leads:', gym.id);
+    }
 
     const lead = await prisma.lead.create({
       data: {
-        gymId: defaultGymId, // Using default gym for audit leads
+        gymId: gym.id,
         source: 'audit_page',
         sourceDetail: 'Pre-upload audit form',
         name,
