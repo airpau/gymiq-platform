@@ -37,37 +37,43 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
 
     const { name, email, phone, gymName, memberCount } = parsed.data;
 
-    // Find or create a gym for this audit lead using upsert
-    let gym;
+    // Find or create a gym for this audit lead
+    let gymId: string;
     try {
-      gym = await prisma.gym.upsert({
-        where: { slug: 'audit-leads' },
-        update: {}, // No update needed if exists
-        create: {
-          name: 'Audit Leads',
-          slug: 'audit-leads',
-          settings: {},
-          knowledgeBase: {},
-        }
+      // First try to find existing gym
+      const existingGym = await prisma.gym.findUnique({
+        where: { slug: 'audit-leads' }
       });
-      console.log('[Audit Signup] Gym upsert success:', gym.id);
-    } catch (upsertError) {
-      console.error('[Audit Signup] Gym upsert failed:', upsertError);
+      
+      if (existingGym) {
+        gymId = existingGym.id;
+        console.log('[Audit Signup] Found existing gym:', gymId);
+      } else {
+        // Create new gym
+        const newGym = await prisma.gym.create({
+          data: {
+            name: 'Audit Leads',
+            slug: 'audit-leads',
+            settings: {},
+            knowledgeBase: {},
+          }
+        });
+        gymId = newGym.id;
+        console.log('[Audit Signup] Created new gym:', gymId);
+      }
+    } catch (gymError) {
+      console.error('[Audit Signup] Gym operation failed:', gymError);
       return res.status(500).json({
         success: false,
         error: 'Failed to create gym record'
       });
     }
 
-    if (!gym || !gym.id) {
-      console.error('[Audit Signup] Gym is null or has no id');
-      return res.status(500).json({
-        success: false,
-        error: 'Gym record invalid'
-      });
-    }
+    console.log('[Audit Signup] Creating lead with gymId:', gymId);
 
     const lead = await prisma.lead.create({
+      data: {
+        gymId: gymId,
       data: {
         gymId: gym.id,
         source: 'audit_page',
