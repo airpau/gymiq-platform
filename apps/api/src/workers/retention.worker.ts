@@ -58,10 +58,10 @@ async function processChurnJob(job: Job<ChurnJobData>): Promise<void> {
       where: { id: { in: actionableMembers.map((r: BatchResult) => r.memberId) } },
       select: { id: true, name: true, phone: true },
     });
-    const phoneMap = new Map(memberPhones.map((m) => [m.id, m]));
+    const phoneMap = new Map(memberPhones.map((m: { id: string; name: string; phone: string | null }) => [m.id, m]));
 
     for (const result of actionableMembers) {
-      const info = phoneMap.get(result.memberId);
+      const info = phoneMap.get(result.memberId) as { id: string; name: string; phone: string | null } | undefined;
       if (!info) continue;
 
       const { score } = result;

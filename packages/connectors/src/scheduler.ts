@@ -15,7 +15,7 @@
 
 import cron from 'node-cron';
 import { prisma } from '@gymiq/database';
-import type { Gym } from '@gymiq/database';
+type Gym = any; // TODO: Import from @gymiq/database when types are exported
 import { dataPipeline } from './pipeline';
 import { createConnector } from './factory';
 import type { ConnectorConfig } from './types';

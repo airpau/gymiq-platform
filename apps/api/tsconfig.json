@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
+    "noImplicitAny": false,
     "paths": {
       "@gymiq/database": ["../../packages/database/src"],
       "@gymiq/ai-gateway": ["../../packages/ai-gateway/src"],

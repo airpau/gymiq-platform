@@ -62,7 +62,7 @@ export class LeadCaptureService {
 
       // Check for duplicate leads (same email or phone)
       if (leadData.email || leadData.phone) {
-        const orConditions = [];
+        const orConditions: any[] = [];
         if (leadData.email) {
           orConditions.push({ email: leadData.email });
         }

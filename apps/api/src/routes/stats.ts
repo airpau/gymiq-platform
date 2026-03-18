@@ -113,10 +113,10 @@ statsRouter.get('/overview', async (req, res) => {
     ]);
 
     // Process member statistics
-    const memberStatusCounts = membersStats.reduce((acc, item) => {
-      acc[item.status] = item._count;
-      return acc;
-    }, {} as Record<string, number>);
+    const memberStatusCounts: Record<string, number> = {};
+    for (const item of membersStats as any[]) {
+      memberStatusCounts[item.status] = item._count;
+    }
 
     const totalMembers = Object.values(memberStatusCounts).reduce((sum, count) => sum + count, 0);
     const activeMembers = memberStatusCounts.active || 0;
@@ -125,10 +125,10 @@ statsRouter.get('/overview', async (req, res) => {
 
     // Process lead statistics
     const totalLeads = leadsStats._count.id;
-    const leadsByStageMap = leadsByStage.reduce((acc, item) => {
-      acc[item.currentStage] = item._count;
-      return acc;
-    }, {} as Record<string, number>);
+    const leadsByStageMap: Record<string, number> = {};
+    for (const item of leadsByStage as any[]) {
+      leadsByStageMap[item.currentStage] = item._count;
+    }
 
     const convertedLeads = leadsByStageMap.converted || 0;
     const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
@@ -175,10 +175,10 @@ statsRouter.get('/overview', async (req, res) => {
     ]);
 
     // Process cancel-save statistics
-    const cancelSaveByOutcome = cancelSaveStats.reduce((acc, item) => {
-      acc[item.outcome] = item._count;
-      return acc;
-    }, {} as Record<string, number>);
+    const cancelSaveByOutcome: Record<string, number> = {};
+    for (const item of cancelSaveStats as any[]) {
+      cancelSaveByOutcome[item.outcome] = item._count;
+    }
 
     const totalCancelSaves = Object.values(cancelSaveByOutcome).reduce((sum, count) => sum + count, 0);
     const savedMembers = cancelSaveByOutcome.saved || 0;
