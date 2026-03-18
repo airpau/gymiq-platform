@@ -38,17 +38,34 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
     const { name, email, phone, gymName, memberCount } = parsed.data;
 
     // Find or create a gym for this audit lead using upsert
-    const gym = await prisma.gym.upsert({
-      where: { slug: 'audit-leads' },
-      update: {}, // No update needed if exists
-      create: {
-        name: 'Audit Leads',
-        slug: 'audit-leads',
-        settings: {},
-        knowledgeBase: {},
-      }
-    });
-    console.log('[Audit Signup] Using gym:', gym.id);
+    let gym;
+    try {
+      gym = await prisma.gym.upsert({
+        where: { slug: 'audit-leads' },
+        update: {}, // No update needed if exists
+        create: {
+          name: 'Audit Leads',
+          slug: 'audit-leads',
+          settings: {},
+          knowledgeBase: {},
+        }
+      });
+      console.log('[Audit Signup] Gym upsert success:', gym.id);
+    } catch (upsertError) {
+      console.error('[Audit Signup] Gym upsert failed:', upsertError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create gym record'
+      });
+    }
+
+    if (!gym || !gym.id) {
+      console.error('[Audit Signup] Gym is null or has no id');
+      return res.status(500).json({
+        success: false,
+        error: 'Gym record invalid'
+      });
+    }
 
     const lead = await prisma.lead.create({
       data: {
