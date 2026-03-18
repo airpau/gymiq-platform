@@ -37,23 +37,18 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
 
     const { name, email, phone, gymName, memberCount } = parsed.data;
 
-    // Find or create a gym for this audit lead
-    // First try to find by name, then create if not exists
-    let gym = await prisma.gym.findFirst({
-      where: { slug: 'audit-leads' }
+    // Find or create a gym for this audit lead using upsert
+    const gym = await prisma.gym.upsert({
+      where: { slug: 'audit-leads' },
+      update: {}, // No update needed if exists
+      create: {
+        name: 'Audit Leads',
+        slug: 'audit-leads',
+        settings: {},
+        knowledgeBase: {},
+      }
     });
-
-    if (!gym) {
-      gym = await prisma.gym.create({
-        data: {
-          name: 'Audit Leads',
-          slug: 'audit-leads',
-          settings: {},
-          knowledgeBase: {},
-        }
-      });
-      console.log('[Audit Signup] Created system gym for audit leads:', gym.id);
-    }
+    console.log('[Audit Signup] Using gym:', gym.id);
 
     const lead = await prisma.lead.create({
       data: {
