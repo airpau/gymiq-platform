@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import Link from 'next/link';
+import { API_URL } from '../lib/api';
 
 interface OverviewStats {
   totalMembers: number;
@@ -94,8 +95,8 @@ export default function Home() {
     try {
       setLoading(true);
       const [statsResponse, tasksResponse] = await Promise.all([
-        fetch(`https://gymiq-api-production.up.railway.app/stats/overview?gymId=${gymId}`),
-        fetch(`https://gymiq-api-production.up.railway.app/tasks/today?gymId=${gymId}`)
+        fetch(`${API_URL}/stats/overview?gymId=${gymId}`),
+        fetch(`${API_URL}/tasks/today?gymId=${gymId}`)
       ]);
 
       if (!statsResponse.ok) {
@@ -122,7 +123,7 @@ export default function Home() {
 
   const completeTask = async (taskId: string, resolution: string) => {
     try {
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks/${taskId}/complete`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}/complete`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resolution }),

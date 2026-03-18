@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { API_URL } from '../../lib/api';
 
 interface GymConfig {
   id: string;
@@ -109,7 +110,7 @@ export default function SettingsPage() {
   const fetchConfig = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/gyms/${gymId}/config`);
+      const response = await fetch(`${API_URL}/gyms/${gymId}/config`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -133,7 +134,7 @@ export default function SettingsPage() {
 
     try {
       setSaving(true);
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/gyms/${gymId}/config`, {
+      const response = await fetch(`${API_URL}/gyms/${gymId}/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

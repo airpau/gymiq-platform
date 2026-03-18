@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { API_URL } from '../../lib/api';
 
 interface Member {
   id: string;
@@ -149,8 +150,8 @@ export default function RetentionPage() {
     try {
       setLoading(true);
       const [membersResponse, tasksResponse] = await Promise.all([
-        fetch(`https://gymiq-api-production.up.railway.app/members?gymId=${gymId}&status=active&riskMin=30&perPage=100`),
-        fetch(`https://gymiq-api-production.up.railway.app/tasks/today?gymId=${gymId}`)
+        fetch(`${API_URL}/members?gymId=${gymId}&status=active&riskMin=30&perPage=100`),
+        fetch(`${API_URL}/tasks/today?gymId=${gymId}`)
       ]);
 
       if (!membersResponse.ok) throw new Error('Failed to fetch members');
@@ -172,7 +173,7 @@ export default function RetentionPage() {
 
   const fetchMemberProfile = async (memberId: string) => {
     try {
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/members/${memberId}/full-profile`);
+      const response = await fetch(`${API_URL}/members/${memberId}/full-profile`);
       if (!response.ok) throw new Error('Failed to fetch member profile');
       const data = await response.json();
       setSelectedMember(data.data);
@@ -185,7 +186,7 @@ export default function RetentionPage() {
     if (!taskResolution.trim()) return;
 
     try {
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks/${taskId}/complete`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}/complete`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -208,7 +209,7 @@ export default function RetentionPage() {
 
   const dismissTask = async (taskId: string, reason: string) => {
     try {
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks/${taskId}/dismiss`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}/dismiss`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
@@ -225,7 +226,7 @@ export default function RetentionPage() {
 
   const createTask = async (memberId: string, title: string, category: string, priority: string) => {
     try {
-      const response = await fetch(`https://gymiq-api-production.up.railway.app/tasks`, {
+      const response = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

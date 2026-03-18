@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { API_URL } from '../../lib/api';
 
 interface Message {
   id: string;
@@ -53,7 +54,7 @@ export default function ConversationsPage() {
 
       // Try fetching from real API first
       try {
-        const response = await fetch(`https://gymiq-api-production.up.railway.app/conversations?gymId=${gymId}`);
+        const response = await fetch(`${API_URL}/conversations?gymId=${gymId}`);
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -141,7 +142,7 @@ export default function ConversationsPage() {
 
   const handleTakeOver = async (conversationId: string) => {
     try {
-      // In real app: await fetch(`https://gymiq-api-production.up.railway.app/conversations/${conversationId}/takeover`, { method: 'POST' });
+      // In real app: await fetch(`${API_URL}/conversations/${conversationId}/takeover`, { method: 'POST' });
       console.log('Taking over conversation:', conversationId);
 
       // Update local state optimistically
@@ -167,7 +168,7 @@ export default function ConversationsPage() {
 
   const handleResolve = async (conversationId: string) => {
     try {
-      // In real app: await fetch(`https://gymiq-api-production.up.railway.app/conversations/${conversationId}/resolve`, { method: 'POST' });
+      // In real app: await fetch(`${API_URL}/conversations/${conversationId}/resolve`, { method: 'POST' });
       console.log('Resolving conversation:', conversationId);
 
       // Update local state optimistically

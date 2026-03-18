@@ -17,6 +17,7 @@ import {
   PhoneCall
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { API_URL } from '../lib/api'
 
 export default function HomePage() {
   return (
@@ -401,7 +402,7 @@ function WaitlistSection() {
     setError('');
 
     try {
-      const response = await fetch('https://gymiq-api-production.up.railway.app/leads', {
+      const response = await fetch(`${API_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

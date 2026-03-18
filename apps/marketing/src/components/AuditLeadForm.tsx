@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { User, Mail, Phone, Building, Users, ArrowRight, Loader2 } from 'lucide-react'
+import { API_URL } from '../lib/api'
 
 interface FormData {
   name: string
@@ -55,7 +56,7 @@ export default function AuditLeadForm({ onSuccess }: AuditLeadFormProps) {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('https://gymiq-api-production.up.railway.app/leads/audit-signup', {
+      const response = await fetch(`${API_URL}/leads/audit-signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

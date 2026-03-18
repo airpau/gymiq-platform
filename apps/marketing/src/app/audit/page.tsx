@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import AuditLeadForm from '@/components/AuditLeadForm'
+import { API_URL } from '../../lib/api'
 
 interface AuditResult {
   totalMembers: number
@@ -91,7 +92,7 @@ export default function AuditPage() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('https://gymiq-api-production.up.railway.app/audit/analyze', {
+      const response = await fetch(`${API_URL}/audit/analyze`, {
         method: 'POST',
         body: formData,
       })

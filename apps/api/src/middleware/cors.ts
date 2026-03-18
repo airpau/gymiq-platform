@@ -132,7 +132,8 @@ export const productionCORS = createCORSMiddleware({
       'https://dashboard.gymiq.ai',
       'https://app.gymiq.ai',
       'https://gymiq.ai',
-      'https://www.gymiq.ai'
+      'https://www.gymiq.ai',
+      'https://gymiq-web.vercel.app'
     ];
 
     return allowedOrigins.includes(origin);
@@ -169,7 +170,8 @@ export const dashboardCORS = createCORSMiddleware({
       'http://localhost:3000',  // Next.js dev server
       'http://127.0.0.1:3000',
       'https://dashboard.gymiq.ai',
-      'https://app.gymiq.ai'
+      'https://app.gymiq.ai',
+      'https://gymiq-web.vercel.app'
     ];
 
     return dashboardOrigins.includes(origin);
@@ -221,7 +223,8 @@ export const apiCORS = createCORSMiddleware({
       '127.0.0.1',
       'gymiq.ai',
       'app.gymiq.ai',
-      'dashboard.gymiq.ai'
+      'dashboard.gymiq.ai',
+      'gymiq-web.vercel.app'
     ];
 
     return trustedDomains.some(domain => {
