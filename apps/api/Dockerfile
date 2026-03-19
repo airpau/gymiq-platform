@@ -25,9 +25,13 @@ COPY . .
 RUN echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
-# Regenerate Prisma client fresh from current schema into root node_modules
-RUN rm -rf node_modules/@prisma/client node_modules/.prisma && \
-    cd packages/database && npx prisma@5.22.0 generate
+# Remove any local stub Prisma clients that would shadow the generated one
+RUN rm -rf node_modules/@prisma/client node_modules/.prisma \
+           apps/api/node_modules/@prisma/client apps/api/node_modules/.prisma \
+           packages/database/node_modules/@prisma/client packages/database/node_modules/.prisma
+
+# Generate Prisma client into root node_modules
+RUN cd packages/database && npx prisma@5.22.0 generate
 
 # Build
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
