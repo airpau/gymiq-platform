@@ -1,5 +1,6 @@
 [build]
 builder = "NIXPACKS"
+# Force rebuild: 2026-03-19
 buildCommand = "npm install --include=dev && npm install -g prisma@5.22.0 && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api"
 
 [deploy]
