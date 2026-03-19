@@ -1,15 +1,15 @@
 [phases.install]
 cmds = [
-  "npm install",
-  "rm -rf apps/api/node_modules/.prisma apps/api/node_modules/@prisma/client",
-  "cd packages/database && npx prisma generate"
+  "npm install --include=dev",
+  "rm -rf apps/api/node_modules/.prisma apps/api/node_modules/@prisma/client"
 ]
 
 [phases.build]
 cmds = [
+  "npx prisma generate --schema=packages/database/prisma/schema.prisma",
   "npm run build --workspace=packages/shared || true",
   "npm run build --workspace=apps/api"
 ]
 
 [start]
-cmd = "cd packages/database && npx prisma migrate deploy --schema=prisma/schema.prisma && cd ../.. && node apps/api/dist/apps/api/src/index.js"
+cmd = "npx prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/apps/api/src/index.js"
