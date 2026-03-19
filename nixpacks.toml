@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["nodejs-20_x", "openssl"]
+
+[phases.install]
+cmds = [
+  "npm install",
+  "rm -rf apps/api/node_modules/.prisma apps/api/node_modules/@prisma/client",
+  "cd packages/database && npx prisma generate"
+]
+
+[phases.build]
+cmds = [
+  "npm run build --workspace=packages/shared || true",
+  "npm run build --workspace=apps/api"
+]
+
+[start]
+cmd = "cd packages/database && npx prisma migrate deploy && cd ../.. && cd apps/api && node dist/index.js"

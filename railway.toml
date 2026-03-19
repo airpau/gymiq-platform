@@ -1,7 +1,9 @@
 [build]
-dockerfilePath = "apps/api/Dockerfile"
+builder = "NIXPACKS"
+nixpacksConfigPath = "nixpacks.toml"
 
 [deploy]
+startCommand = "cd apps/api && npm run start"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
