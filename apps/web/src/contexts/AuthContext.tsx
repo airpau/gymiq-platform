@@ -110,7 +110,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 // API base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gymiq-api-production.up.railway.app';
 
 // Helper function to make authenticated API calls
 async function apiCall(endpoint: string, options: RequestInit = {}) {
