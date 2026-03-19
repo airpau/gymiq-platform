@@ -1,0 +1,8 @@
+[build]
+# This service should NOT be built on Railway
+# It's deployed on Vercel instead
+skip = true
+
+[deploy]
+# Prevent this from being deployed on Railway
+skip = true
