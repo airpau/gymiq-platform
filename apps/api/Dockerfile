@@ -32,7 +32,7 @@ RUN mkdir -p apps/web apps/marketing && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
 # Generate Prisma client
-RUN cd packages/database && npx prisma generate
+RUN cd packages/database && npx prisma@5.22.0 generate
 
 # Build shared packages and API
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
@@ -54,5 +54,5 @@ COPY --from=builder /app/package.json /app/package.json
 EXPOSE 3001
 
 # Run migrations then start
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=/app/packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
+CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy --schema=/app/packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
 # Cache bust 1773948367
