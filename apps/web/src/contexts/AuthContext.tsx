@@ -1,14 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import {
-  UserProfile,
-  LoginRequest,
-  RegisterRequest,
-  LoginResponse,
-  User,
-  Gym
-} from '@gymiq/shared';
+// Inlined from @gymiq/shared to avoid workspace dependency in Vercel builds
+type UserRole = 'SUPER_ADMIN' | 'GYM_OWNER' | 'GYM_STAFF';
+interface User { id: string; email: string; role: UserRole; gymId: string; firstName?: string; lastName?: string; phone?: string; isActive: boolean; lastLoginAt?: Date; createdAt: Date; updatedAt: Date; }
+interface Gym { id: string; name: string; slug: string; settings?: Record<string, unknown>; createdAt: Date; updatedAt: Date; }
+interface LoginRequest { email: string; password: string; }
+interface RegisterRequest { gymName: string; firstName: string; lastName: string; email: string; password: string; phone?: string; }
+interface LoginResponse { user: { id: string; email: string; firstName?: string; lastName?: string; role: UserRole; }; gym: { id: string; name: string; slug: string; }; token: string; }
+interface UserProfile { user: { id: string; email: string; firstName?: string; lastName?: string; role: UserRole; phone?: string; lastLoginAt?: Date; }; gym: { id: string; name: string; slug: string; settings?: Record<string, unknown>; }; session: { id: string; expiresAt: Date; }; }
 
 // Types
 interface AuthState {
