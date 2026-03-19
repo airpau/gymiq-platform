@@ -32,7 +32,7 @@ RUN mkdir -p apps/web apps/marketing && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
 # Generate Prisma client
-RUN cd packages/database && npx prisma@5.22.0 generate
+RUN echo "schema-version-20260319-v2" && cd packages/database && npx prisma@5.22.0 generate
 
 # Build shared packages and API
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
