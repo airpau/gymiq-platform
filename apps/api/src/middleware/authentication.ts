@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@gymiq/database';
+import { prisma } from '../lib/prisma';
 import { UnauthorizedError, ForbiddenError } from './errorHandler';
 
 // Extend Express Request type to include user and session
@@ -31,7 +31,6 @@ interface JWTPayload {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gymiq-development-secret-change-in-production';
-const prisma = new PrismaClient();
 
 /**
  * Extracts JWT token from cookies or Authorization header
