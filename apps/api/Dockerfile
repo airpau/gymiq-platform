@@ -3,6 +3,8 @@ RUN apk add --no-cache openssl
 
 FROM base AS builder
 WORKDIR /app
+# Cache buster — increment to force full rebuild
+ARG CACHE_BUST=3
 
 COPY package.json package-lock.json* ./
 
