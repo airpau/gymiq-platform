@@ -8,12 +8,15 @@ WORKDIR /app
 # Copy root package files
 COPY package.json package-lock.json* ./
 COPY apps/api/package.json ./apps/api/
-COPY apps/marketing/package.json ./apps/marketing/
-COPY apps/web/package.json ./apps/web/
 COPY packages/database/package.json ./packages/database/
 COPY packages/ai-gateway/package.json ./packages/ai-gateway/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/connectors/package.json ./packages/connectors/
+
+# Create stub package.json files for apps not included in build
+RUN mkdir -p apps/web apps/marketing && \
+    echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
+    echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
 RUN npm install --production=false
 
@@ -23,10 +26,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Restore stub package.json files for missing apps
+RUN mkdir -p apps/web apps/marketing && \
+    echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
+    echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
+
 # Generate Prisma client
 RUN cd packages/database && npx prisma generate
 
-# Build essential packages and API
+# Build shared packages and API
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
 RUN npm run build --workspace=apps/api
 
@@ -39,13 +47,11 @@ ENV NODE_ENV=production
 # Copy necessary files
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/package.json ./apps/api/
-COPY --from=builder /app/package.json ./
-
-WORKDIR /app/apps/api
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package.json ./
+COPY --from=builder /app/package.json /app/package.json
 
 EXPOSE 3001
 
-# Run migrations then start - FIXED PATH
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
+# Run migrations then start
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=/app/packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
