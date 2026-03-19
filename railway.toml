@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 buildCommand = "npm install --include=dev && npm install -g prisma@5.22.0 && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api"
 
 [deploy]
-startCommand = "npx prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/apps/api/src/index.js"
+startCommand = "echo '=== Running migrations ===' && npx prisma migrate deploy --schema=packages/database/prisma/schema.prisma && echo '=== Starting application ===' && node apps/api/dist/apps/api/src/index.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
