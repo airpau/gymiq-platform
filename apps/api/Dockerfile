@@ -4,10 +4,9 @@ RUN apk add --no-cache openssl
 FROM base AS builder
 WORKDIR /app
 
-# Copy everything first
 COPY package.json package-lock.json* ./
 
-# Create stub package.json for apps not in build
+# Stubs for apps not in build
 RUN mkdir -p apps/web apps/marketing && \
     echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
@@ -20,15 +19,14 @@ COPY packages/connectors/package.json ./packages/connectors/
 
 RUN npm install --production=false
 
-# Copy source (after npm install so deps are cached)
 COPY . .
 
 # Restore stubs overwritten by COPY
 RUN echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
-# ALWAYS regenerate Prisma client from current schema (no cache)
-RUN rm -rf packages/database/node_modules/@prisma/client && \
+# Regenerate Prisma client fresh from current schema into root node_modules
+RUN rm -rf node_modules/@prisma/client node_modules/.prisma && \
     cd packages/database && npx prisma@5.22.0 generate
 
 # Build
