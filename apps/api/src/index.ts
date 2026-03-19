@@ -92,7 +92,17 @@ app.get('/health/live', (_req, res) => {
   res.json({ status: 'alive', timestamp: new Date().toISOString() });
 });
 
+// Authentication routes
 app.use('/auth', authRouter);
+
+// Version endpoint to verify deployed code
+app.get('/version', (_req, res) => {
+  res.json({
+    commit: '6a74ca2',
+    feature: 'audit-signup-fix-v2',
+    timestamp: '2026-03-18T16:30:00Z'
+  });
+});
 app.use('/webhooks', webhookRouter);
 app.use('/conversations', conversationRouter);
 app.use('/members', memberRouter);
