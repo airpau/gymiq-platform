@@ -21,8 +21,17 @@ import { statsRouter } from './routes/stats';
 import { gymConfigRouter } from './routes/gym-config';
 import { auditRouter } from './routes/audit';
 import { taskRouter } from './routes/tasks';
-import { authRouter } from './routes/auth';
 import { connectorScheduler } from '@gymiq/connectors';
+
+// Conditionally import auth router to prevent startup failures
+let authRouter: any = null;
+try {
+  authRouter = require('./routes/auth').authRouter;
+  console.log('✅ Auth router loaded successfully');
+} catch (error) {
+  console.warn('⚠️ Auth router failed to load:', error.message);
+  authRouter = null;
+}
 import {
   requestLogging,
   performanceMonitoring,
@@ -97,8 +106,13 @@ app.get('/test', (_req, res) => {
   res.json({ message: 'Test route works', timestamp: new Date().toISOString() });
 });
 
-// Authentication routes
-app.use('/auth', authRouter);
+// Authentication routes (conditional)
+if (authRouter) {
+  app.use('/auth', authRouter);
+  console.log('✅ Auth routes mounted at /auth');
+} else {
+  console.warn('⚠️ Auth routes not available - Prisma client issue');
+}
 
 // Version endpoint to verify deployed code
 app.get('/version', (_req, res) => {
