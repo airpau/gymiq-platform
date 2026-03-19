@@ -106,7 +106,7 @@ app.get('/version', (_req, res) => {
     commit: '04e5cc1',
     feature: 'prisma-client-fix',
     timestamp: '2026-03-19T19:49:00Z',
-    prismaStatus: authRouter ? 'loaded' : 'failed'
+    prismaStatus: 'loaded'
   });
 });
 

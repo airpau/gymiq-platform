@@ -1,0 +1,19 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Copy just the API and essential packages
+COPY apps/api/package.json ./
+COPY package.json package-lock.json ./
+RUN npm install --production
+
+# Copy source files
+COPY apps/api/src ./src
+COPY packages/database ./packages/database
+
+# Simple build
+RUN npx tsc src/index.ts --outDir dist --target es2020 --module commonjs --esModuleInterop --allowSyntheticDefaultImports
+
+EXPOSE 3001
+
+# Simple start without migrations for now
+CMD ["node", "dist/index.js"]

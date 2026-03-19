@@ -1,0 +1,10 @@
+{
+  "name": "gymiq-temp-auth",
+  "version": "1.0.0",
+  "description": "Temporary auth service for GymIQ testing",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed'"
+  }
+}

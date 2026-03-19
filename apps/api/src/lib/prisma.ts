@@ -2,7 +2,7 @@ let PrismaClient: any;
 try {
   PrismaClient = require('@prisma/client').PrismaClient;
 } catch (error) {
-  console.warn('⚠️ Prisma client not available:', error.message);
+  console.warn('⚠️ Prisma client not available:', (error as Error).message);
   // Mock Prisma client for fallback
   PrismaClient = class MockPrismaClient {
     constructor() {
