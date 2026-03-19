@@ -117,9 +117,10 @@ if (authRouter) {
 // Version endpoint to verify deployed code
 app.get('/version', (_req, res) => {
   res.json({
-    commit: '27deae8',
-    feature: 'auth-system-fix',
-    timestamp: '2026-03-19T18:35:00Z'
+    commit: '04e5cc1',
+    feature: 'prisma-client-fix',
+    timestamp: '2026-03-19T19:49:00Z',
+    prismaStatus: authRouter ? 'loaded' : 'failed'
   });
 });
 
