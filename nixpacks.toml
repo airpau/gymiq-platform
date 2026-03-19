@@ -6,10 +6,10 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "node_modules/.bin/prisma generate --schema=packages/database/prisma/schema.prisma",
+  "packages/database/node_modules/.bin/prisma generate --schema=packages/database/prisma/schema.prisma",
   "npm run build --workspace=packages/shared || true",
   "npm run build --workspace=apps/api"
 ]
 
 [start]
-cmd = "node_modules/.bin/prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/apps/api/src/index.js"
+cmd = "packages/database/node_modules/.bin/prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/apps/api/src/index.js"
