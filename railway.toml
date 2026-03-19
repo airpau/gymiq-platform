@@ -1,7 +1,9 @@
 [build]
-dockerfilePath = "apps/api/Dockerfile"
+builder = "NIXPACKS"
+buildCommand = "npm install && cd packages/database && npx prisma generate && cd ../.. && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api"
 
 [deploy]
+startCommand = "npx prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/apps/api/src/index.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
