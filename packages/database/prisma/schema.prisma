@@ -7,6 +7,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Authentication ────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  GYM_OWNER
+  GYM_STAFF
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+  role         Role   @default(GYM_STAFF)
+
+  // Gym relationship
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  // User details
+  firstName String?
+  lastName  String?
+  phone     String?
+
+  // Account status
+  isActive    Boolean @default(true)
+  lastLoginAt DateTime?
+
+  // Relations
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([gymId, role])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token     String   @unique
+  expiresAt DateTime
+
+  // Session metadata
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email, expiresAt])
+  @@map("password_resets")
+}
+
 model Gym {
   id   String @id @default(uuid())
   name String
@@ -32,6 +104,7 @@ model Gym {
   knowledgeBase Json @default("{}")
 
   // Relations
+  users             User[]
   members           Member[]
   leads             Lead[]
   conversations     Conversation[]

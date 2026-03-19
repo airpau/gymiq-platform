@@ -1,12 +1,12 @@
 /**
  * /connectors routes — manage connector configs and trigger syncs.
  *
- * GET    /connectors/:gymId           — get current connector config (credentials redacted)
- * POST   /connectors/:gymId           — create or replace connector config
- * PATCH  /connectors/:gymId/schedule  — update sync schedule only
- * POST   /connectors/:gymId/sync      — trigger an immediate sync
- * POST   /connectors/:gymId/test      — test connection credentials
- * GET    /connectors/:gymId/logs      — list recent sync logs
+ * GET    /connectors           — get current connector config (credentials redacted)
+ * POST   /connectors           — create or replace connector config
+ * PATCH  /connectors/schedule  — update sync schedule only
+ * POST   /connectors/sync      — trigger an immediate sync
+ * POST   /connectors/test      — test connection credentials
+ * GET    /connectors/logs      — list recent sync logs
  */
 
 import { Router, Request, Response } from 'express';
@@ -14,12 +14,15 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { createConnector, dataPipeline } from '@gymiq/connectors';
 import type { ConnectorConfig } from '@gymiq/connectors';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const connectorRouter = Router();
 
-// ─── Validation schemas ───────────────────────────────────────────────────────
+// Apply authentication to all routes
+connectorRouter.use(authenticate);
+connectorRouter.use(requireGymAccess);
 
-const GymIdParam = z.object({ gymId: z.string().uuid() });
+// ─── Validation schemas ───────────────────────────────────────────────────────
 
 const ApiConfigSchema = z.object({
   type: z.literal('api'),
@@ -83,12 +86,11 @@ function redactConfig(config: ConnectorConfig): Record<string, unknown> {
 
 // ─── GET /connectors/:gymId ───────────────────────────────────────────────────
 
-connectorRouter.get('/:gymId', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.get('/', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
   const gym = await prisma.gym.findUnique({
-    where: { id: params.data.gymId },
+    where: { id: gymId },
     select: {
       id: true,
       connectorType: true,
@@ -118,20 +120,19 @@ connectorRouter.get('/:gymId', async (req: Request, res: Response) => {
 
 // ─── POST /connectors/:gymId ──────────────────────────────────────────────────
 
-connectorRouter.post('/:gymId', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.post('/', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
   const body = SetConnectorBody.safeParse(req.body);
   if (!body.success) {
     return res.status(400).json({ success: false, error: 'Invalid body', details: body.error.flatten() });
   }
 
-  const gym = await prisma.gym.findUnique({ where: { id: params.data.gymId } });
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
   if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
 
   await prisma.gym.update({
-    where: { id: params.data.gymId },
+    where: { id: gymId },
     data: {
       connectorType: body.data.config.type,
       connectorConfig: body.data.config as any,
@@ -148,20 +149,19 @@ connectorRouter.post('/:gymId', async (req: Request, res: Response) => {
 
 // ─── PATCH /connectors/:gymId/schedule ───────────────────────────────────────
 
-connectorRouter.patch('/:gymId/schedule', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.patch('/schedule', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
   const body = ScheduleBody.safeParse(req.body);
   if (!body.success) {
     return res.status(400).json({ success: false, error: 'Invalid body', details: body.error.flatten() });
   }
 
-  const gym = await prisma.gym.findUnique({ where: { id: params.data.gymId } });
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
   if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
 
   await prisma.gym.update({
-    where: { id: params.data.gymId },
+    where: { id: gymId },
     data: { syncSchedule: body.data.syncSchedule },
   });
 
@@ -170,11 +170,10 @@ connectorRouter.patch('/:gymId/schedule', async (req: Request, res: Response) =>
 
 // ─── POST /connectors/:gymId/sync ─────────────────────────────────────────────
 
-connectorRouter.post('/:gymId/sync', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.post('/sync', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
-  const gym = await prisma.gym.findUnique({ where: { id: params.data.gymId } });
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
   if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
 
   if (!gym.connectorType || !gym.connectorConfig) {
@@ -192,7 +191,7 @@ connectorRouter.post('/:gymId/sync', async (req: Request, res: Response) => {
   }
 
   // Start sync in background — respond immediately
-  const syncLogId = await dataPipeline.createSyncLog(params.data.gymId, connectorType);
+  const syncLogId = await dataPipeline.createSyncLog(gymId, connectorType);
 
   res.json({
     success: true,
@@ -222,11 +221,10 @@ connectorRouter.post('/:gymId/sync', async (req: Request, res: Response) => {
 
 // ─── POST /connectors/:gymId/test ─────────────────────────────────────────────
 
-connectorRouter.post('/:gymId/test', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.post('/test', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
-  const gym = await prisma.gym.findUnique({ where: { id: params.data.gymId } });
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
   if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
 
   if (!gym.connectorConfig) {
@@ -246,14 +244,13 @@ connectorRouter.post('/:gymId/test', async (req: Request, res: Response) => {
 
 // ─── GET /connectors/:gymId/logs ──────────────────────────────────────────────
 
-connectorRouter.get('/:gymId/logs', async (req: Request, res: Response) => {
-  const params = GymIdParam.safeParse(req.params);
-  if (!params.success) return res.status(400).json({ success: false, error: 'Invalid gymId' });
+connectorRouter.get('/logs', async (req: Request, res: Response) => {
+  const gymId = req.user!.gymId;
 
   const limit = Math.min(parseInt((req.query.limit as string) ?? '20', 10), 100);
 
   const logs = await prisma.syncLog.findMany({
-    where: { gymId: params.data.gymId },
+    where: { gymId: gymId },
     orderBy: { createdAt: 'desc' },
     take: limit,
   });

@@ -1,22 +1,26 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma, aiGateway, twilioService } from '../lib/services';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const conversationRouter = Router();
 
+// Apply authentication to all routes
+conversationRouter.use(authenticate);
+conversationRouter.use(requireGymAccess);
+
 /**
- * GET /conversations?gymId=&status=&phone=&page=&perPage=
+ * GET /conversations?status=&phone=&page=&perPage=
  */
 conversationRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const { gymId, status, phone, page = '1', perPage = '50' } = req.query;
-
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const { status, phone, page = '1', perPage = '50' } = req.query;
+    const gymId = req.user!.gymId;
 
     const pageNum = parseInt(page as string, 10);
     const perPageNum = parseInt(perPage as string, 10);
 
-    const where: Record<string, unknown> = { gymId: gymId as string };
+    const where: Record<string, unknown> = { gymId };
     if (status) where.status = status;
     if (phone) where.phone = phone;
 

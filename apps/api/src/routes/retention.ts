@@ -16,8 +16,13 @@ import { prisma } from '../lib/services';
 import { churnQueue } from '../lib/queue';
 import { scoreChurnRisk, runBatchChurnAnalysis } from '../services/churn-engine';
 import { getRetentionLog, logRetentionAction, DEFAULT_OFFERS, RetentionOffer } from '../services/retention-log';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const retentionRouter = Router();
+
+// Apply authentication to all routes
+retentionRouter.use(authenticate);
+retentionRouter.use(requireGymAccess);
 
 const MS_PER_DAY = 24 * 60 * 60 * 1_000;
 
@@ -35,20 +40,19 @@ function daysAgo(n: number): Date {
  *   lost     — 60+ days (DO NOT CONTACT — sleeping dogs)
  *
  * Query params:
- *   gymId (required) — filter by gym
  *   category (optional) — filter by 'light', 'deep', 'critical', 'lost'
  *   includeDoNotContact (optional) — include 60+ day sleepers (default: false)
  */
 retentionRouter.get('/sleepers', async (req: Request, res: Response) => {
   try {
-    const { gymId, category, includeDoNotContact } = req.query;
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const { category, includeDoNotContact } = req.query;
+    const gymId = req.user!.gymId;
 
     const cutoff = daysAgo(14);
 
     const members = await prisma.member.findMany({
       where: {
-        gymId: gymId as string,
+        gymId,
         status: { in: ['active', 'sleeper', 'frozen'] },
         OR: [
           { lastVisit: { lt: cutoff } },
@@ -145,14 +149,13 @@ retentionRouter.get('/sleepers', async (req: Request, res: Response) => {
  */
 retentionRouter.get('/overdue', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.query;
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const gymId = req.user!.gymId;
 
     const now = new Date();
 
     const members = await prisma.member.findMany({
       where: {
-        gymId: gymId as string,
+        gymId,
         status: { not: 'cancelled' },
         nextPayment: { lt: now },
       },
@@ -215,10 +218,7 @@ retentionRouter.get('/overdue', async (req: Request, res: Response) => {
  */
 retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.query;
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
-
-    const gid = gymId as string;
+    const gymId = req.user!.gymId;
     const now  = new Date();
     const thirtyDaysAgo = daysAgo(30);
 
@@ -231,7 +231,7 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
     ] = await Promise.all([
       // All non-cancelled members with enough fields to compute metrics
       prisma.member.findMany({
-        where: { gymId: gid, status: { not: 'cancelled' } },
+        where: { gymId: gymId, status: { not: 'cancelled' } },
         select: {
           id: true,
           status: true,
@@ -247,7 +247,7 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
       // Overdue payments
       prisma.member.count({
         where: {
-          gymId: gid,
+          gymId: gymId,
           status: { not: 'cancelled' },
           nextPayment: { lt: now },
         },
@@ -256,7 +256,7 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
       // Members who cancelled in the last 30 days (approximation via updatedAt + status)
       prisma.member.count({
         where: {
-          gymId: gid,
+          gymId: gymId,
           status: 'cancelled',
           updatedAt: { gte: thirtyDaysAgo },
         },
@@ -265,7 +265,7 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
       // Members who visited in last 7 days but were previously sleepers (came back)
       prisma.member.count({
         where: {
-          gymId: gid,
+          gymId: gymId,
           status: { in: ['active', 'sleeper'] },
           lastVisit: { gte: daysAgo(7) },
           riskScore: { gte: 50 }, // Was flagged as medium/high risk
@@ -348,7 +348,7 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        gym: gid,
+        gym: gymId,
         generatedAt: now.toISOString(),
 
         membersByStatus: {
@@ -396,8 +396,9 @@ retentionRouter.get('/dashboard', async (req: Request, res: Response) => {
  */
 retentionRouter.get('/log', async (req: Request, res: Response) => {
   try {
-    const { gymId, limit = '100' } = req.query;
-    const entries = getRetentionLog(gymId as string | undefined);
+    const { limit = '100' } = req.query;
+    const gymId = req.user!.gymId;
+    const entries = getRetentionLog(gymId);
     const limitNum = parseInt(limit as string, 10);
     const page = entries.slice(0, limitNum);
 
@@ -426,13 +427,7 @@ retentionRouter.get('/log', async (req: Request, res: Response) => {
  */
 retentionRouter.post('/run-analysis', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.body as { gymId?: string };
-
-    // Verify the gym exists if gymId is provided
-    if (gymId) {
-      const gym = await prisma.gym.findUnique({ where: { id: gymId } });
-      if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
-    }
+    const gymId = req.user!.gymId;
 
     const job = await churnQueue.add(
       'manual-churn-analysis',
@@ -624,10 +619,9 @@ retentionRouter.post('/preview-actions', async (req: Request, res: Response) => 
  */
 retentionRouter.get('/offers', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.query;
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const gymId = req.user!.gymId;
 
-    const gym = await prisma.gym.findUnique({ where: { id: gymId as string } });
+    const gym = await prisma.gym.findUnique({ where: { id: gymId } });
     if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
 
     const gymSettings = (gym.settings as Record<string, unknown>) || {};

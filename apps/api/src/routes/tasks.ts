@@ -1,11 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/services';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const taskRouter = Router();
 
+// Apply authentication to all routes
+taskRouter.use(authenticate);
+taskRouter.use(requireGymAccess);
+
 const CreateTaskSchema = z.object({
-  gymId: z.string().uuid(),
   title: z.string().min(1),
   description: z.string().optional(),
   category: z.enum(['cancellation', 'freeze', 'retention', 'lead_followup', 'payment', 'manual_call', 'general']),
@@ -31,16 +35,15 @@ const CompleteTaskSchema = z.object({
 });
 
 /**
- * GET /tasks?gymId=&status=&priority=&category=&assignedTo=&date=
+ * GET /tasks?status=&priority=&category=&assignedTo=&date=
  * Returns tasks filtered by params
  */
 taskRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const { gymId, status, priority, category, assignedTo, date } = req.query;
+    const { status, priority, category, assignedTo, date } = req.query;
+    const gymId = req.user!.gymId;
 
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
-
-    const where: Record<string, unknown> = { gymId: gymId as string };
+    const where: Record<string, unknown> = { gymId };
 
     // Default to pending + in_progress tasks if no status filter provided
     if (status) {
@@ -134,14 +137,12 @@ taskRouter.get('/', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /tasks/today?gymId=
+ * GET /tasks/today
  * Today's tasks: all pending/in_progress, grouped by priority
  */
 taskRouter.get('/today', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.query;
-
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const gymId = req.user!.gymId;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -232,8 +233,7 @@ taskRouter.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: parsed.error.flatten() });
     }
 
-    const gym = await prisma.gym.findUnique({ where: { id: parsed.data.gymId } });
-    if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
+    const gymId = req.user!.gymId;
 
     // Validate member/lead if provided
     if (parsed.data.memberId) {
@@ -249,6 +249,7 @@ taskRouter.post('/', async (req: Request, res: Response) => {
     const task = await prisma.staffTask.create({
       data: {
         ...parsed.data,
+        gymId,
         dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : undefined,
         createdBy: 'staff', // Could be enhanced to track specific staff member
       },
@@ -449,9 +450,7 @@ taskRouter.put('/:id/dismiss', async (req: Request, res: Response) => {
  */
 taskRouter.get('/stats', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.query;
-
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const gymId = req.user!.gymId;
 
     // Get current date boundaries
     const today = new Date();

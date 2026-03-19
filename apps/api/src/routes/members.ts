@@ -2,11 +2,15 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma, aiGateway } from '../lib/services';
 import { scoreChurnRisk, runBatchChurnAnalysis } from '../services/churn-engine';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const memberRouter = Router();
 
+// Apply authentication to all member routes
+memberRouter.use(authenticate);
+memberRouter.use(requireGymAccess);
+
 const CreateMemberSchema = z.object({
-  gymId: z.string().uuid(),
   name: z.string().min(1),
   email: z.string().email().optional(),
   phone: z.string().optional(),
@@ -18,16 +22,15 @@ const CreateMemberSchema = z.object({
   lastVisit: z.string().datetime().optional(),
 });
 
-const UpdateMemberSchema = CreateMemberSchema.partial().omit({ gymId: true });
+const UpdateMemberSchema = CreateMemberSchema.partial();
 
 /**
- * GET /members?gymId=&status=&riskMin=&page=&perPage=
+ * GET /members?status=&riskMin=&page=&perPage=
  */
 memberRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const { gymId, status, riskMin, page = '1', perPage = '50' } = req.query;
-
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const { status, riskMin, page = '1', perPage = '50' } = req.query;
+    const gymId = req.user!.gymId; // Available from auth middleware
 
     const pageNum = parseInt(page as string, 10);
     const perPageNum = parseInt(perPage as string, 10);
@@ -279,12 +282,12 @@ memberRouter.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: parsed.error.flatten() });
     }
 
-    const gym = await prisma.gym.findUnique({ where: { id: parsed.data.gymId } });
-    if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
+    const gymId = req.user!.gymId;
 
     const member = await prisma.member.create({
       data: {
         ...parsed.data,
+        gymId,
         joinDate: parsed.data.joinDate ? new Date(parsed.data.joinDate) : undefined,
         nextPayment: parsed.data.nextPayment ? new Date(parsed.data.nextPayment) : undefined,
         lastVisit: parsed.data.lastVisit ? new Date(parsed.data.lastVisit) : undefined,
@@ -335,11 +338,7 @@ memberRouter.put('/:id', async (req: Request, res: Response) => {
  */
 memberRouter.post('/analyze-churn', async (req: Request, res: Response) => {
   try {
-    const { gymId } = req.body as { gymId?: string };
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
-
-    const gym = await prisma.gym.findUnique({ where: { id: gymId } });
-    if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
+    const gymId = req.user!.gymId;
 
     const startedAt = Date.now();
     const summary = await runBatchChurnAnalysis(prisma, gymId);

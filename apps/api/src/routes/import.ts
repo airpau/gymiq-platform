@@ -7,10 +7,10 @@
  *
  * Request formats:
  *   Content-Type: text/csv
- *     Query params: gymId, type (members | leads | abandoned_cart)
+ *     Query params: type (members | leads | abandoned_cart)
  *
  *   Content-Type: application/json
- *     Body: { gymId, type, csvData }
+ *     Body: { type, csvData }
  *
  * Response:
  *   { success: true, summary: { created, updated, skipped, errors, total, parseErrors? } }
@@ -23,13 +23,17 @@ import { followupQueue } from '../lib/queue';
 import { parseMemberCSV, parseLeadCSV } from '../lib/csv-parser';
 import { dataPipeline } from '@gymiq/connectors';
 import type { NormalizedMember, NormalizedLead } from '@gymiq/connectors';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const importRouter = Router();
+
+// Apply authentication to all routes
+importRouter.use(authenticate);
+importRouter.use(requireGymAccess);
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 const ImportQuerySchema = z.object({
-  gymId: z.string().uuid(),
   type: z.enum(['members', 'leads', 'abandoned_cart']),
   sync: z.enum(['true', 'false']).optional().default('false'),
 });
@@ -47,12 +51,12 @@ function extractCSV(req: Request): string | null {
   return null;
 }
 
-function extractParams(req: Request): { gymId?: string; type?: string; sync?: string } {
+function extractParams(req: Request): { type?: string; sync?: string } {
   const contentType = (req.headers['content-type'] ?? '').toLowerCase();
   if (contentType.startsWith('application/json') && req.body) {
-    return { gymId: req.body.gymId, type: req.body.type, sync: req.body.sync };
+    return { type: req.body.type, sync: req.body.sync };
   }
-  return { gymId: req.query.gymId as string, type: req.query.type as string, sync: req.query.sync as string };
+  return { type: req.query.type as string, sync: req.query.sync as string };
 }
 
 // ─── POST /import/csv ─────────────────────────────────────────────────────────
@@ -70,7 +74,8 @@ importRouter.post('/csv', async (req: Request, res: Response) => {
       });
     }
 
-    const { gymId, type, sync } = parsed.data;
+    const { type, sync } = parsed.data;
+    const gymId = req.user!.gymId;
     const isSync = sync === 'true';
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId } });

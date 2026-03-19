@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { useAuth, withAuth } from '../../contexts/AuthContext';
 import { API_URL } from '../../lib/api';
 
 interface Lead {
@@ -97,7 +98,7 @@ const SOURCE_ICONS: { [key: string]: string } = {
   other: '❓',
 };
 
-export default function LeadsPage() {
+function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<PipelineStats>({});
   const [loading, setLoading] = useState(true);
@@ -107,14 +108,17 @@ export default function LeadsPage() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [dateRange, setDateRange] = useState('all');
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f'; // Energie Fitness Hoddesdon
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
     fetchPipelineData();
-  }, [sourceFilter, dateRange]);
+  }, [sourceFilter, dateRange, gymId]);
 
   const fetchPipelineData = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       // Fetch from real API endpoint
@@ -857,3 +861,6 @@ export default function LeadsPage() {
     </DashboardLayout>
   );
 }
+
+// Export with auth protection
+export default withAuth(LeadsPage);

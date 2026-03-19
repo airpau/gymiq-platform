@@ -65,3 +65,112 @@ export interface ApiResponse<T = unknown> {
     total?: number;
   };
 }
+
+// ─── Authentication Types ─────────────────────────────────────────────────
+
+export type UserRole = 'SUPER_ADMIN' | 'GYM_OWNER' | 'GYM_STAFF';
+
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  gymId: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  isActive: boolean;
+  lastLoginAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Gym {
+  id: string;
+  name: string;
+  slug: string;
+  settings?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Session {
+  id: string;
+  userId: string;
+  token: string;
+  expiresAt: Date;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: Date;
+}
+
+export interface AuthToken {
+  token: string;
+  expiresAt: Date;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  gymName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+export interface LoginResponse {
+  user: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role: UserRole;
+  };
+  gym: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  token: string;
+}
+
+export interface UserProfile {
+  user: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role: UserRole;
+    phone?: string;
+    lastLoginAt?: Date;
+  };
+  gym: {
+    id: string;
+    name: string;
+    slug: string;
+    settings?: Record<string, any>;
+  };
+  session: {
+    id: string;
+    expiresAt: Date;
+  };
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export interface AuthError {
+  success: false;
+  error: string;
+  code?: string;
+}

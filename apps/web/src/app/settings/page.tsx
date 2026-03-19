@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { API_URL } from '../../lib/api';
+import { useAuth, withAuth } from '../../contexts/AuthContext';
 
 interface GymConfig {
   id: string;
@@ -92,7 +93,7 @@ const BOOKING_TYPES = [
   { value: 'consultation', label: 'Consultation' },
 ];
 
-export default function SettingsPage() {
+function SettingsPage() {
   const [config, setConfig] = useState<GymConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -100,14 +101,17 @@ export default function SettingsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('general');
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f'; // Energie Fitness Hoddesdon
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
     fetchConfig();
-  }, []);
+  }, [gymId]);
 
   const fetchConfig = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/gyms/${gymId}/config`);
@@ -130,7 +134,7 @@ export default function SettingsPage() {
   };
 
   const saveConfig = async () => {
-    if (!config) return;
+    if (!config || !gymId) return;
 
     try {
       setSaving(true);
@@ -688,3 +692,5 @@ export default function SettingsPage() {
     </DashboardLayout>
   );
 }
+
+export default withAuth(SettingsPage);

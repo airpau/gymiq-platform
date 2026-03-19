@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { API_URL } from '../../lib/api';
+import { useAuth, withAuth } from '../../contexts/AuthContext';
 
 interface CancelSaveAttempt {
   id: string;
@@ -60,7 +61,7 @@ interface CancelSaveStats {
   avgConversationLength: number;
 }
 
-export default function CancelSavePage() {
+function CancelSavePage() {
   const [activeAttempts, setActiveAttempts] = useState<CancelSaveAttempt[]>([]);
   const [stats, setStats] = useState<CancelSaveStats | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<CancelSaveAttempt | null>(null);
@@ -69,14 +70,17 @@ export default function CancelSavePage() {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7' | '30' | '90'>('30');
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f'; // Energie Fitness Hoddesdon
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
     fetchData();
-  }, [timeRange]);
+  }, [timeRange, gymId]);
 
   const fetchData = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       setError(null);
@@ -826,3 +830,5 @@ export default function CancelSavePage() {
     </DashboardLayout>
   );
 }
+
+export default withAuth(CancelSavePage);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { useAuth, withAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
 import { API_URL } from '../lib/api';
 
@@ -75,23 +76,27 @@ interface TasksData {
   };
 }
 
-export default function Home() {
+function Home() {
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [tasksData, setTasksData] = useState<TasksData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f'; // Energie Fitness Hoddesdon
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
+
     fetchData();
     // Refresh stats every 5 minutes
     const interval = setInterval(fetchData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [gymId]);
 
   const fetchData = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       const [statsResponse, tasksResponse] = await Promise.all([
@@ -602,3 +607,6 @@ function TaskQuickCard({
     </div>
   );
 }
+
+// Export with auth protection
+export default withAuth(Home);

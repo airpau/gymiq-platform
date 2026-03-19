@@ -23,7 +23,6 @@ export {
   createRateLimiter,
   generalRateLimit,
   strictRateLimit,
-  authRateLimit,
   uploadRateLimit,
   rateLimiterStatus,
   shutdownRateLimiter
@@ -39,3 +38,13 @@ export {
   apiCORS,
   getCORSForEnvironment
 } from './cors';
+
+// Authentication middleware
+export {
+  authenticate,
+  requireRole,
+  requireGymAccess,
+  optionalAuth,
+  createToken,
+  authRateLimit
+} from './authentication';

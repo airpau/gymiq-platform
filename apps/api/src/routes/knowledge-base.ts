@@ -1,16 +1,21 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { knowledgeBaseService } from '../services/knowledge-base';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const knowledgeBaseRouter = Router();
 
+// Apply authentication to all routes
+knowledgeBaseRouter.use(authenticate);
+knowledgeBaseRouter.use(requireGymAccess);
+
 /**
- * GET /gyms/:id/knowledge-base
+ * GET /knowledge-base
  * Get gym knowledge base
  */
-knowledgeBaseRouter.get('/gyms/:id/knowledge-base', async (req, res) => {
+knowledgeBaseRouter.get('/knowledge-base', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
 
     const knowledgeBase = await knowledgeBaseService.getKnowledgeBase(gymId);
 
@@ -31,12 +36,12 @@ knowledgeBaseRouter.get('/gyms/:id/knowledge-base', async (req, res) => {
 });
 
 /**
- * PUT /gyms/:id/knowledge-base
+ * PUT /knowledge-base
  * Update gym knowledge base
  */
-knowledgeBaseRouter.put('/gyms/:id/knowledge-base', async (req, res) => {
+knowledgeBaseRouter.put('/knowledge-base', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
     const updates = req.body;
 
     // Verify gym exists
@@ -76,9 +81,9 @@ knowledgeBaseRouter.put('/gyms/:id/knowledge-base', async (req, res) => {
  * POST /gyms/:id/knowledge-base/test
  * Test a question against the knowledge base
  */
-knowledgeBaseRouter.post('/gyms/:id/knowledge-base/test', async (req, res) => {
+knowledgeBaseRouter.post('/knowledge-base/test', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
     const { question } = req.body;
 
     if (!question) {
@@ -115,9 +120,9 @@ knowledgeBaseRouter.post('/gyms/:id/knowledge-base/test', async (req, res) => {
  * GET /gyms/:id/knowledge-base/context
  * Get formatted context string for AI prompts
  */
-knowledgeBaseRouter.get('/gyms/:id/knowledge-base/context', async (req, res) => {
+knowledgeBaseRouter.get('/knowledge-base/context', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
 
     const context = await knowledgeBaseService.buildContext(gymId);
 
@@ -139,9 +144,9 @@ knowledgeBaseRouter.get('/gyms/:id/knowledge-base/context', async (req, res) => 
  * GET /gyms/:id/knowledge-base/template
  * Get default knowledge base template
  */
-knowledgeBaseRouter.get('/gyms/:id/knowledge-base/template', async (req, res) => {
+knowledgeBaseRouter.get('/knowledge-base/template', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
 
     // Get gym name
     const gym = await prisma.gym.findUnique({
@@ -171,9 +176,9 @@ knowledgeBaseRouter.get('/gyms/:id/knowledge-base/template', async (req, res) =>
  * POST /gyms/:id/knowledge-base/reset
  * Reset knowledge base to default template
  */
-knowledgeBaseRouter.post('/gyms/:id/knowledge-base/reset', async (req, res) => {
+knowledgeBaseRouter.post('/knowledge-base/reset', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
 
     // Get gym name
     const gym = await prisma.gym.findUnique({
@@ -211,9 +216,9 @@ knowledgeBaseRouter.post('/gyms/:id/knowledge-base/reset', async (req, res) => {
  * POST /gyms/:id/knowledge-base/search
  * Search knowledge base with multiple questions
  */
-knowledgeBaseRouter.post('/gyms/:id/knowledge-base/search', async (req, res) => {
+knowledgeBaseRouter.post('/knowledge-base/search', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
     const { questions } = req.body;
 
     if (!questions || !Array.isArray(questions)) {
@@ -250,9 +255,9 @@ knowledgeBaseRouter.post('/gyms/:id/knowledge-base/search', async (req, res) => 
  * GET /gyms/:id/knowledge-base/validation
  * Validate knowledge base completeness
  */
-knowledgeBaseRouter.get('/gyms/:id/knowledge-base/validation', async (req, res) => {
+knowledgeBaseRouter.get('/knowledge-base/validation', async (req, res) => {
   try {
-    const { id: gymId } = req.params;
+    const gymId = req.user!.gymId;
 
     const kb = await knowledgeBaseService.getKnowledgeBase(gymId);
 

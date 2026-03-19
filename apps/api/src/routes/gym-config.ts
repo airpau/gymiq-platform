@@ -2,8 +2,13 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { leadCapture } from '../services/lead-capture';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const gymConfigRouter = Router();
+
+// Apply authentication to all routes
+gymConfigRouter.use(authenticate);
+gymConfigRouter.use(requireGymAccess);
 
 // Validation schemas for gym configuration
 const OpeningHoursSchema = z.object({
@@ -93,10 +98,10 @@ const GymSettingsSchema = z.object({
  * GET /gyms/:id/config
  * Get complete gym configuration
  */
-gymConfigRouter.get('/:id/config', async (req: Request, res: Response) => {
+gymConfigRouter.get('/config', async (req: Request, res: Response) => {
   try {
     const gym = await prisma.gym.findUnique({
-      where: { id: req.params.id },
+      where: { id: req.user!.gymId },
       select: {
         id: true,
         name: true,
@@ -147,18 +152,18 @@ gymConfigRouter.get('/:id/config', async (req: Request, res: Response) => {
 
     res.json({ success: true, data: response });
   } catch (error) {
-    console.error(`[Gym Config] Error fetching config for gym ${req.params.id}:`, error);
+    console.error(`[Gym Config] Error fetching config for gym ${req.user!.gymId}:`, error);
     res.status(500).json({ success: false, error: 'Failed to fetch gym configuration' });
   }
 });
 
 /**
- * PUT /gyms/:id/config
+ * PUT /gym/config
  * Update gym configuration
  */
-gymConfigRouter.put('/:id/config', async (req: Request, res: Response) => {
+gymConfigRouter.put('/config', async (req: Request, res: Response) => {
   try {
-    const gymId = req.params.id;
+    const gymId = req.user!.gymId;
 
     // Check if gym exists
     const existingGym = await prisma.gym.findUnique({
@@ -248,7 +253,7 @@ gymConfigRouter.put('/:id/config', async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    console.error(`[Gym Config] Error updating config for gym ${req.params.id}:`, error);
+    console.error(`[Gym Config] Error updating config for gym ${req.user!.gymId}:`, error);
     res.status(500).json({ success: false, error: 'Failed to update gym configuration' });
   }
 });
@@ -257,16 +262,16 @@ gymConfigRouter.put('/:id/config', async (req: Request, res: Response) => {
  * GET /gyms/:id/lead-sources
  * Get lead sources configuration
  */
-gymConfigRouter.get('/:id/lead-sources', async (req: Request, res: Response) => {
+gymConfigRouter.get('/lead-sources', async (req: Request, res: Response) => {
   try {
-    const leadSources = await leadCapture.getLeadSources(req.params.id);
+    const leadSources = await leadCapture.getLeadSources(req.user!.gymId);
 
     res.json({
       success: true,
       data: leadSources,
     });
   } catch (error) {
-    console.error(`[Gym Config] Error fetching lead sources for gym ${req.params.id}:`, error);
+    console.error(`[Gym Config] Error fetching lead sources for gym ${req.user!.gymId}:`, error);
     res.status(500).json({ success: false, error: 'Failed to fetch lead sources' });
   }
 });
@@ -275,7 +280,7 @@ gymConfigRouter.get('/:id/lead-sources', async (req: Request, res: Response) => 
  * PUT /gyms/:id/lead-sources
  * Update lead sources configuration
  */
-gymConfigRouter.put('/:id/lead-sources', async (req: Request, res: Response) => {
+gymConfigRouter.put('/lead-sources', async (req: Request, res: Response) => {
   try {
     const leadSourcesValidation = z.array(LeadSourceConfigSchema).safeParse(req.body);
 
@@ -287,7 +292,7 @@ gymConfigRouter.put('/:id/lead-sources', async (req: Request, res: Response) => 
       });
     }
 
-    const result = await leadCapture.updateLeadSources(req.params.id, leadSourcesValidation.data);
+    const result = await leadCapture.updateLeadSources(req.user!.gymId, leadSourcesValidation.data);
 
     if (result.success) {
       res.json({
@@ -298,18 +303,19 @@ gymConfigRouter.put('/:id/lead-sources', async (req: Request, res: Response) => 
       res.status(400).json({ success: false, error: result.error });
     }
   } catch (error) {
-    console.error(`[Gym Config] Error updating lead sources for gym ${req.params.id}:`, error);
+    console.error(`[Gym Config] Error updating lead sources for gym ${req.user!.gymId}:`, error);
     res.status(500).json({ success: false, error: 'Failed to update lead sources' });
   }
 });
 
 /**
- * POST /gyms/:id/test-lead-source/:sourceId
+ * POST /gym/test-lead-source/:sourceId
  * Test a specific lead source configuration
  */
-gymConfigRouter.post('/:id/test-lead-source/:sourceId', async (req: Request, res: Response) => {
+gymConfigRouter.post('/test-lead-source/:sourceId', async (req: Request, res: Response) => {
   try {
-    const { id: gymId, sourceId } = req.params;
+    const gymId = req.user!.gymId;
+    const { sourceId } = req.params;
 
     const leadSources = await leadCapture.getLeadSources(gymId);
     const source = leadSources.find(s => s.id === sourceId);
@@ -379,7 +385,7 @@ gymConfigRouter.post('/:id/test-lead-source/:sourceId', async (req: Request, res
  * GET /gyms/:id/config/defaults
  * Get default configuration template
  */
-gymConfigRouter.get('/:id/config/defaults', async (req: Request, res: Response) => {
+gymConfigRouter.get('/config/defaults', async (req: Request, res: Response) => {
   try {
     const defaults = {
       settings: {

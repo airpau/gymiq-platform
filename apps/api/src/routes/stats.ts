@@ -1,16 +1,17 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const statsRouter = Router();
 
-// GET /stats/overview?gymId=<id> - Unified dashboard stats
+// Apply authentication to all routes
+statsRouter.use(authenticate);
+statsRouter.use(requireGymAccess);
+
+// GET /stats/overview - Unified dashboard stats
 statsRouter.get('/overview', async (req, res) => {
   try {
-    const { gymId } = req.query;
-
-    if (!gymId || typeof gymId !== 'string') {
-      return res.status(400).json({ error: 'gymId parameter is required' });
-    }
+    const gymId = req.user!.gymId;
 
     // Execute all queries in parallel for better performance
     const [
@@ -306,14 +307,10 @@ statsRouter.get('/overview', async (req, res) => {
   }
 });
 
-// GET /stats/retention?gymId=<id> - Retention-specific stats
+// GET /stats/retention - Retention-specific stats
 statsRouter.get('/retention', async (req, res) => {
   try {
-    const { gymId } = req.query;
-
-    if (!gymId || typeof gymId !== 'string') {
-      return res.status(400).json({ error: 'gymId parameter is required' });
-    }
+    const gymId = req.user!.gymId;
 
     const [sleepersByCategory, riskDistribution] = await Promise.all([
       // Sleepers by intervention category

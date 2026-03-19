@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { API_URL } from '../../lib/api';
+import { useAuth, withAuth } from '../../contexts/AuthContext';
 
 interface Member {
   id: string;
@@ -124,7 +125,7 @@ const PRIORITY_ICONS = {
   low: '⚪',
 };
 
-export default function RetentionPage() {
+function RetentionPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [tasksData, setTasksData] = useState<TasksData | null>(null);
   const [selectedMember, setSelectedMember] = useState<MemberFullProfile | null>(null);
@@ -136,17 +137,20 @@ export default function RetentionPage() {
   const [taskResolution, setTaskResolution] = useState('');
   const [taskNotes, setTaskNotes] = useState('');
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f';
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
     fetchData();
     // Refresh every 5 minutes
     const interval = setInterval(fetchData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [gymId]);
 
   const fetchData = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       const [membersResponse, tasksResponse] = await Promise.all([
@@ -834,6 +838,8 @@ export default function RetentionPage() {
     </DashboardLayout>
   );
 }
+
+export default withAuth(RetentionPage);
 
 // Task Card Component
 function TaskCard({

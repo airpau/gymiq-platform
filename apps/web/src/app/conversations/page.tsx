@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { API_URL } from '../../lib/api';
+import { useAuth, withAuth } from '../../contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -32,7 +33,7 @@ interface Conversation {
   lastMessageAt: string;
 }
 
-export default function ConversationsPage() {
+function ConversationsPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,14 +41,17 @@ export default function ConversationsPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'waiting_human' | 'ai_handled'>('all');
   const [intentFilter, setIntentFilter] = useState<string>('all');
 
-  // In a real app, this would come from context/auth
-  const gymId = '6169f878-8493-4cd9-974f-a554863a6f7f'; // Energie Fitness Hoddesdon
+  const { gym } = useAuth();
+  const gymId = gym?.id;
 
   useEffect(() => {
+    if (!gymId) return; // Wait for auth to load
     fetchConversations();
-  }, []);
+  }, [gymId]);
 
   const fetchConversations = async () => {
+    if (!gymId) return; // Guard against missing gymId
+
     try {
       setLoading(true);
       setError(null);
@@ -488,3 +492,5 @@ export default function ConversationsPage() {
     </DashboardLayout>
   );
 }
+
+export default withAuth(ConversationsPage);

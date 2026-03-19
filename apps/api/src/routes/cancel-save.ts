@@ -1,8 +1,13 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { cancelSaveEngine } from '../services/cancel-save';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const cancelSaveRouter = Router();
+
+// Apply authentication to all routes
+cancelSaveRouter.use(authenticate);
+cancelSaveRouter.use(requireGymAccess);
 
 /**
  * POST /cancel-save/initiate
@@ -10,11 +15,12 @@ export const cancelSaveRouter = Router();
  */
 cancelSaveRouter.post('/initiate', async (req, res) => {
   try {
-    const { gymId, memberId, initialMessage } = req.body;
+    const { memberId, initialMessage } = req.body;
+    const gymId = req.user!.gymId;
 
-    if (!gymId || !memberId || !initialMessage) {
+    if (!memberId || !initialMessage) {
       return res.status(400).json({
-        error: 'Missing required fields: gymId, memberId, initialMessage'
+        error: 'Missing required fields: memberId, initialMessage'
       });
     }
 
@@ -90,15 +96,9 @@ cancelSaveRouter.post('/:id/respond', async (req, res) => {
  */
 cancelSaveRouter.get('/active', async (req, res) => {
   try {
-    const { gymId } = req.query;
+    const gymId = req.user!.gymId;
 
-    if (!gymId) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: gymId'
-      });
-    }
-
-    const activeAttempts = await cancelSaveEngine.getActiveCancelSaveAttempts(gymId as string);
+    const activeAttempts = await cancelSaveEngine.getActiveCancelSaveAttempts(gymId);
 
     res.json({
       success: true,
@@ -116,16 +116,11 @@ cancelSaveRouter.get('/active', async (req, res) => {
  */
 cancelSaveRouter.get('/stats', async (req, res) => {
   try {
-    const { gymId, days } = req.query;
-
-    if (!gymId) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: gymId'
-      });
-    }
+    const { days } = req.query;
+    const gymId = req.user!.gymId;
 
     const daysNum = days ? parseInt(days as string) : 30;
-    const stats = await cancelSaveEngine.getCancelSaveStats(gymId as string, daysNum);
+    const stats = await cancelSaveEngine.getCancelSaveStats(gymId, daysNum);
 
     if (!stats) {
       return res.status(500).json({
@@ -149,20 +144,15 @@ cancelSaveRouter.get('/stats', async (req, res) => {
  */
 cancelSaveRouter.get('/history', async (req, res) => {
   try {
-    const { gymId, limit, offset } = req.query;
-
-    if (!gymId) {
-      return res.status(400).json({
-        error: 'Missing required query parameter: gymId'
-      });
-    }
+    const { limit, offset } = req.query;
+    const gymId = req.user!.gymId;
 
     const limitNum = limit ? parseInt(limit as string) : 50;
     const offsetNum = offset ? parseInt(offset as string) : 0;
 
     const attempts = await prisma.cancelSaveAttempt.findMany({
       where: {
-        gymId: gymId as string,
+        gymId,
         outcome: { not: 'in_progress' }
       },
       include: {
@@ -184,7 +174,7 @@ cancelSaveRouter.get('/history', async (req, res) => {
     // Calculate summary stats
     const totalAttempts = await prisma.cancelSaveAttempt.count({
       where: {
-        gymId: gymId as string,
+        gymId,
         outcome: { not: 'in_progress' }
       }
     });

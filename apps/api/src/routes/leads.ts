@@ -7,6 +7,7 @@ import { bookingService, BookingType } from '../services/booking';
 import { messagingService } from '../services/messaging';
 import { leadNurtureWorker } from '../workers/lead-nurture.worker';
 import { emailNurtureWorker } from '../workers/email-nurture.worker';
+import { authenticate, requireGymAccess } from '../middleware/authentication';
 
 export const leadRouter = Router();
 
@@ -112,8 +113,22 @@ leadRouter.post('/audit-signup', async (req: Request, res: Response) => {
   }
 });
 
+// Apply authentication to all routes except audit-signup
+leadRouter.use((req, res, next) => {
+  if (req.path === '/audit-signup' && req.method === 'POST') {
+    return next(); // Skip auth for audit signup
+  }
+  authenticate(req, res, next);
+});
+
+leadRouter.use((req, res, next) => {
+  if (req.path === '/audit-signup' && req.method === 'POST') {
+    return next(); // Skip gym access check for audit signup
+  }
+  requireGymAccess(req, res, next);
+});
+
 const CreateLeadSchema = z.object({
-  gymId: z.string().uuid(),
   source: z.enum(['abandoned_cart', 'web_form', 'walk_in', 'call', 'referral', 'waitlist', 'audit']),
   sourceDetail: z.string().optional(),
   name: z.string().optional(),
@@ -137,18 +152,17 @@ const UpdateLeadSchema = z.object({
 });
 
 /**
- * GET /leads?gymId=&status=&source=&page=&perPage=
+ * GET /leads?status=&source=&page=&perPage=
  */
 leadRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const { gymId, status, source, page = '1', perPage = '50' } = req.query;
-
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const { status, source, page = '1', perPage = '50' } = req.query;
+    const gymId = req.user!.gymId;
 
     const pageNum = parseInt(page as string, 10);
     const perPageNum = parseInt(perPage as string, 10);
 
-    const where: Record<string, unknown> = { gymId: gymId as string };
+    const where: Record<string, unknown> = { gymId };
     if (status) where.status = status;
     if (source) where.source = source;
 
@@ -176,20 +190,17 @@ leadRouter.get('/', async (req: Request, res: Response) => {
 // ─── STATIC ROUTES (must come before /:id) ────────────────────────────────────
 
 /**
- * GET /leads/pipeline?gymId=
+ * GET /leads/pipeline?stage=
  * Get lead pipeline with stats and leads by stage
  */
 leadRouter.get('/pipeline', async (req: Request, res: Response) => {
   try {
-    const { gymId, stage } = req.query;
-
-    if (!gymId) {
-      return res.status(400).json({ success: false, error: 'gymId is required' });
-    }
+    const { stage } = req.query;
+    const gymId = req.user!.gymId;
 
     const [stats, leads] = await Promise.all([
-      leadPipeline.getPipelineStats(gymId as string),
-      leadPipeline.getLeadsByStage(gymId as string, stage as LeadStage | undefined),
+      leadPipeline.getPipelineStats(gymId),
+      leadPipeline.getLeadsByStage(gymId, stage as LeadStage | undefined),
     ]);
 
     res.json({
@@ -207,20 +218,20 @@ leadRouter.get('/pipeline', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /leads/bookings?gymId=&date=
+ * GET /leads/bookings?date=
  */
 leadRouter.get('/bookings', async (req: Request, res: Response) => {
   try {
-    const { gymId, date } = req.query;
-    if (!gymId) return res.status(400).json({ success: false, error: 'gymId is required' });
+    const { date } = req.query;
+    const gymId = req.user!.gymId;
 
     const targetDate = date ? new Date(date as string) : new Date();
     const endDate = new Date(targetDate); endDate.setDate(endDate.getDate() + 1);
-    const slots = await bookingService.getAvailableSlots(gymId as string, targetDate, endDate);
+    const slots = await bookingService.getAvailableSlots(gymId, targetDate, endDate);
 
     const bookings = await prisma.booking.findMany({
       where: {
-        gymId: gymId as string,
+        gymId,
         date: {
           gte: new Date(targetDate.toISOString().split('T')[0]),
           lt: new Date(new Date(targetDate).setDate(targetDate.getDate() + 1)),
@@ -276,13 +287,12 @@ leadRouter.post('/', async (req: Request, res: Response) => {
     }
 
     const { triggerFollowup, triggerEmailNurture, ...leadData } = parsed.data;
-
-    const gym = await prisma.gym.findUnique({ where: { id: leadData.gymId } });
-    if (!gym) return res.status(404).json({ success: false, error: 'Gym not found' });
+    const gymId = req.user!.gymId;
 
     const lead = await prisma.lead.create({
       data: {
         ...leadData,
+        gymId,
         enquiryDate: leadData.enquiryDate ? new Date(leadData.enquiryDate) : new Date(),
         metadata: leadData.metadata ?? {},
       },
@@ -365,7 +375,6 @@ leadRouter.post('/:id/followup', async (req: Request, res: Response) => {
  * Capture a lead from various sources (webhook, manual, etc.)
  */
 const CaptureLeadSchema = z.object({
-  gymId: z.string().uuid(),
   source: z.string(),
   sourceDetail: z.string().optional(),
   name: z.string().optional(),
@@ -384,7 +393,9 @@ leadRouter.post('/capture', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: parsed.error.flatten() });
     }
 
-    const result = await leadCapture.captureLead(parsed.data.gymId, {
+    const gymId = req.user!.gymId;
+
+    const result = await leadCapture.captureLead(gymId, {
       source: parsed.data.source,
       sourceDetail: parsed.data.sourceDetail,
       name: parsed.data.name,

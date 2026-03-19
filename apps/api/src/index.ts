@@ -4,6 +4,7 @@ import path from 'path';
 // Load .env from monorepo root (two levels up from apps/api/src/)
 config({ path: path.resolve(__dirname, '../../../.env') });
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { webhookRouter } from './routes/webhooks';
 import { conversationRouter } from './routes/conversations';
 import { memberRouter } from './routes/members';
@@ -20,6 +21,7 @@ import { statsRouter } from './routes/stats';
 import { gymConfigRouter } from './routes/gym-config';
 import { auditRouter } from './routes/audit';
 import { taskRouter } from './routes/tasks';
+import { authRouter } from './routes/auth';
 import { connectorScheduler } from '@gymiq/connectors';
 import {
   requestLogging,
@@ -50,6 +52,9 @@ app.use(generalRateLimit);
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Required for Twilio webhooks
+
+// Cookie parsing for authentication
+app.use(cookieParser());
 
 // Accept raw CSV bodies on /import routes
 app.use('/import', express.text({ type: ['text/csv', 'text/plain'], limit: '10mb' }));
@@ -87,6 +92,7 @@ app.get('/health/live', (_req, res) => {
   res.json({ status: 'alive', timestamp: new Date().toISOString() });
 });
 
+app.use('/auth', authRouter);
 app.use('/webhooks', webhookRouter);
 app.use('/conversations', conversationRouter);
 app.use('/members', memberRouter);
