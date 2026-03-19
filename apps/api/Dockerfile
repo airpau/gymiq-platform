@@ -51,4 +51,4 @@ WORKDIR /app/apps/api
 EXPOSE 3001
 
 # Run migrations then start
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=../../packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
