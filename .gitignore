@@ -39,3 +39,4 @@ packages/database/prisma/migrations/**/migration_lock.toml
 *.csv
 !test-members.csv
 .vercel
+.github/workflows/deploy.yml
