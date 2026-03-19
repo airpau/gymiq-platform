@@ -20,7 +20,7 @@ RUN mkdir -p apps/web apps/marketing && \
 
 RUN npm install --production=false
 
-# Build stage
+# Build stage - CACHE BUST: 20260319-v3-passwordHash
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -31,8 +31,8 @@ RUN mkdir -p apps/web apps/marketing && \
     echo '{"name":"@gymiq/web","version":"0.1.0","private":true}' > apps/web/package.json && \
     echo '{"name":"@gymiq/marketing","version":"0.1.0","private":true}' > apps/marketing/package.json
 
-# Generate Prisma client
-RUN echo "schema-version-20260319-v2" && cd packages/database && npx prisma@5.22.0 generate
+# Generate Prisma client from schema (schema has passwordHash, role, gymId, firstName, lastName)
+RUN cd packages/database && node_modules/.bin/prisma generate
 
 # Build shared packages and API
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
@@ -53,6 +53,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 EXPOSE 3001
 
-# Run migrations then start
-CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy --schema=/app/packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
-# Cache bust 1773948367
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --schema=/app/packages/database/prisma/schema.prisma && node dist/apps/api/src/index.js"]
