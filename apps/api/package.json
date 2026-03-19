@@ -6,7 +6,7 @@
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "postinstall": "rm -rf node_modules/.prisma node_modules/@prisma/client && cd ../../packages/database && npx prisma generate"
+    "postinstall": "echo 'skipping local prisma generate - handled by build pipeline'"
   },
   "dependencies": {
     "@gymiq/ai-gateway": "*",
