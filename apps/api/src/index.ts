@@ -92,6 +92,11 @@ app.get('/health/live', (_req, res) => {
   res.json({ status: 'alive', timestamp: new Date().toISOString() });
 });
 
+// Simple test route for debugging
+app.get('/test', (_req, res) => {
+  res.json({ message: 'Test route works', timestamp: new Date().toISOString() });
+});
+
 // Authentication routes
 app.use('/auth', authRouter);
 
