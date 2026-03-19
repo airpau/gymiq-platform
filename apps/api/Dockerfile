@@ -26,11 +26,8 @@ COPY . .
 # Generate Prisma client
 RUN cd packages/database && npx prisma generate
 
-# Build all packages and API
-RUN npm run build --workspace=packages/database 2>/dev/null || true
-RUN npm run build --workspace=packages/ai-gateway 2>/dev/null || true
+# Build essential packages and API
 RUN npm run build --workspace=packages/shared 2>/dev/null || true
-RUN npm run build --workspace=packages/connectors 2>/dev/null || true
 RUN npm run build --workspace=apps/api
 
 # Production stage
