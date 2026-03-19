@@ -8,6 +8,8 @@ WORKDIR /app
 # Copy root package files
 COPY package.json package-lock.json* ./
 COPY apps/api/package.json ./apps/api/
+COPY apps/marketing/package.json ./apps/marketing/
+COPY apps/web/package.json ./apps/web/
 COPY packages/database/package.json ./packages/database/
 COPY packages/ai-gateway/package.json ./packages/ai-gateway/
 COPY packages/shared/package.json ./packages/shared/
