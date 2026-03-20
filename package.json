@@ -21,6 +21,9 @@
     "packages/*"
   ],
   "packageManager": "npm@10.0.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@prisma/client": "^7.5.0",
     "bcrypt": "^6.0.0"
