@@ -15,4 +15,4 @@ cmds = [
 ]
 
 [start]
-cmd = "packages/database/node_modules/.bin/prisma migrate deploy --schema=packages/database/prisma/schema.prisma && node apps/api/dist/src/index.js"
+cmd = "node apps/api/dist/src/index.js"
