@@ -6,28 +6,38 @@ services:
     plan: free
     branch: main
     rootDir: .
-    buildCommand: |
-      npm install
-      rm -rf apps/api/node_modules/.prisma apps/api/node_modules/@prisma/client
-      cd packages/database && npx prisma generate && cd ../..
-      npm run build --workspace=packages/shared || true
-      npm run build --workspace=apps/api
-    startCommand: |
-      cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/api/dist/apps/api/src/index.js
+    buildCommand: npm install && rm -rf apps/api/node_modules/.prisma apps/api/node_modules/@prisma/client && cd packages/database && npx prisma generate && cd ../.. && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api
+    startCommand: cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/api/dist/apps/api/src/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3001
       - key: DATABASE_URL
         fromDatabase:
-          name: gymiq-db
+          name: gymiq-postgres
           property: connectionString
-      - fromGroup: gymiq-secrets
+      - key: REDIS_URL
+        fromDatabase:
+          name: gymiq-redis
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
 
 databases:
-  - name: gymiq-db
+  - name: gymiq-postgres
     plan: free
     databaseName: gymiq
     user: gymiq
+    region: oregon
+
+  - name: gymiq-redis
+    plan: free
+    region: oregon
