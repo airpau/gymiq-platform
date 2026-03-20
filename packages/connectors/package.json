@@ -1,8 +1,8 @@
 {
   "name": "@gymiq/connectors",
   "version": "0.1.0",
-  "description": "Universal data connector system — API, browser, email, upload, manual",
-  "main": "./dist/index.js",
+  "description": "Universal data connector system \u2014 API, browser, email, upload, manual",
+  "main": "./dist/connectors/src/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",

@@ -10,6 +10,8 @@ cmds = [
 cmds = [
   "cd packages/database && npx prisma generate",
   "npm run build --workspace=packages/shared || true",
+  "npm run build --workspace=packages/connectors || true",
+  "npm run build --workspace=packages/ai-gateway || true",
   "npm run build --workspace=apps/api"
 ]
 
