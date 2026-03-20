@@ -6,7 +6,7 @@ services:
     plan: free
     branch: main
     buildCommand: npm install --include=dev && cd packages/database && npx prisma generate && cd ../.. && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api
-    startCommand: node apps/api/dist/apps/api/src/index.js
+    startCommand: echo "Starting GymIQ API..." && ls -la apps/api/dist/apps/api/src/ && echo "Running node..." && node apps/api/dist/apps/api/src/index.js
     envVars:
       - key: NODE_ENV
         value: production
