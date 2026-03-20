@@ -1,8 +1,8 @@
 {
   "name": "@gymiq/database",
   "version": "0.1.0",
-  "description": "GymIQ database package — Prisma + PostgreSQL",
-  "main": "./src/index.ts",
+  "description": "GymIQ database package \u2014 Prisma + PostgreSQL",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
