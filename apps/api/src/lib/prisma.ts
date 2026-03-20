@@ -1,9 +1,10 @@
 import path from 'path';
 
-// Candidate paths for @prisma/client - try root node_modules first
+// Candidate paths for @prisma/client - try multiple locations to handle different working directories
 const candidates = [
   path.join(process.cwd(), 'node_modules', '@prisma', 'client'),
   path.join(process.cwd(), '..', 'node_modules', '@prisma', 'client'),
+  path.join(process.cwd(), '../..', 'node_modules', '@prisma', 'client'),
   '@prisma/client',
 ];
 
