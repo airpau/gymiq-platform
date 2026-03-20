@@ -6,7 +6,7 @@ services:
     plan: free
     branch: main
     buildCommand: npm install --include=dev && cd packages/database && npx prisma generate && cd ../.. && npm run build --workspace=packages/shared || true && npm run build --workspace=apps/api
-    startCommand: cd packages/database && npx prisma migrate deploy && cd ../.. && node apps/api/dist/apps/api/src/index.js
+    startCommand: node apps/api/dist/apps/api/src/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
