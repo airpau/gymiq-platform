@@ -1,33 +1,45 @@
 import path from 'path';
 
-let PrismaClient: any;
-
-// Try loading Prisma client — first from cwd (root node_modules in Railway/monorepo),
-// then standard resolution. The local apps/api/node_modules/.prisma stub throws
-// "did not initialize yet" which silently breaks all route registration.
+// Candidate paths for @prisma/client - try root node_modules first
 const candidates = [
   path.join(process.cwd(), 'node_modules', '@prisma', 'client'),
   path.join(process.cwd(), '..', 'node_modules', '@prisma', 'client'),
   '@prisma/client',
 ];
 
+let PrismaClient: any = null;
+
 for (const candidate of candidates) {
   try {
     const mod = require(candidate);
     if (mod && mod.PrismaClient) {
-      PrismaClient = mod.PrismaClient;
-      console.log(`✅ Prisma client loaded from: ${candidate}`);
-      break;
+      // Test that the constructor works before committing
+      try {
+        const testClient = new mod.PrismaClient({ log: [] });
+        // If we get here, it works
+        PrismaClient = mod.PrismaClient;
+        console.log(`✅ Prisma client loaded from: ${candidate}`);
+        break;
+      } catch (constructorError: any) {
+        console.warn(`⚠️  Prisma client at ${candidate} failed to construct: ${constructorError.message}`);
+        // Try next candidate
+      }
     }
   } catch {
-    // try next
+    // module not found, try next
   }
 }
 
 if (!PrismaClient) {
-  console.warn('⚠️ Prisma client not available — using mock. DB operations will fail.');
+  console.error('❌ FATAL: Could not initialise Prisma client from any location.');
+  console.error('   Run prisma generate before starting the server.');
+  // Provide a mock so imports don't crash — DB calls will fail gracefully
   PrismaClient = class MockPrismaClient {
-    constructor() {}
+    constructor() {
+      console.warn('🔄 Using mock Prisma client — all DB operations will fail');
+    }
+    async $connect() {}
+    async $disconnect() {}
   };
 }
 
