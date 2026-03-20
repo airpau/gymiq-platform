@@ -1,8 +1,8 @@
 {
   "name": "@gymiq/ai-gateway",
   "version": "0.1.0",
-  "description": "GymIQ AI Gateway — routes requests to cheapest/best model",
-  "main": "./src/index.ts",
+  "description": "GymIQ AI Gateway \u2014 routes requests to cheapest/best model",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

@@ -2,7 +2,7 @@
   "name": "@gymiq/shared",
   "version": "0.1.0",
   "description": "GymIQ shared types and utilities",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
