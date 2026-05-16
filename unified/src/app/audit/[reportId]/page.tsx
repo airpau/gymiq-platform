@@ -34,6 +34,7 @@ export default async function AuditReportPage({ params }: PageProps) {
       gymName={data.gym_name}
       firstName={data.first_name}
       createdAt={new Date(data.created_at)}
+      auditId={data.id}
     />
   )
 }

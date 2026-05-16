@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { ScoredMember } from '@/lib/services/audit-analysis'
+import { maskEmail } from '@/lib/services/audit-analysis'
 
 const INITIAL_VISIBLE = 25
 const PAGE = 50
@@ -70,7 +71,7 @@ export default function ExpandableList({
             {rows.map((m, i) => (
               <tr key={i} className="hover:bg-zinc-50/60">
                 <Td className="font-medium text-zinc-900">{m.name ?? '—'}</Td>
-                <Td className="text-zinc-500">{m.email ?? '—'}</Td>
+                <Td className="text-zinc-500">{m.email ? maskEmail(m.email) : '—'}</Td>
                 <Td className="hidden capitalize text-zinc-600 sm:table-cell">{m.status}</Td>
                 <Td className="hidden text-zinc-600 md:table-cell">{m.membershipType ?? '—'}</Td>
                 <Td className="text-right tabular-nums text-zinc-700">

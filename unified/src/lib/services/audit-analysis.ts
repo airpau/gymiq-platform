@@ -544,10 +544,13 @@ export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary
     },
     newMemberDropoutRisk,
     benchmarks,
-    topDeepSleepers: redact(topDeepSleepers),
-    topPaymentOverdue: redact(topPaymentOverdue),
-    topNewMemberRisk: redact(topNewMemberRisk),
-    topFrozen: redact(topFrozen),
+    // Stored UNMASKED so the post-audit onboarding flow can actually
+    // contact these members. The public /audit/[id] view applies masking
+    // at render time in ExpandableMemberList.
+    topDeepSleepers,
+    topPaymentOverdue,
+    topNewMemberRisk,
+    topFrozen,
     actionPlan,
     parseSummary,
   }
@@ -567,22 +570,16 @@ function percentile(sorted: number[], p: number): number | null {
   return sorted[idx]
 }
 
-function redact(list: ScoredMember[]): ScoredMember[] {
-  return list.map((m) => ({
-    ...m,
-    email: m.email ? maskEmail(m.email) : null,
-    phone: m.phone ? maskPhone(m.phone) : null,
-  }))
-}
-
-function maskEmail(e: string): string {
+// Mask helpers exported for use at display time in AuditReportView. Storage
+// keeps the unmasked values; only the rendered output redacts.
+export function maskEmail(e: string): string {
   const [user, domain] = e.split('@')
   if (!domain) return e
   const visible = user.slice(0, Math.min(2, user.length))
   return `${visible}${'•'.repeat(Math.max(2, user.length - 2))}@${domain}`
 }
 
-function maskPhone(p: string): string {
+export function maskPhone(p: string): string {
   const digits = p.replace(/\D/g, '')
   if (digits.length <= 4) return p
   return `${digits.slice(0, digits.length - 4).replace(/./g, '•')}${digits.slice(-4)}`

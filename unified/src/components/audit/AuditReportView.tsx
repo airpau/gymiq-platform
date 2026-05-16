@@ -34,9 +34,11 @@ interface Props {
   createdAt: Date
   /** When true, shows a banner that this is an in-memory preview not saved to the server. */
   isPreview?: boolean
+  /** When provided, the autopilot CTA links to /auth/signup?audit=<id>. */
+  auditId?: string
 }
 
-export default function AuditReportView({ report, gymName, firstName, createdAt, isPreview }: Props) {
+export default function AuditReportView({ report, gymName, firstName, createdAt, isPreview, auditId }: Props) {
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
       <ReportNav />
@@ -53,7 +55,7 @@ export default function AuditReportView({ report, gymName, firstName, createdAt,
       <PaymentHealth report={report} />
       <ActionPlan report={report} />
       <Lists report={report} />
-      <CallToAction />
+      <CallToAction auditId={auditId} highRisk={report.risk.high} deepSleepers={report.sleepers.deep} />
       <Diagnostics report={report} />
     </div>
   )
@@ -775,25 +777,48 @@ function List({
 /* CALL TO ACTION                                                     */
 /* ------------------------------------------------------------------ */
 
-function CallToAction() {
+function CallToAction({
+  auditId,
+  highRisk,
+  deepSleepers,
+}: {
+  auditId?: string
+  highRisk: number
+  deepSleepers: number
+}) {
+  const signupHref = auditId ? `/auth/signup?audit=${auditId}` : '/auth/signup'
+  const hasAudit = Boolean(auditId)
   return (
     <section className="border-t border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8">
       <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-emerald-50/60 px-8 py-14 text-center sm:px-12">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-          <Sparkles className="h-3.5 w-3.5" /> Want GymIQ to do this every day?
+          <Sparkles className="h-3.5 w-3.5" />
+          {hasAudit ? 'Run this on autopilot' : 'Want GymIQ to do this every day?'}
         </span>
         <h2 className="mx-auto mt-5 max-w-2xl text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
-          We&apos;ll run this analysis daily, flag the at-risk list each morning, and (with your permission) handle the cancel-save conversations for you.
+          {hasAudit ? (
+            <>
+              Let GymIQ contact your <span className="text-emerald-700">{deepSleepers.toLocaleString('en-GB')} deep sleepers</span> and <span className="text-emerald-700">{highRisk.toLocaleString('en-GB')} high-risk members</span> for you.
+            </>
+          ) : (
+            <>We&apos;ll run this analysis daily, flag the at-risk list each morning, and handle the cancel-save conversations for you.</>
+          )}
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-zinc-600">
-          Bolts on to your existing CRM. £179/month. Live in a day.
+          {hasAudit ? (
+            <>
+              We&apos;ll import your members, set up a 3-touch retention sequence, and queue everything in dry-run mode until you&apos;re ready to flip the switch.
+            </>
+          ) : (
+            <>Bolts on to your existing CRM. £179/month. Live in a day.</>
+          )}
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/auth/signup"
+            href={signupHref}
             className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
           >
-            Start free trial
+            {hasAudit ? <>Yes — run this for me</> : <>Start free trial</>}
             <ArrowUpRight className="h-4 w-4" />
           </Link>
           <a
