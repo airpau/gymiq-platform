@@ -91,7 +91,32 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body?.error ?? `Upload failed (${res.status}).`)
       }
-      const data = (await res.json()) as { reportId: string }
+      const data = (await res.json()) as {
+        reportId: string
+        previewReport?: unknown
+      }
+
+      // In-memory preview path: when SUPABASE_SERVICE_ROLE_KEY isn't configured,
+      // the API returns the full report inline so we can still show the user
+      // their audit without persistence.
+      if (data.reportId === 'preview' && data.previewReport) {
+        try {
+          window.sessionStorage.setItem(
+            'gymiq:audit-preview',
+            JSON.stringify({
+              report: data.previewReport,
+              firstName: firstName.trim(),
+              gymName: gymName.trim(),
+              createdAt: new Date().toISOString(),
+            }),
+          )
+        } catch {
+          // sessionStorage disabled — page will show empty state and prompt rerun.
+        }
+        router.push('/audit/preview')
+        return
+      }
+
       router.push(`/audit/${data.reportId}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Upload failed. Try again.'

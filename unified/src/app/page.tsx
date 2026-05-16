@@ -403,47 +403,61 @@ function HowItWorks() {
 function Pricing() {
   const tiers = [
     {
-      name: 'Starter',
-      price: '£99',
-      desc: 'Single location, under 500 members.',
+      name: 'Retention AI',
+      price: '£179',
+      desc: 'For gyms focused on keeping the members they already have.',
       features: [
-        'Churn prediction + at-risk alerts',
-        'Lead pipeline + WhatsApp follow-up',
-        'CSV import + basic CRM connector',
-        'Email support',
+        'Churn prediction for every member',
+        'Automated sleeper detection',
+        'Cancel-save AI conversations',
+        'Payment recovery sequences',
+        'Risk dashboard',
+        'Email + WhatsApp channels',
+        'Up to 4,000 members',
+        '500 WhatsApp messages / mo',
+        '200 AI conversations / mo',
       ],
       cta: 'Start free trial',
       ctaHref: '/auth/signup',
       highlight: false,
     },
     {
-      name: 'Growth',
-      price: '£199',
-      desc: 'Up to 3 locations and 2,000 members.',
+      name: 'Lead Recovery AI',
+      price: '£179',
+      desc: 'For growing gyms that want to convert every enquiry.',
       features: [
-        'Everything in Starter',
-        'Cancel-save AI conversations',
-        'Glofox / Mindbody / ClubRight live sync',
-        'Email nurture sequences + A/B testing',
+        'AI lead nurturing (WhatsApp, Email, SMS)',
+        '30-second response time',
+        '5-touch follow-up sequence',
+        'Automated tour booking',
+        'Post-visit conversion tracking',
+        'Lead pipeline dashboard',
+        'Up to 500 leads / month',
+        '1,000 WhatsApp messages / mo',
+        '300 AI conversations / mo',
+      ],
+      cta: 'Start free trial',
+      ctaHref: '/auth/signup',
+      highlight: false,
+    },
+    {
+      name: 'GymIQ Complete',
+      price: '£299',
+      saving: 'Save £59/mo vs. buying both',
+      desc: 'The complete revenue-protection system. Both products, plus premium extras.',
+      features: [
+        'Everything in Retention AI',
+        'Everything in Lead Recovery AI',
         'Priority support',
+        'Custom AI personality matched to your brand',
+        'Advanced analytics',
+        '4,000 members + unlimited leads',
+        '1,500 WhatsApp messages / mo',
+        '500 AI conversations / mo',
       ],
       cta: 'Start free trial',
       ctaHref: '/auth/signup',
       highlight: true,
-    },
-    {
-      name: 'Enterprise',
-      price: '£399',
-      desc: 'Unlimited locations and members.',
-      features: [
-        'Everything in Growth',
-        'AI voice receptionist',
-        'Custom integrations',
-        'Dedicated account manager',
-      ],
-      cta: 'Talk to us',
-      ctaHref: 'mailto:hello@gymiq.ai',
-      highlight: false,
     },
   ]
   return (
@@ -455,6 +469,7 @@ function Pricing() {
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
           One member saved pays for it. <span className="text-zinc-500">Twice over.</span>
         </h2>
+        <p className="mt-4 text-sm text-zinc-500">No setup fees. No contracts. Cancel anytime.</p>
       </div>
       <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {tiers.map((t) => (
@@ -478,6 +493,11 @@ function Pricing() {
               <span className="text-4xl font-semibold tracking-tight">{t.price}</span>
               <span className={`text-sm ${t.highlight ? 'text-zinc-400' : 'text-zinc-500'}`}>/ month</span>
             </p>
+            {t.saving && (
+              <p className={`mt-2 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${t.highlight ? 'bg-emerald-500/20 text-emerald-200' : 'bg-emerald-50 text-emerald-700'}`}>
+                {t.saving}
+              </p>
+            )}
             <p className={`mt-2 text-sm ${t.highlight ? 'text-zinc-300' : 'text-zinc-600'}`}>{t.desc}</p>
             <ul className="mt-6 space-y-2.5">
               {t.features.map((f) => (
@@ -503,6 +523,30 @@ function Pricing() {
             </Link>
           </div>
         ))}
+      </div>
+
+      {/* Enterprise strip */}
+      <div className="mt-10 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 text-white">
+        <div className="flex flex-col items-start gap-6 px-7 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-8">
+          <div className="max-w-xl">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-300">
+              Enterprise
+            </p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight">
+              4,000+ members? Multi-site? Custom integrations?
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+              Custom pricing tailored to usage, dedicated account manager, and centralised analytics across every site.
+            </p>
+          </div>
+          <a
+            href="mailto:hello@gymiq.ai?subject=GymIQ Enterprise enquiry"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100"
+          >
+            Talk to us
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
       </div>
     </section>
   )
