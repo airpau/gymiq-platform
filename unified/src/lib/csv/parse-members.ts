@@ -158,7 +158,8 @@ export async function parseMemberFile(file: File): Promise<ParseResult> {
   // columns; we just remember the headers and use them at row-parse time to
   // set `paymentFailed`.
   const paymentStatusColumn = headers.find((h) =>
-    /\b(payment[_\s-]?status|payment[_\s-]?state|subscription[_\s-]?status|billing[_\s-]?status|last[_\s-]?payment[_\s-]?status|direct[_\s-]?debit[_\s-]?status|dd[_\s-]?status)\b/i.test(h ?? ''),
+    /^(overdue|is[_\s-]?overdue|in[_\s-]?arrears|failed[_\s-]?payment|payment[_\s-]?failed|has[_\s-]?failed[_\s-]?payment)$/i.test(h ?? '') ||
+    /\b(payment[_\s-]?status|payment[_\s-]?state|subscription[_\s-]?status|billing[_\s-]?status|last[_\s-]?payment[_\s-]?status|direct[_\s-]?debit[_\s-]?status|dd[_\s-]?status|overdue|arrears|payment[_\s-]?failed|failed[_\s-]?payment)\b/i.test(h ?? ''),
   ) ?? null
   const outstandingBalanceColumn = headers.find((h) =>
     /\b(outstanding|balance|amount[_\s-]?owed|owed|debt|arrears|unpaid)\b/i.test(h ?? '') &&
@@ -428,7 +429,20 @@ function detectPaymentFailure(
   if (statusColumn) {
     const raw = cells[statusColumn]
     if (raw !== null && raw !== undefined && raw !== '') {
-      const lower = String(raw).toLowerCase()
+      // Boolean / numeric "overdue: yes" style columns
+      if (typeof raw === 'boolean') return raw
+      if (typeof raw === 'number') return raw > 0
+      const lower = String(raw).toLowerCase().trim()
+      // Truthy boolean-ish values when the column itself is the "Overdue" flag
+      if (/^(yes|y|true|1|x|✓|✅)$/.test(lower)) {
+        // Only treat as failure if the column name signals overdue (vs e.g.
+        // a generic "active: yes" column). The header detector above only
+        // grabs payment-related columns, so this is safe.
+        return true
+      }
+      // Falsy values are explicit "not overdue"
+      if (/^(no|n|false|0|—|-|)$/.test(lower)) return false
+      // String values with failure words
       if (/\b(fail|failed|overdue|past[\s-]?due|arrears|unpaid|declined|chargeback|refused|insufficient|outstanding|owing|pending[\s-]?retry|retry)\b/.test(lower)) {
         return true
       }
