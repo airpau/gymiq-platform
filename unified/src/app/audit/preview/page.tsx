@@ -24,16 +24,6 @@ interface StoredPreview {
 
 const STORAGE_KEY = 'gymiq:audit-preview'
 
-export function setPreview(p: StoredPreview) {
-  if (typeof window === 'undefined') return
-  try {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(p))
-  } catch {
-    // sessionStorage quota or disabled — fall through silently; the page
-    // will show the "no report" empty state.
-  }
-}
-
 export default function AuditPreviewPage() {
   const [state, setState] = useState<
     { status: 'loading' } | { status: 'ready'; data: StoredPreview } | { status: 'empty' }
