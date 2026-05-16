@@ -25,6 +25,7 @@ import {
   DEFAULT_SEQUENCE_DESCRIPTION,
   DEFAULT_SEQUENCE_STEPS,
 } from '@/lib/services/default-sequence'
+import { decideContact } from '@/lib/services/contact-policy'
 import type { AuditReport, ScoredMember } from '@/lib/services/audit-analysis'
 
 export const runtime = 'nodejs'
@@ -216,16 +217,34 @@ export async function POST(req: NextRequest) {
     sequenceId = newSeq.id
   }
 
-  // 9. Enrol deep sleepers (the highest-leverage cohort) in the sequence.
-  // sequence_runs rows are status='pending' with next_send_at = now; the
-  // cron runner will pick them up.
-  const deepSleepers = (report.topDeepSleepers ?? []) as ScoredMember[]
+  // 9. Enrol contactable members in the sequence. Applies the contact
+  // policy — skips the "long-tenured silent payer" cohort and other groups
+  // where outreach is net-negative (see lib/services/contact-policy.ts).
+  // sequence_runs rows are status='pending' with next_send_at = now.
+  const candidates: ScoredMember[] = uniqueMembers([
+    ...(report.topDeepSleepers ?? []),
+    ...(report.topNewMemberRisk ?? []),
+    ...(report.topPaymentOverdue ?? []),
+  ])
   const now = new Date().toISOString()
   let enrolledCount = 0
-  for (const m of deepSleepers) {
+  let skippedByPolicy = 0
+  for (const m of candidates) {
     const key = m.externalId || (m.email ?? '').toLowerCase() || `${gymId}:${m.name}`
     const memberId = memberIdsByKey.get(key)
     if (!memberId) continue
+
+    // Contact-policy gate
+    const decision = decideContact({
+      tenureDays: m.tenureDays,
+      daysSinceLastVisit: m.daysSinceLastVisit,
+      paymentFailed: m.paymentFailed,
+      status: m.status,
+    })
+    if (!decision.contact) {
+      skippedByPolicy++
+      continue
+    }
 
     // Skip if already enrolled (avoid duplicates on re-claim).
     const { data: existingRun } = await svc
@@ -245,6 +264,9 @@ export async function POST(req: NextRequest) {
       next_send_at: now,
     })
     if (!runErr) enrolledCount++
+  }
+  if (skippedByPolicy > 0) {
+    console.log(`[onboard/claim] Contact policy skipped ${skippedByPolicy} members (sleeping-dogs cohort or insufficient signal)`)
   }
 
   // 10. Mark the lead row converted (best-effort).
