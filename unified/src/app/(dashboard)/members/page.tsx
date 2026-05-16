@@ -139,7 +139,12 @@ export default async function MembersPage({ searchParams }: PageProps) {
               {rows.map((m) => (
                 <tr key={m.id} className="hover:bg-zinc-50/60">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-zinc-900">{m.name}</div>
+                    <Link
+                      href={`/members/${m.id}`}
+                      className="font-medium text-zinc-900 hover:underline"
+                    >
+                      {m.name}
+                    </Link>
                     <div className="text-[11px] text-zinc-500">
                       {m.email && <span>{m.email}</span>}
                       {m.email && m.phone && <span className="mx-1.5 text-zinc-300">·</span>}

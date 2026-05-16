@@ -16,6 +16,7 @@
     "lucide-react": "^0.468.0",
     "next": "15.5.14",
     "openai": "^4.85.0",
+    "posthog-js": "^1.373.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^4.4.1",
