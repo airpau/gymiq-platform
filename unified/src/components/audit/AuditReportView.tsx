@@ -25,6 +25,7 @@ import type {
   ScoredMember,
   TenureBucket,
 } from '@/lib/services/audit-analysis'
+import ExpandableList from './ExpandableMemberList'
 
 interface Props {
   report: AuditReport
@@ -758,96 +759,15 @@ function List({
   column: 'daysSinceLastVisit' | 'daysOverdue' | 'riskScore'
   columnLabel: string
 }) {
-  if (members.length === 0) {
-    return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-        <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-          <Icon className="h-4 w-4 text-zinc-400" />
-          {title}
-        </div>
-        <p className="mt-1.5 text-sm text-zinc-500">{subtitle}</p>
-        <p className="mt-4 text-sm text-emerald-700">Nothing to flag in this category. Nice.</p>
-      </div>
-    )
-  }
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-      <div className="border-b border-zinc-100 p-5">
-        <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-          <Icon className="h-4 w-4 text-zinc-400" />
-          {title}
-          <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-600">
-            {members.length}
-          </span>
-        </div>
-        <p className="mt-1.5 text-sm text-zinc-500">{subtitle}</p>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-zinc-100">
-          <thead className="bg-zinc-50/60">
-            <tr>
-              <Th>Member</Th>
-              <Th>Email</Th>
-              <Th className="hidden sm:table-cell">Status</Th>
-              <Th className="hidden md:table-cell">Plan</Th>
-              <Th className="text-right">{columnLabel}</Th>
-              <Th className="text-right">Risk</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {members.map((m, i) => (
-              <tr key={i} className="hover:bg-zinc-50/60">
-                <Td className="font-medium text-zinc-900">{m.name ?? '—'}</Td>
-                <Td className="text-zinc-500">{m.email ?? '—'}</Td>
-                <Td className="hidden capitalize text-zinc-600 sm:table-cell">{m.status}</Td>
-                <Td className="hidden text-zinc-600 md:table-cell">{m.membershipType ?? '—'}</Td>
-                <Td className="text-right tabular-nums text-zinc-700">
-                  {column === 'daysSinceLastVisit'
-                    ? m.daysSinceLastVisit ?? '—'
-                    : column === 'daysOverdue'
-                    ? m.daysOverdue ?? '—'
-                    : m.riskScore}
-                </Td>
-                <Td className="text-right">
-                  <RiskBadge band={m.riskBand} score={m.riskScore} />
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-function Th({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <th
-      scope="col"
-      className={`px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500 ${className}`}
-    >
-      {children}
-    </th>
-  )
-}
-
-function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-5 py-3 text-sm ${className}`}>{children}</td>
-}
-
-function RiskBadge({ band, score }: { band: 'low' | 'medium' | 'high'; score: number }) {
-  const cls =
-    band === 'high'
-      ? 'bg-red-50 text-red-700 ring-red-100'
-      : band === 'medium'
-      ? 'bg-amber-50 text-amber-800 ring-amber-100'
-      : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ${cls}`}
-    >
-      <span className="font-semibold tabular-nums">{score}</span>
-    </span>
+    <ExpandableList
+      title={title}
+      subtitle={subtitle}
+      Icon={Icon}
+      members={members}
+      column={column}
+      columnLabel={columnLabel}
+    />
   )
 }
 
@@ -900,11 +820,30 @@ function Diagnostics({ report }: { report: AuditReport }) {
     const v = cols[k]
     if (v) detected.push({ key: k, value: v })
   })
+  // Add the special non-canonical columns we sniff for separately.
+  if (r.parseSummary.paymentStatusColumn) {
+    detected.push({ key: 'paymentStatus', value: r.parseSummary.paymentStatusColumn })
+  }
+  if (r.parseSummary.outstandingBalanceColumn) {
+    detected.push({ key: 'outstandingBalance', value: r.parseSummary.outstandingBalanceColumn })
+  }
+
   const missing: string[] = []
   if (!cols.monthlyValue) missing.push('membership price')
   if (!cols.joinDate) missing.push('join date')
   if (!cols.visitCount30d) missing.push('visit count')
   if (!cols.membershipType) missing.push('plan/membership type')
+
+  // Headers we found in the file that we did NOT map. Helps spot
+  // missed signal columns.
+  const mappedHeaderValues = new Set(
+    Object.values(cols).filter((v): v is string => typeof v === 'string'),
+  )
+  if (r.parseSummary.paymentStatusColumn) mappedHeaderValues.add(r.parseSummary.paymentStatusColumn)
+  if (r.parseSummary.outstandingBalanceColumn) mappedHeaderValues.add(r.parseSummary.outstandingBalanceColumn)
+  const unmappedHeaders = (r.parseSummary.allHeaders ?? []).filter(
+    (h) => !mappedHeaderValues.has(h),
+  )
 
   return (
     <section className="px-5 pb-24 sm:px-8">
@@ -936,6 +875,23 @@ function Diagnostics({ report }: { report: AuditReport }) {
             Not detected in your export: <span className="font-medium">{missing.join(', ')}</span>. Including these gives you sharper revenue, tenure, and engagement insights next time.
           </p>
         )}
+        {unmappedHeaders.length > 0 && (
+          <details className="mt-4 rounded-lg border border-zinc-100 bg-zinc-50/40 px-3 py-2 text-xs">
+            <summary className="cursor-pointer select-none text-zinc-500">
+              Other columns we saw but didn&apos;t use ({unmappedHeaders.length})
+            </summary>
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {unmappedHeaders.map((h) => (
+                <li key={h} className="rounded bg-white px-2 py-0.5 font-mono text-[10px] text-zinc-600 ring-1 ring-zinc-200">
+                  {h}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-[11px] text-zinc-500">
+              If any of these look like a payment-status, plan-price, or join-date field we missed, reply to your audit email and we&apos;ll tune the parser.
+            </p>
+          </details>
+        )}
         {r.parseSummary.warnings.length > 0 && (
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-amber-700">
             {r.parseSummary.warnings.map((w, i) => (
@@ -960,6 +916,8 @@ function labelFor(k: string): string {
     case 'visitCount30d': return 'Visits (30d)'
     case 'membershipType': return 'Plan / membership'
     case 'monthlyValue': return 'Monthly fee'
+    case 'paymentStatus': return 'Payment status'
+    case 'outstandingBalance': return 'Outstanding balance'
     default: return k
   }
 }

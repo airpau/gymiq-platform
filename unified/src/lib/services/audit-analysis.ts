@@ -182,7 +182,9 @@ export interface ActionItem {
   estimatedRevenueImpact: number | null
 }
 
-const MAX_LIST_LEN = 25
+// Generous cap so we don't truncate at typical gym sizes. Stored in the
+// audit JSONB so the report page can decide how much to render at once.
+const MAX_LIST_LEN = 500
 
 export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary): AuditReport {
   const now = new Date()
@@ -258,9 +260,16 @@ export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary
   )
   const monthlyRevenueDeepSleepers = sum(deepSleeperMembers.map((m) => m.monthlyValueEstimate))
 
-  // Filter overdue to >0 days (don't show "due today" as overdue).
-  const overdueMembers = live.filter((m) => (m.daysOverdue ?? 0) > 0)
-  const dueTodayCount = live.filter((m) => m.daysOverdue === 0).length
+  // Overdue = nextPayment in the past OR a payment-failure signal from a
+  // separate column (Glofox keeps next_payment_at pointed at the retry date
+  // even when the previous charge bounced — without this fallback we badly
+  // under-count overdue accounts).
+  const overdueMembers = live.filter(
+    (m) => (m.daysOverdue ?? 0) > 0 || m.paymentFailed,
+  )
+  const dueTodayCount = live.filter(
+    (m) => m.daysOverdue === 0 && !m.paymentFailed,
+  ).length
   const monthlyRevenueOverdue = sum(overdueMembers.map((m) => m.monthlyValueEstimate))
 
   // 8. Visit percentiles + frequency distribution.
@@ -287,13 +296,16 @@ export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary
     else freq.dormant++
   }
 
-  // 9. Payment health.
+  // 9. Payment health. Members flagged via paymentFailed only (no date) count
+  // as stage-2 by default — we don't know the exact lateness but they're
+  // demonstrably in arrears.
   let stage1 = 0, stage2 = 0, stage3 = 0
   for (const m of overdueMembers) {
     const d = m.daysOverdue ?? 0
     if (d >= 15) stage3++
     else if (d >= 8) stage2++
     else if (d >= 1) stage1++
+    else if (m.paymentFailed) stage2++
   }
 
   // 10. Plan mix.
@@ -425,8 +437,14 @@ export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary
   const topDeepSleepers = [...deepSleeperMembers]
     .sort((a, b) => b.riskScore - a.riskScore)
     .slice(0, MAX_LIST_LEN)
+  // Sort overdue by daysOverdue desc; paymentFailed-only members (no date)
+  // sort to the top because they're indeterminately late.
   const topPaymentOverdue = [...overdueMembers]
-    .sort((a, b) => (b.daysOverdue ?? 0) - (a.daysOverdue ?? 0))
+    .sort((a, b) => {
+      const aDays = a.daysOverdue ?? (a.paymentFailed ? Number.MAX_SAFE_INTEGER : -1)
+      const bDays = b.daysOverdue ?? (b.paymentFailed ? Number.MAX_SAFE_INTEGER : -1)
+      return bDays - aDays
+    })
     .slice(0, MAX_LIST_LEN)
   const topNewMemberRisk = live
     .filter((m) => {

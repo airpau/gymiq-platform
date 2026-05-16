@@ -1,17 +1,19 @@
 # CLAUDE.md — GymIQ AI Operating Manual
-# Read this file at the start of every session. Single source of truth for the entire project.
+# Read this file at the start of every session. Single source of truth.
 
 ---
 
 ## CRITICAL — READ THIS FIRST
 
-This project is being migrated from an Express monorepo to a unified Next.js app (Supabase + Vercel).
-The existing Express codebase contains production-ready business logic that must be preserved during migration.
+GymIQ is **one Next.js 15 + Supabase app** under `unified/`. The old Express + Prisma monorepo (`apps/`, `packages/`) was salvaged and deleted on 2026-05-16. If you find anything referencing those paths in code, comments, or docs, that's a stale reference — flag it.
 
-1. Audit what already exists — the Express services contain mature, tested business logic
-2. Never lose existing functionality — migrate, don't rewrite from scratch
-3. All database changes must be written as migration files
-4. When in doubt, ask before you build
+Operating rules:
+
+1. **The retention thesis is the spec.** GymIQ is the outbound retention agent: it works the dormant-member database via SMS/WhatsApp, classifies replies, runs the cancel-save flow. Lead capture, AI receptionist, voice agent — out of scope unless we change our minds in writing.
+2. **Never send a real outbound message without the `MESSAGING_LIVE=true` env var AND the gym's `gyms.messaging_enabled=true` flag.** See [SAFETY.md](./SAFETY.md). The TwilioService enforces both gates.
+3. **All Supabase schema changes go through a migration file in `unified/supabase/migrations/`** and are applied via the Supabase MCP. Don't edit tables directly from Studio in production.
+4. **Multi-tenant from day one.** Every query is scoped to `gym_id`. RLS policies restrict gym owners to their own data.
+5. **AI routing through `unified/src/lib/ai/gateway.ts`.** Never use GPT-4 when GPT-4o-mini works. Cancel-save and other empathy-required calls use Claude Sonnet.
 
 ---
 
@@ -19,441 +21,173 @@ The existing Express codebase contains production-ready business logic that must
 
 **Company:** GymIQ AI
 **Website:** gymiq.ai
-**Domain:** Registered and configured
-**Contact:** Paul (founder)
+**Founder:** Paul Airey (aireypaul@googlemail.com)
+**First pilot:** Energie Fitness Hoddesdon (Glofox CRM) — Paul's own club
 
-GymIQ is an AI-powered gym CRM and retention platform. It helps gym owners stop losing members, recover cancelled memberships, automate lead follow-up, and answer calls with AI — all from one dashboard.
-
-**Target audience:** Independent gym owners and small chain operators in the UK, expanding internationally. Gyms using CRM systems like Glofox, Mindbody, ClubRight, or manual spreadsheets.
-
-**Pilot gym:** Energie Fitness Hoddesdon (Glofox CRM)
+**Target audience:** UK independent gym owners and boutique studios, 100–1,000 members, using Glofox / Mindbody / PushPress / ClubRight or spreadsheets.
 
 ---
 
 ## CORE VALUE PROPOSITION
 
-"Most gyms lose 30-50% of members annually without knowing why. GymIQ predicts who's about to leave, saves cancellations with AI, and converts leads 3x faster — for £4-6/month in AI costs per gym."
+"Most gyms lose 30–50% of members annually without knowing why. GymIQ predicts who's about to leave, runs cancel-save conversations on autopilot, and recovers dormant payers — bolting on to your existing CRM."
 
-**Key stats (from pilot data):**
-- £2,494 average revenue at risk per gym per month
-- 72% cancel-save rate (AI retention conversations)
-- 3x faster lead response vs manual follow-up
+**Audit-derived stats (real Glofox export, 1,622 members, May 16 2026):**
+- 173 high-risk members (11% of base)
+- 180 deep sleepers (21–45 days no visit) — most savable cohort
+- £6,920/month revenue at risk
+
+**Industry research (Health & Fitness Association / Motionsoft / GymMaster):**
+- 23% of all gym cancellations come from non-use
+- 50% of new members quit within first 6 months
+- A single warm email to dormant members cuts monthly cancellations ~80% (debunks the old "let sleeping dogs lie" advice)
+- Comprehensive onboarding lifts 6-month retention from 60% → 87%
 
 ---
 
 ## PRICING (CANONICAL — matches the live site)
 
 **Retention AI — £179/month:**
-- Churn prediction for every member
-- Automated sleeper detection
-- Cancel-save AI conversations
-- Payment recovery sequences
-- Risk dashboard
-- Email + WhatsApp channels
-- Up to 4,000 members
-- 500 WhatsApp messages / month
-- 200 AI conversations / month
+- Churn prediction, sleeper detection, cancel-save AI, payment recovery
+- Up to 4,000 members, 500 WhatsApp + 200 AI conversations / month
 
 **Lead Recovery AI — £179/month:**
-- AI lead nurturing (WhatsApp, Email, SMS)
-- 30-second response time
-- 5-touch follow-up sequence
-- Automated tour booking
-- Post-visit conversion tracking
-- Lead pipeline dashboard
-- Up to 500 leads / month
-- 1,000 WhatsApp messages / month
-- 300 AI conversations / month
+- AI lead nurturing, 30-sec response, 5-touch follow-up, tour booking
+- Up to 500 leads / month, 1,000 WhatsApp + 300 AI conversations / month
 
 **GymIQ Complete — £299/month** (Popular — save £59/mo vs. buying both):
-- Everything in Retention AI
-- Everything in Lead Recovery AI
-- Priority support
-- Custom AI personality matched to your brand
-- Advanced analytics
-- 4,000 members + unlimited leads
-- 1,500 WhatsApp messages / month
-- 500 AI conversations / month
+- Everything in Retention AI + Lead Recovery AI
+- Priority support, custom AI personality, advanced analytics
+- 4,000 members + unlimited leads, 1,500 WhatsApp + 500 AI conversations / month
 
-**Enterprise — custom pricing:**
-- 4,000+ members or multi-site
-- Centralised analytics across locations
-- Dedicated account manager
-- Custom integrations
+**Enterprise — custom:** 4,000+ members or multi-site.
 
 ---
 
-## TECH STACK (TARGET — UNIFIED NEXT.JS)
+## TECH STACK
 
-### Current (Express Monorepo — Being Migrated)
-- **API:** Express + TypeScript (apps/api)
-- **Dashboard:** Next.js 14 (apps/web)
-- **Marketing:** Next.js 14 (apps/marketing)
-- **Database:** PostgreSQL + Prisma (packages/database)
-- **Queue:** BullMQ + Redis
-- **AI:** OpenAI (GPT-4o-mini) + Anthropic (Claude Sonnet) via AI Gateway
-- **Messaging:** Twilio (WhatsApp, SMS, Voice)
-- **Email:** Nodemailer (SMTP)
-- **CRM Connectors:** Mindbody API, ClubRight API, Glofox (Playwright browser)
-- **Deployment:** Render (API), Vercel (marketing), Railway (attempted)
-
-### Target (Unified Next.js — Like Paybacker)
-- **Framework:** Next.js 15, React, TypeScript, Tailwind CSS
-- **Database:** Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **AI:** Anthropic Claude API (primary) + OpenAI (secondary, for cheap tasks)
-- **Messaging:** Twilio (WhatsApp, SMS, Voice)
-- **Email:** Resend (transactional) or Nodemailer (SMTP)
-- **Queue:** Supabase Edge Functions + pg_cron (replace BullMQ/Redis)
-- **Hosting:** Vercel
-- **Analytics:** PostHog
-- **Voice AI:** ElevenLabs or Twilio + Claude (AI receptionist)
+- **Framework:** Next.js 15.5, React 19, TypeScript strict
+- **Styling:** Tailwind v4, Inter font
+- **Database & Auth:** Supabase (PostgreSQL + Auth + RLS)
+- **AI:** Anthropic Claude Sonnet (cancel-save, hard decisions) + OpenAI GPT-4o-mini (cheap routing). All routed through `unified/src/lib/ai/gateway.ts` with cost tracking to `ai_cost_log`.
+- **Messaging:** Twilio (WhatsApp + SMS). Wrapped in `unified/src/lib/messaging/twilio.ts` with dry-run gate, quiet hours, STOP opt-out.
+- **Email:** Resend (transactional)
+- **File parsing:** SheetJS (xlsx via Sheet.JS CDN tarball)
+- **Hosting:** Vercel (`web` project, prj_6Dqhdcgzh4tqZMA8I6RoDe3KBfsp, root directory `unified`)
+- **Live domains:** gymiq.ai, www.gymiq.ai, gymiq.co.uk, www.gymiq.co.uk, app.gymiq.ai
 
 ---
 
-## ARCHITECTURE RULES
+## SUPABASE SCHEMA
 
-1. **ALL AI routing goes through a single gateway module.** Route to cheapest model per task. Never use GPT-4 when GPT-4o-mini works.
-2. **Retention actions are DRY-RUN by default.** No outbound messages without explicit gym owner approval. See SAFETY.md.
-3. **All CRM connectors normalize to a standard format** before entering the data pipeline.
-4. **Churn scoring uses heuristics first, AI second.** The churn engine is pure functions (fast, no API cost). Only use AI for cancel-save conversations.
-5. **Never expose API keys in client-side code.** All external API calls must be server-side only.
-6. **Multi-tenant from day one.** Every query must be scoped to a gymId. Never return data across gym boundaries.
-7. **Lead pipeline is a state machine.** All stage transitions must go through the validated pipeline service.
+Project ref: `fugixpfgwhnmhtttdzym` (region eu-west-2).
 
----
+| Table | Purpose |
+|---|---|
+| `audits` | Public landing-page upload reports (anonymous lead capture + retention analysis) |
+| `gyms` | Tenant root. Owned by a Supabase auth user via `owner_user_id`. |
+| `members` | Imported member list per gym. Risk score, plan, monthly fee, last visit. |
+| `conversations` | A WhatsApp/SMS thread with a member (or future lead) |
+| `messages` | Individual messages within a conversation, with classification + AI cost |
+| `cancel_save_attempts` | The 5-stage cancel-save engine state per attempt |
+| `sequences` | 3-touch outbound campaign templates |
+| `sequence_runs` | A member's path through a sequence |
+| `messaging_optouts` | STOP list — phone numbers we will never message |
+| `ai_cost_log` | Per-call AI cost tracking, used for the £/gym/month KPI |
 
-## EXISTING CODEBASE — WHAT'S BUILT
-
-### Database Schema (Prisma — 14 Models)
-| Model | Purpose | Status |
-|-------|---------|--------|
-| User | Staff auth (SUPER_ADMIN, GYM_OWNER, GYM_STAFF) | ✅ Complete |
-| Session | JWT session tracking | ✅ Complete |
-| PasswordReset | Password recovery flow | ✅ Complete |
-| Gym | Multi-tenant root entity, CRM config, knowledge base | ✅ Complete |
-| Member | Active members with risk scoring (0-100) | ✅ Complete |
-| Lead | 9-stage pipeline (new→converted) | ✅ Complete |
-| LeadJourney | Full audit trail of stage transitions | ✅ Complete |
-| Booking | Trial/tour scheduling | ✅ Complete |
-| Conversation | WhatsApp/SMS/Voice chat threads | ✅ Complete |
-| Message | Chat messages with AI cost tracking | ✅ Complete |
-| Workflow | Automation sequences | ✅ Complete |
-| Call | Twilio call logs with transcription | ✅ Complete |
-| SyncLog | CRM sync audit trail | ✅ Complete |
-| CancelSaveAttempt | Retention conversation tracking | ✅ Complete |
-| MessageTemplate | A/B testing templates | ✅ Complete |
-| StaffTask | Action queue for gym staff | ✅ Complete |
-
-### API Routes (Express — 15 Route Files)
-| Route | Endpoints | Status |
-|-------|-----------|--------|
-| /auth | register, login, logout, refresh, forgot/reset password | ✅ Complete |
-| /members | CRUD, full-profile, filtering | ✅ Complete |
-| /leads | Pipeline management, audit-signup, bookings | ✅ Complete |
-| /retention | Sleepers, overdue, dashboard, run-analysis | ✅ Complete |
-| /cancel-save | Initiate, respond, active list, stats | ✅ Complete (DRY-RUN) |
-| /conversations | Message threads | 🟡 Basic |
-| /connectors | CRM sync config, test, logs | ✅ Complete |
-| /import | CSV bulk import | ✅ Complete |
-| /gyms | Config, knowledge base, settings | ✅ Complete |
-| /knowledge-base | FAQ, hours, pricing storage | ✅ Complete |
-| /tasks | Staff action queue | ✅ Complete |
-| /stats | Dashboard analytics | ✅ Complete |
-| /webhooks | Twilio inbound routing | ✅ Complete |
-| /whatsapp | WhatsApp message handling | ✅ Complete |
-| /audit | Summary, potential revenue, save rate | ✅ Complete |
-
-### Services (16 Files — Core Business Logic)
-| Service | Purpose | Status |
-|---------|---------|--------|
-| ai-conversation.ts | AI-powered member/lead conversations | ✅ Complete |
-| cancel-save.ts | 5-stage retention flow with offers | ✅ Complete (DRY-RUN) |
-| churn-engine.ts | Heuristic risk scoring (0-100, no AI) | ✅ Production-ready |
-| lead-pipeline.ts | 9-stage state machine with validation | ✅ Production-ready |
-| conversation-router.ts | Message routing and escalation | ✅ Complete |
-| intent-classifier.ts | Intent detection (book, cancel, etc.) | ✅ Complete |
-| knowledge-base.ts | Gym-specific FAQ/pricing storage | ✅ Complete |
-| lead-capture.ts | Lead ingestion from webhooks | ✅ Complete |
-| booking.ts | Trial/tour scheduling | ✅ Complete |
-| email-templates.ts | Template variants + A/B testing | ✅ Complete |
-| email.ts | SMTP sending via Nodemailer | ✅ Complete |
-| messaging.ts | Multi-channel send (WhatsApp/SMS/email) | ✅ Complete |
-| message-templates.ts | Template management | ✅ Complete |
-| retention-log.ts | Dry-run action logging | ✅ Complete |
-| twilio.ts | Twilio SDK wrapper | ✅ Complete |
-| workflow.ts | Workflow execution engine | ✅ Complete |
-
-### Background Workers (BullMQ + Redis)
-| Worker | Purpose | Status |
-|--------|---------|--------|
-| followup.worker | 3-step lead follow-up sequence | ✅ Complete |
-| retention.worker | Daily churn batch analysis (02:00 UTC) | ✅ Complete |
-| email-nurture.worker | Automated email sequences | ✅ Complete |
-| lead-nurture.worker | Lead nurture sequences | ✅ Complete |
-
-### CRM Connectors
-| Connector | Type | Status |
-|-----------|------|--------|
-| Glofox | Browser (Playwright) | ✅ Complete |
-| Mindbody | API | ✅ Complete |
-| ClubRight | API | ✅ Complete |
-| Email/IMAP | CSV from email | ✅ Complete |
-| CSV Upload | Manual | ✅ Complete |
-
-### AI Gateway (Cost-Optimised Model Routing)
-| Task | Model | Cost/1K tokens | Status |
-|------|-------|----------------|--------|
-| Member replies | GPT-4o-mini | $0.00075 | ✅ |
-| Intent classification | GPT-4o-mini | $0.00075 | ✅ |
-| Churn analysis | Claude Sonnet | $0.003 | ✅ |
-| Cancel-save | Claude Sonnet | $0.003 | ✅ |
-| CSV parsing | GPT-4.1 | $0.005 | ✅ |
-
-### Dashboard Pages (Next.js)
-| Page | Status | Notes |
-|------|--------|-------|
-| / (Dashboard home) | ✅ Functional | Stats, tasks, activity feed |
-| /login | ✅ Complete | JWT auth |
-| /register | ✅ Complete | Gym owner registration |
-| /leads | ✅ Complete | Pipeline kanban view |
-| /retention | ✅ Complete | At-risk member list |
-| /cancel-save | ✅ Complete | Active conversations + stats |
-| /conversations | 🟡 Basic | Chat interface needs work |
-| /settings | 🟡 Basic | Connector setup, knowledge base |
-
-### Marketing Site
-| Page | Status |
-|------|--------|
-| / (Landing) | ✅ Complete — hero, features, social proof |
-| /pricing | ✅ Complete |
-| /audit | ✅ Complete — lead capture form |
+All tables have RLS enabled. Gym owners can `select` their own gym's rows. Service role bypasses RLS (used by all server API routes).
 
 ---
 
-## MIGRATION PLAN — EXPRESS → UNIFIED NEXT.JS
-
-### Phase 1: Foundation (Week 1)
-- [ ] Create new Supabase project for gymIQ
-- [ ] Migrate Prisma schema to Supabase SQL migrations
-- [ ] Set up Next.js 15 app with Supabase Auth
-- [ ] Configure Vercel deployment
-- [ ] Port auth system (Supabase Auth replaces custom JWT)
-- [ ] Create CLAUDE.md (this file) ✅
-
-### Phase 2: Core API Migration (Week 2)
-- [ ] Port churn-engine service (pure functions — easy)
-- [ ] Port lead-pipeline service (state machine — easy)
-- [ ] Port AI gateway as lib module
-- [ ] Create Next.js API routes for: members, leads, stats, tasks
-- [ ] Port data pipeline + CSV import
-- [ ] Set up Supabase RLS policies (multi-tenant security)
-
-### Phase 3: Dashboard Build (Week 3)
-- [ ] Dashboard home with real-time stats
-- [ ] Members page (list, search, risk scores)
-- [ ] Leads page (pipeline kanban board)
-- [ ] Retention page (at-risk members, intervention actions)
-- [ ] Cancel-save page (active conversations, stats)
-- [ ] Settings page (gym config, knowledge base, connector setup)
-
-### Phase 4: Messaging & AI (Week 4)
-- [ ] Port Twilio webhook handlers to Next.js API routes
-- [ ] Port AI conversation service
-- [ ] Port cancel-save conversation flow
-- [ ] Port messaging service (WhatsApp/SMS/email)
-- [ ] Replace BullMQ workers with Supabase Edge Functions or Vercel cron
-
-### Phase 5: CRM Connectors (Week 5)
-- [ ] Port Glofox browser connector (may need separate service for Playwright)
-- [ ] Port Mindbody + ClubRight API connectors
-- [ ] Port email/IMAP connector
-- [ ] Port CSV upload handler
-- [ ] Set up sync scheduling via cron
-
-### Phase 6: Advanced Features (Week 6+)
-- [ ] AI Voice Receptionist (Twilio + ElevenLabs/Claude)
-- [ ] Marketing site integration (same Next.js app or separate)
-- [ ] Stripe billing integration
-- [ ] PostHog analytics
-- [ ] Email sequences via Resend
-- [ ] Mobile-responsive dashboard polish
-
----
-
-## AI COST OPTIMISATION
-
-**Estimated monthly AI cost per gym: £4-6**
-
-| Task | Model | Cost/call | Frequency | Monthly cost |
-|------|-------|-----------|-----------|-------------|
-| Member replies | GPT-4o-mini | £0.0001 | ~500/month | £0.05 |
-| Intent classification | GPT-4o-mini | £0.0001 | ~500/month | £0.05 |
-| Churn analysis | Claude Sonnet | £0.002 | ~500 members/month | £1.00 |
-| Cancel-save | Claude Sonnet | £0.004 | ~20 conversations | £0.08 |
-| CSV parsing | GPT-4.1 | £0.008 | ~30 imports/month | £0.24 |
-| **TOTAL** | | | | **~£1.42** |
-
-This is 10-40x cheaper than competitors using GPT-4 for everything.
-
----
-
-## CHURN SCORING SYSTEM
-
-### Risk Score (0-100, pure heuristics, no AI)
-- Days since last visit: up to 40 pts (highest weight)
-- Visit frequency (30d): up to 25 pts
-- Payment overdue: up to 20 pts
-- Member status: up to 15 pts
-- New-member early dropout: up to 20 pts
-
-### Intervention Windows
-| Days Since Visit | Category | Action |
-|-----------------|----------|--------|
-| 0-13 | Healthy | No action |
-| 14-20 | Light sleeper | Friendly check-in |
-| 21-45 | Deep sleeper | **PRIORITY CONTACT** with offer |
-| 46-60 | Critical | Manual staff call only |
-| 60+ | Lost | DO NOT CONTACT (sleeping dogs keep paying) |
-
----
-
-## LEAD PIPELINE (State Machine)
+## CODE LAYOUT
 
 ```
-new → contacted → engaged → booked → visited → converting → converted
-         ↓           ↓         ↓         ↓           ↓
-       lost        lost      lost      lost        lost
-         ↓           ↓         ↓         ↓           ↓
-      nurturing   nurturing nurturing nurturing   nurturing
+unified/src/
+├── app/
+│   ├── page.tsx                  # Marketing landing (Premium SaaS aesthetic, audit upload in hero)
+│   ├── layout.tsx                # Inter font, root metadata
+│   ├── globals.css               # Tailwind v4 imports, base styles
+│   ├── auth/{login,signup,callback}/  # Supabase auth pages
+│   ├── audit/
+│   │   ├── [reportId]/page.tsx   # Server component, loads from Supabase
+│   │   └── preview/page.tsx      # Client component, sessionStorage fallback
+│   ├── (dashboard)/              # Logged-in dashboard (still skeleton; finish next)
+│   └── api/
+│       ├── audit/route.ts        # POST: parse upload → analyse → save to audits → email link
+│       ├── members/route.ts
+│       ├── leads/route.ts
+│       ├── stats/route.ts
+│       └── retention/run/route.ts
+├── components/
+│   ├── marketing/AuditUpload.tsx
+│   ├── audit/AuditReportView.tsx
+│   └── dashboard/sidebar.tsx
+└── lib/
+    ├── ai/gateway.ts             # Cost-routed AI calls + Supabase cost-flush
+    ├── ai/reply-classifier.ts    # Retention reply → category + outcome signal
+    ├── csv/parse-members.ts      # Smart Glofox/Mindbody/CSV parser
+    ├── email/send-audit.ts       # Resend wrapper for audit emails
+    ├── messaging/twilio.ts       # Twilio with dry-run gate, quiet hours, STOP list
+    ├── services/audit-analysis.ts # The retention-audit analyzer
+    ├── services/cancel-save.ts   # 5-stage cancel-save engine
+    ├── services/churn-engine.ts  # Heuristic risk scorer (no AI)
+    └── supabase/{client,server,middleware}.ts
 ```
 
-Valid transitions are enforced — invalid stage changes are rejected.
-
 ---
 
-## CANCEL-SAVE FLOW (5 Stages)
+## RETENTION-AGENT MVP ROADMAP
 
-1. **Initiate** — Empathetic acknowledgment, ask for reason
-2. **Reason Inquiry** — Probe for details, categorize
-3. **Offer Stage** — Make retention offer based on reason:
-   - Too expensive → Downgrade or discount
-   - Not using → Free sessions
-   - Moving → Freeze membership
-   - Injury → Freeze + recovery support
-   - Unhappy → Escalate to human
-4. **Objection Handling** — Address concerns, accept gracefully
-5. **Closing** — Confirm outcome or process cancellation
+What's already built (✅) vs. what's left (🟡):
 
----
-
-## CRM CONNECTOR TIERS
-
-| Tier | Type | Connectors | How It Works |
-|------|------|-----------|-------------|
-| A | API | Mindbody, ClubRight | Direct API integration |
-| B | Browser | Glofox | Playwright automation (login → export CSV) |
-| C | Email | IMAP | Parse CSV attachments from automated reports |
-| D | Manual | CSV Upload | Gym staff uploads spreadsheet |
-
-All connectors normalize data to `NormalizedMember` / `NormalizedLead` format before entering the data pipeline.
-
----
-
-## COMPETITORS
-
-- **Keepme** — AI retention, expensive (£500+/month), enterprise-only
-- **GymSales** — Lead management, no AI, manual processes
-- **ABC Fitness** — Full CRM, no AI retention features
-- **Glofox/Mindbody** — CRM platforms, no predictive analytics or AI messaging
-
-**GymIQ's advantage:** AI-native from day one, 10-40x cheaper AI costs, works WITH existing CRMs (doesn't replace them), cancel-save conversations that actually retain members.
+- ✅ Marketing landing page + integrated CSV audit upload
+- ✅ Smart CSV parser (handles Glofox column quirks, money sniffing, plan-name price extraction)
+- ✅ Audit analysis (ARPU, LTV, plan mix, tenure cohorts, sleeper buckets, action plan, industry benchmarks)
+- ✅ Resend audit-email template
+- ✅ Supabase schema for retention agent
+- ✅ AI gateway (cost-routed)
+- ✅ Twilio service (dry-run + quiet hours + STOP)
+- ✅ Reply classifier (busy / cost / problem / leaving / positive / opt_out)
+- ✅ Cancel-save engine (5-stage)
+- 🟡 Sequence runner (Vercel Cron + sequence_runs polling) — **next**
+- 🟡 Twilio inbound webhook (`/api/webhooks/twilio`) — **next**
+- 🟡 Audit → "GymIQ contact these for me" onboarding flow
+- 🟡 Dashboard pages (overview, members, retention, conversations, settings) — currently shells
+- 🟡 Stripe Payment Link for billing
+- 🟡 WhatsApp Business Sender registration (24–72h Meta clock — start now)
 
 ---
 
 ## SAFETY RULES
 
-See SAFETY.md for full details. Key rules:
-- **NO outbound messages until gym owner explicitly approves**
-- Test mode by default — import data, calculate scores, view dashboards only
-- Retention worker logs actions but does NOT send messages (dry-run)
-- Cancel-save conversations are dry-run until activated
+Detail in [SAFETY.md](./SAFETY.md). Key:
+
+- The Twilio service has a `MESSAGING_LIVE` env-var gate and a per-gym `messaging_enabled` boolean.
+- Quiet hours default 09:00–20:00 Europe/London.
+- STOP keyword adds the phone to `messaging_optouts`. The service refuses to message anyone on that list.
+- `cancel_save_attempts.outcome` is the source of truth for "did we save them?" — never override outside of the staff dashboard.
 
 ---
 
 ## ENVIRONMENT VARIABLES
 
-```env
-# Supabase (target)
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+See `unified/.env.local.example`. Set in Vercel project settings for production.
 
-# AI
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-
-# Twilio (WhatsApp + SMS + Voice)
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_WHATSAPP_NUMBER=
-
-# Email
-RESEND_API_KEY= (or SMTP_USER + SMTP_PASS)
-
-# App
-NEXT_PUBLIC_APP_URL=https://app.gymiq.ai
-CRON_SECRET=
-
-# Analytics
-POSTHOG_API_KEY=
-POSTHOG_HOST=https://app.posthog.com
-
-# Voice AI (Phase 6)
-ELEVENLABS_API_KEY=
-```
+Critical: `SUPABASE_SERVICE_ROLE_KEY` is the bypass-RLS key. Never import it into a client component or expose it client-side. Vercel marks it Sensitive.
 
 ---
 
-## GIT WORKFLOW
+## DEPLOYMENT
 
-- Main branch is production
-- Feature branches: feature/description
-- Commit messages: Conventional Commits format
-- Always include Co-Authored-By: Claude when pair programming
-
----
-
-## KEY FILES (Current Express Codebase)
-
-### Business Logic to Preserve
-- `apps/api/src/services/churn-engine.ts` — Risk scoring (CRITICAL — port as-is)
-- `apps/api/src/services/lead-pipeline.ts` — State machine (CRITICAL — port as-is)
-- `apps/api/src/services/cancel-save.ts` — Retention AI flow
-- `apps/api/src/services/ai-conversation.ts` — AI message handling
-- `apps/api/src/services/conversation-router.ts` — Message routing
-- `apps/api/src/services/intent-classifier.ts` — Intent detection
-- `packages/ai-gateway/src/index.ts` — AI model routing
-- `packages/connectors/src/` — All CRM connectors
-- `packages/database/prisma/schema.prisma` — Data models
-
-### Dashboard Pages to Rebuild
-- `apps/web/src/app/page.tsx` — Dashboard home
-- `apps/web/src/app/leads/page.tsx` — Lead pipeline
-- `apps/web/src/app/retention/page.tsx` — At-risk members
-- `apps/web/src/app/cancel-save/page.tsx` — Cancel-save conversations
-- `apps/marketing/src/app/page.tsx` — Marketing landing page
+- Push to `main` → Vercel auto-builds → live on gymiq.ai / app.gymiq.ai within 90 seconds.
+- Preview branches get their own auto-built URL.
+- Deploy hooks exist (`Settings → Git → Deploy Hooks`) for manual triggering without a commit.
+- The `legacy-monorepo` branch on GitHub holds the dormant code as our rollback point for 30 days after the May 16 salvage.
 
 ---
 
-## KNOWN ISSUES TO FIX DURING MIGRATION
+## HOUSEKEEPING
 
-1. **Cancel-save is DRY-RUN** — Needs production activation path
-2. **Risk score calculated in two places** — Churn engine vs data pipeline (consolidate)
-3. **Credentials stored in plain JSON** — connectorConfig needs encryption
-4. **Staff tasks use string names** — Should be foreign key references
-5. **Quiet hours hardcoded (9am-8pm)** — Make configurable per gym
-6. **Conversation context limited to 10 messages** — May need expansion
-7. **AI cost tracking in-memory only** — Persist to database
-8. **No error monitoring** — Add Sentry or similar
-9. **No structured logging** — Replace console.log with proper logging
-10. **GloFox CSS selector broken** — Line 79 in browser connector
+- Audit doc: [GYMIQ_AUDIT_2026-05-16.md](./GYMIQ_AUDIT_2026-05-16.md). Re-do every quarter or after major scope changes.
+- Test coverage: none yet. Add Vitest before the first paid customer.
+- CI: none yet. Add Vercel checks + `npm run lint` + `npm run typecheck` on PR before the first second engineer.

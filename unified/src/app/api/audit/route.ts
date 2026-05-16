@@ -88,6 +88,26 @@ export async function POST(req: NextRequest) {
 
     const reportId = inserted.id as string
 
+    // Upsert the lead row (handles the edge case of a fast submit before the
+    // debounced lead-capture fired). Best-effort — never block the redirect.
+    supabase
+      .from('leads')
+      .upsert(
+        {
+          email,
+          first_name: firstName,
+          gym_name: gymName,
+          source: 'audit_form',
+          stage: 'audit_completed',
+          audit_id: reportId,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'email,source' },
+      )
+      .then(() => undefined, (err: unknown) => {
+        console.warn('[audit] lead upsert failed:', err)
+      })
+
     // 3. Fire-and-forget the email (don't block the user's redirect on it).
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ??

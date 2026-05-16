@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, FormEvent, DragEvent } from 'react'
+import { useState, useRef, useEffect, FormEvent, DragEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Upload,
@@ -10,6 +10,8 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type FieldErrors = Partial<Record<'file' | 'firstName' | 'gymName' | 'email', string>>
 
@@ -29,6 +31,41 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
+  // Track the last-captured lead snapshot so we only POST when something
+  // actually changes — avoids spamming /api/leads/start on every keystroke.
+  const lastLeadSnapshotRef = useRef<string>('')
+
+  // Lead capture — fire to /api/leads/start as soon as we have a valid email,
+  // then again whenever firstName/gymName get filled. Idempotent server-side.
+  useEffect(() => {
+    if (!EMAIL_RE.test(email.trim())) return
+    const snapshot = JSON.stringify({
+      email: email.trim().toLowerCase(),
+      firstName: firstName.trim() || null,
+      gymName: gymName.trim() || null,
+    })
+    if (snapshot === lastLeadSnapshotRef.current) return
+    lastLeadSnapshotRef.current = snapshot
+
+    // Debounce a touch — the user is often still typing.
+    const t = setTimeout(() => {
+      fetch('/api/leads/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          firstName: firstName.trim() || null,
+          gymName: gymName.trim() || null,
+          source: 'audit_form',
+          referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+        }),
+      }).catch(() => {
+        // Lead capture is best-effort — failing here should never block the
+        // user from completing their audit.
+      })
+    }, 700)
+    return () => clearTimeout(t)
+  }, [email, firstName, gymName])
 
   function validateFile(f: File): string | null {
     const max = 20 * 1024 * 1024 // 20 MB

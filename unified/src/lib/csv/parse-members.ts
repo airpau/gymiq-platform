@@ -27,6 +27,15 @@ export interface ParsedMember extends MemberInput {
   membershipType: string | null
   monthlyValue: number | null
   tenureDays: number | null
+  /**
+   * True when something other than nextPayment indicates the member is in
+   * arrears — e.g. an "Outstanding Balance" column, a "Payment Status" of
+   * "failed", or a non-zero "Balance Owed". Many CRMs (Glofox in particular)
+   * keep `next_payment_at` pointing at the *retry* date and signal overdue
+   * via a parallel column. Without this fallback we under-count overdue
+   * members substantially.
+   */
+  paymentFailed: boolean
 }
 
 export interface ParseSummary {
@@ -34,6 +43,10 @@ export interface ParseSummary {
   rowsSkipped: number
   detectedColumns: Record<keyof ColumnMap, string | null>
   pricingSource: 'column' | 'plan-name' | 'estimate'
+  paymentStatusColumn: string | null
+  outstandingBalanceColumn: string | null
+  /** All column headers we found in the file — useful for debugging which fields we missed. */
+  allHeaders: string[]
   warnings: string[]
 }
 
@@ -139,6 +152,19 @@ export async function parseMemberFile(file: File): Promise<ParseResult> {
     }
   }
 
+  // Look for ANY column whose header hints at payment trouble — Glofox often
+  // exports a "Payment Status" or "Outstanding Balance" column alongside (and
+  // independent of) "Next payment at". We don't promote these to canonical
+  // columns; we just remember the headers and use them at row-parse time to
+  // set `paymentFailed`.
+  const paymentStatusColumn = headers.find((h) =>
+    /\b(payment[_\s-]?status|payment[_\s-]?state|subscription[_\s-]?status|billing[_\s-]?status|last[_\s-]?payment[_\s-]?status|direct[_\s-]?debit[_\s-]?status|dd[_\s-]?status)\b/i.test(h ?? ''),
+  ) ?? null
+  const outstandingBalanceColumn = headers.find((h) =>
+    /\b(outstanding|balance|amount[_\s-]?owed|owed|debt|arrears|unpaid)\b/i.test(h ?? '') &&
+    !/\b(monthly|fee|price|rate|recurring)\b/i.test(h ?? ''),
+  ) ?? null
+
   const warnings: string[] = []
   if (!columnMap.lastVisit) warnings.push('No "last visit" column detected — visit-based risk scoring is unavailable.')
   if (!columnMap.email && !columnMap.fullName && !columnMap.firstName) {
@@ -159,7 +185,7 @@ export async function parseMemberFile(file: File): Promise<ParseResult> {
     headers.forEach((h, idx) => {
       cells[h] = row[idx]
     })
-    const member = rowToMember(cells, columnMap, now)
+    const member = rowToMember(cells, columnMap, now, paymentStatusColumn, outstandingBalanceColumn)
     if (!member) {
       skipped++
       continue
@@ -189,6 +215,9 @@ export async function parseMemberFile(file: File): Promise<ParseResult> {
       rowsSkipped: skipped,
       detectedColumns: columnMap,
       pricingSource,
+      paymentStatusColumn,
+      outstandingBalanceColumn,
+      allHeaders: headers.filter(Boolean),
       warnings,
     },
   }
@@ -339,6 +368,8 @@ function rowToMember(
   cells: Record<string, unknown>,
   map: ColumnMap,
   now: Date,
+  paymentStatusColumn?: string | null,
+  outstandingBalanceColumn?: string | null,
 ): ParsedMember | null {
   const firstName = pickString(cells, map.firstName)
   const lastName = pickString(cells, map.lastName)
@@ -367,6 +398,11 @@ function rowToMember(
     ? Math.floor((now.getTime() - joinDate.getTime()) / 86_400_000)
     : null
 
+  // Detect payment trouble from indicators OTHER than nextPayment.
+  // Glofox in particular sets `next_payment_at` to a future retry date even
+  // for members in arrears, so without this we under-count overdue badly.
+  const paymentFailed = detectPaymentFailure(cells, paymentStatusColumn, outstandingBalanceColumn)
+
   return {
     externalId,
     name: fullName,
@@ -380,7 +416,34 @@ function rowToMember(
     membershipType,
     monthlyValue,
     tenureDays,
+    paymentFailed,
   }
+}
+
+function detectPaymentFailure(
+  cells: Record<string, unknown>,
+  statusColumn?: string | null,
+  balanceColumn?: string | null,
+): boolean {
+  if (statusColumn) {
+    const raw = cells[statusColumn]
+    if (raw !== null && raw !== undefined && raw !== '') {
+      const lower = String(raw).toLowerCase()
+      if (/\b(fail|failed|overdue|past[\s-]?due|arrears|unpaid|declined|chargeback|refused|insufficient|outstanding|owing|pending[\s-]?retry|retry)\b/.test(lower)) {
+        return true
+      }
+    }
+  }
+  if (balanceColumn) {
+    const raw = cells[balanceColumn]
+    if (raw !== null && raw !== undefined && raw !== '') {
+      const num = Number(String(raw).replace(/[^0-9.\-]/g, ''))
+      if (Number.isFinite(num) && num > 0.5) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function pickString(cells: Record<string, unknown>, key: string | null): string | null {
@@ -509,6 +572,9 @@ function emptyResult(warnings: string[] = []): ParseResult {
         monthlyValue: null,
       },
       pricingSource: 'estimate',
+      paymentStatusColumn: null,
+      outstandingBalanceColumn: null,
+      allHeaders: [],
       warnings,
     },
   }
