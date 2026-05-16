@@ -11,9 +11,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <Sidebar />
-      <main className="ml-64 min-h-screen p-8">
+    <div className="min-h-screen bg-white text-zinc-900 antialiased">
+      <Sidebar userEmail={user.email ?? null} />
+      <main className="ml-64 min-h-screen">
         {children}
       </main>
     </div>
