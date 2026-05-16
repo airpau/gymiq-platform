@@ -1,90 +1,82 @@
-import { createClient } from '@/lib/supabase/server'
-import { Settings, Database, MessageSquare, Brain } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+import SettingsForm from '@/components/dashboard/SettingsForm'
+
+export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const ssr = await createServerClient()
+  const { data: { user } } = await ssr.auth.getUser()
+  if (!user) redirect('/auth/login')
 
-  const { data: profile } = await supabase.from('users').select('gym_id').eq('id', user.id).single()
-  if (!profile?.gym_id) return null
+  const svc = serviceClient()
+  if (!svc) {
+    return (
+      <Wrap>
+        <Empty
+          title="Service not configured"
+          body="The Supabase service key is missing from this environment."
+        />
+      </Wrap>
+    )
+  }
 
-  const { data: gym } = await supabase.from('gyms').select('*').eq('id', profile.gym_id).single()
+  const { data: gym } = await svc
+    .from('gyms')
+    .select('id, name, timezone, whatsapp_number, sms_number, messaging_enabled')
+    .eq('owner_user_id', user.id)
+    .maybeSingle()
+
+  if (!gym) {
+    return (
+      <Wrap>
+        <Empty
+          title="No gym set up yet"
+          body="Run a member audit from the homepage and click 'Run this for me' to create your gym account."
+        />
+      </Wrap>
+    )
+  }
+
+  const messagingLiveGlobal = process.env.MESSAGING_LIVE === 'true'
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="mt-1 text-slate-400">Configure your gym and integrations</p>
-      </div>
+    <Wrap>
+      <SettingsForm gym={gym} messagingLiveGlobal={messagingLiveGlobal} />
+    </Wrap>
+  )
+}
 
-      <div className="space-y-6">
-        {/* Gym Info */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <Settings className="h-5 w-5 text-amber-500" />
-            <h2 className="text-lg font-semibold text-white">Gym Information</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-sm text-slate-400">Name</p>
-              <p className="mt-1 text-white">{gym?.name || 'Not set'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-400">Email</p>
-              <p className="mt-1 text-white">{gym?.email || 'Not set'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-400">Timezone</p>
-              <p className="mt-1 text-white">{gym?.timezone || 'Europe/London'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-400">CRM Connector</p>
-              <p className="mt-1 text-white">{gym?.connector_type || 'Not connected'}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* CRM Connection */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <Database className="h-5 w-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">CRM Connection</h2>
-          </div>
-          <p className="mb-4 text-sm text-slate-400">Connect your existing gym CRM to import members and keep data in sync.</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {['Glofox', 'Mindbody', 'ClubRight', 'CSV Upload'].map((crm) => (
-              <button
-                key={crm}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-medium text-white hover:border-amber-500/50 transition-colors"
-              >
-                {crm}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Messaging */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <MessageSquare className="h-5 w-5 text-emerald-400" />
-            <h2 className="text-lg font-semibold text-white">Messaging</h2>
-          </div>
-          <p className="mb-4 text-sm text-slate-400">Configure WhatsApp, SMS, and email for member communication.</p>
-          <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-            <p className="text-sm text-amber-400">Messaging is currently in test mode. No outbound messages will be sent until you activate it.</p>
-          </div>
-        </div>
-
-        {/* AI Configuration */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <Brain className="h-5 w-5 text-purple-400" />
-            <h2 className="text-lg font-semibold text-white">AI Configuration</h2>
-          </div>
-          <p className="text-sm text-slate-400">AI is configured to route tasks to the cheapest adequate model. Estimated cost: £4-6/month per gym.</p>
-        </div>
-      </div>
+function Wrap({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-8 py-10">
+      <header className="mb-8">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Settings</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Configuration</h1>
+        <p className="mt-1.5 text-sm text-zinc-500">
+          Gym profile, Twilio senders, and the master live-messaging switch.
+        </p>
+      </header>
+      {children}
     </div>
   )
+}
+
+function Empty({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white px-8 py-12 text-center">
+      <h2 className="text-base font-semibold text-zinc-900">{title}</h2>
+      <p className="mx-auto mt-1 max-w-md text-sm text-zinc-500">{body}</p>
+    </div>
+  )
+}
+
+function serviceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 }
