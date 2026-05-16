@@ -1,4 +1,0 @@
-# Ignore this entire web app directory from Railway builds
-# This service is deployed on Vercel, not Railway
-*
-!.railwayignore

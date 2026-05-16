@@ -41,30 +41,45 @@ GymIQ is an AI-powered gym CRM and retention platform. It helps gym owners stop 
 
 ---
 
-## PRICING (PLANNED)
+## PRICING (CANONICAL — matches the live site)
 
-**Starter — £99/month:**
-- 1 location
-- Up to 500 members
-- Churn prediction + alerts
-- Lead pipeline
-- Basic AI messaging (WhatsApp/SMS)
-- CSV import
-
-**Growth — £199/month:**
-- Up to 3 locations
-- Up to 2,000 members
+**Retention AI — £179/month:**
+- Churn prediction for every member
+- Automated sleeper detection
 - Cancel-save AI conversations
-- CRM connector (Glofox, Mindbody, ClubRight)
-- Email nurture sequences
-- Staff task queue
+- Payment recovery sequences
+- Risk dashboard
+- Email + WhatsApp channels
+- Up to 4,000 members
+- 500 WhatsApp messages / month
+- 200 AI conversations / month
 
-**Enterprise — £399/month:**
-- Unlimited locations and members
-- AI voice receptionist
-- Custom integrations
+**Lead Recovery AI — £179/month:**
+- AI lead nurturing (WhatsApp, Email, SMS)
+- 30-second response time
+- 5-touch follow-up sequence
+- Automated tour booking
+- Post-visit conversion tracking
+- Lead pipeline dashboard
+- Up to 500 leads / month
+- 1,000 WhatsApp messages / month
+- 300 AI conversations / month
+
+**GymIQ Complete — £299/month** (Popular — save £59/mo vs. buying both):
+- Everything in Retention AI
+- Everything in Lead Recovery AI
 - Priority support
+- Custom AI personality matched to your brand
+- Advanced analytics
+- 4,000 members + unlimited leads
+- 1,500 WhatsApp messages / month
+- 500 AI conversations / month
+
+**Enterprise — custom pricing:**
+- 4,000+ members or multi-site
+- Centralised analytics across locations
 - Dedicated account manager
+- Custom integrations
 
 ---
 

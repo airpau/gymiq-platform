@@ -104,7 +104,7 @@ function Hero() {
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
               <Sparkles className="h-3.5 w-3.5" />
-              Live with Energie Fitness Hoddesdon
+              First pilot: Energie Fitness Hoddesdon
             </span>
             <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl lg:text-[64px]">
               Know who&apos;s about to quit your gym.

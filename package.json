@@ -2,30 +2,15 @@
   "name": "gymiq",
   "version": "0.1.0",
   "private": true,
-  "description": "AI-powered gym management platform",
+  "description": "GymIQ — AI-powered retention agent for independent gyms",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "db:generate": "cd packages/database && prisma generate",
-    "db:migrate": "cd packages/database && prisma migrate dev",
-    "db:studio": "cd packages/database && prisma studio",
-    "db:seed": "cd packages/database && tsx seed.ts"
+    "dev": "cd unified && npm run dev",
+    "build": "cd unified && npm run build",
+    "lint": "cd unified && npm run lint",
+    "typecheck": "cd unified && npm run typecheck",
+    "start": "cd unified && npm run start"
   },
-  "devDependencies": {
-    "turbo": "^2.0.0",
-    "typescript": "^5.9.3"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "packageManager": "npm@10.0.0",
   "engines": {
     "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.5.0",
-    "bcrypt": "^6.0.0"
   }
 }
