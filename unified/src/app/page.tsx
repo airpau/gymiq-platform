@@ -1,22 +1,16 @@
 import Link from 'next/link'
-import {
-  ArrowRight,
-  ArrowUpRight,
-  ShieldCheck,
-  Sparkles,
-  LineChart,
-  PhoneCall,
-  MessagesSquare,
-  FileSpreadsheet,
-  Workflow,
-  Check,
-} from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 
+/** Set fee per club, per month. Change here and it updates everywhere on the page. */
+const PRICE_PER_CLUB = 395
+const CONTACT = 'paul@gymiq.ai'
+const WALKTHROUGH_HREF = `mailto:${CONTACT}?subject=gymIQ%20walkthrough&body=Hi%20Paul%2C%0A%0AClub%3A%20%0AMembers%3A%20%0AGym%20software%3A%20%0A%0ABest%20time%20for%20a%2020%20minute%20call%3A%20`
+
 export const metadata = {
-  title: 'GymIQ — Predict gym churn. Save members. Grow revenue.',
+  title: 'gymIQ. The morning brief that runs your gym.',
   description:
-    'AI churn prediction, cancel-save conversations, and instant lead follow-up that bolts on to Glofox, Mindbody, ClubRight, or any spreadsheet. Run a free 60-second audit on your member export.',
+    'gymIQ reads your Glofox account and your bank feed, and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
 }
 
 export default function LandingPage() {
@@ -24,12 +18,13 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-zinc-900 antialiased selection:bg-emerald-200 selection:text-emerald-900">
       <Nav />
       <Hero />
-      <TrustStrip />
-      <Stats />
-      <AuditPreview />
-      <Features />
-      <HowItWorks />
+      <Proof />
+      <Day />
+      <WhatItFinds />
+      <Connect />
       <Pricing />
+      <Faq />
+      <Audit />
       <FinalCta />
       <Footer />
     </div>
@@ -42,16 +37,16 @@ export default function LandingPage() {
 
 function Nav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2 text-base font-semibold tracking-tight text-zinc-900">
           <Logo />
-          <span>GymIQ</span>
+          <span>gymIQ</span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-zinc-600 md:flex">
-          <a href="#features" className="transition hover:text-zinc-900">Features</a>
-          <a href="#how" className="transition hover:text-zinc-900">How it works</a>
-          <a href="#audit" className="transition hover:text-zinc-900">Free audit</a>
+          <a href="#day" className="transition hover:text-zinc-900">What it does</a>
+          <a href="#found" className="transition hover:text-zinc-900">What it finds</a>
+          <Link href="/hoddesdon" className="transition hover:text-zinc-900">Hoddesdon numbers</Link>
           <a href="#pricing" className="transition hover:text-zinc-900">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -61,13 +56,13 @@ function Nav() {
           >
             Sign in
           </Link>
-          <Link
-            href="#audit"
+          <a
+            href={WALKTHROUGH_HREF}
             className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800"
           >
-            Free audit
+            Book a walkthrough
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </a>
         </div>
       </div>
     </header>
@@ -83,69 +78,84 @@ function Logo() {
 }
 
 /* ------------------------------------------------------------------ */
-/* HERO                                                               */
+/* HERO: the product is a message on a phone, so show the message     */
 /* ------------------------------------------------------------------ */
 
 function Hero() {
   return (
-    <section id="audit" className="relative overflow-hidden">
-      {/* soft background wash */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 -z-10 h-[640px] bg-gradient-to-b from-emerald-50/60 via-white to-white"
-      />
-      <div
-        aria-hidden
-        className="absolute left-1/2 top-[-160px] -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-200/40 blur-3xl"
-      />
-
-      <div className="mx-auto max-w-6xl px-5 pb-20 pt-16 sm:px-8 sm:pt-20 lg:pt-24">
+    <section className="relative overflow-hidden">
+      <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[640px] bg-gradient-to-b from-emerald-50/70 via-white to-white" />
+      <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-              <Sparkles className="h-3.5 w-3.5" />
-              First pilot: Energie Fitness Hoddesdon
+              Built by a gym owner. Live at énergie Fitness Hoddesdon.
             </span>
-            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl lg:text-[64px]">
-              Know who&apos;s about to quit your gym.
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl lg:text-[60px]">
+              Your gym&apos;s numbers, on your phone,
               <span className="block bg-gradient-to-r from-emerald-700 to-emerald-500 bg-clip-text text-transparent">
-                Before they do.
+                before you have had a coffee.
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-600">
-              GymIQ adds AI churn prediction, cancel-save conversations, and instant lead follow-up to the CRM you already use. The average gym we audit is bleeding{' '}
-              <span className="font-semibold text-zinc-900">£2,494/month</span> in revenue it doesn&apos;t know about. Find yours in 60 seconds.
+              gymIQ reads your Glofox account four times a day and your bank feed once a day. Every morning it tells you what came in, who is leaving, and what your front desk should do about it today. Then it puts those jobs on a board your staff can actually clear.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
-                href="#audit-widget"
+                href={WALKTHROUGH_HREF}
                 className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800"
               >
-                Run my free audit
+                Book a 20 minute walkthrough
                 <ArrowRight className="h-4 w-4" />
               </a>
-              <a
-                href="#how"
+              <Link
+                href="/hoddesdon"
                 className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:border-zinc-300 hover:bg-zinc-50"
               >
-                How it works
-              </a>
+                See the Hoddesdon numbers
+              </Link>
             </div>
-
             <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Bullet>Works with Glofox, Mindbody, ClubRight, or a CSV</Bullet>
-              <Bullet>No CRM migration. Live in under a day.</Bullet>
-              <Bullet>£4–6/month per gym in AI costs. Not £500.</Bullet>
-              <Bullet>72% cancel-save rate in pilot</Bullet>
+              <Bullet>Works with your existing Glofox account. Nothing to migrate.</Bullet>
+              <Bullet>Each club connects its own login. Read only.</Bullet>
+              <Bullet>£{PRICE_PER_CLUB} a month per club. Set fee, no usage charges.</Bullet>
+              <Bullet>Running in a 1,600 member club today.</Bullet>
             </ul>
           </div>
 
-          <div id="audit-widget" className="lg:col-span-5">
-            <AuditUpload variant="hero" />
+          <div className="lg:col-span-6">
+            <BriefCard />
           </div>
         </div>
       </div>
     </section>
+  )
+}
+
+function BriefCard() {
+  return (
+    <div className="mx-auto w-full max-w-md rounded-[28px] border border-zinc-200 bg-zinc-950 p-3 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_24px_60px_-24px_rgba(0,0,0,0.45)]">
+      <div className="rounded-[20px] bg-zinc-900 px-4 pb-4 pt-3 text-zinc-100">
+        <div className="flex items-center justify-between text-[11px] text-zinc-400">
+          <span>gymIQ</span>
+          <span>22:00</span>
+        </div>
+        <p className="mt-3 text-[13px] font-semibold leading-snug text-white">
+          Hoddesdon evening close, Sun 6 Sep: £26,414 collected MTD, 1,472 active paying
+        </p>
+        <pre className="mt-3 whitespace-pre-wrap font-mono text-[12px] leading-[1.55] text-zinc-300">{`TOP 3
+1. Retention is good. 7 leavers this month against 19 over the same six days of August. Roster has grown six days running.
+2. Selling is the problem. Joins project 77 against a 100 target.
+3. £1,884 of September arrears across 47 members clears onto Friday's credit if worked before Wednesday.
+
+FAILURE RATE 6.77 pct, best of the month. Overdue 58, down from 77.
+
+FRIDAY CREDIT forecast £20,471, range 17,000 to 23,000.
+
+BOARD for Monday: 12 overdue calls and 6 billing fixes, 46 more queued behind them.`}</pre>
+        <p className="mt-3 text-[11px] text-zinc-500">A real brief, lightly shortened. Reply to it in plain English and it answers.</p>
+      </div>
+    </div>
   )
 }
 
@@ -161,391 +171,339 @@ function Bullet({ children }: { children: React.ReactNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* TRUST STRIP                                                        */
+/* PROOF STRIP: four figures from the live club                       */
 /* ------------------------------------------------------------------ */
 
-function TrustStrip() {
-  const integrations = ['Glofox', 'Mindbody', 'ClubRight', 'TrainerizeBeyond', 'GymMaster']
+function Proof() {
+  const stats = [
+    { value: '9.55% to 6.77%', label: 'payment failure rate', note: 'August whole month against 1 to 6 September' },
+    { value: '77 to 58', label: 'overdue members', note: 'late August peak to 6 September' },
+    { value: '£13,239', label: 'a year of unpriced memberships found', note: 'students, corporates and two legacy plans' },
+    { value: '3.65%', label: 'July attrition', note: 'lowest month in the club’s recorded history' },
+  ]
   return (
-    <section aria-label="Integrations" className="border-y border-zinc-100 bg-zinc-50/60">
-      <div className="mx-auto max-w-6xl px-5 py-7 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-4">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
-            Works with the CRM you already pay for
-          </p>
-          <ul className="flex flex-wrap items-center gap-x-8 gap-y-2">
-            {integrations.map((name) => (
-              <li key={name} className="text-sm font-medium text-zinc-400">
-                {name}
-              </li>
-            ))}
-          </ul>
+    <section className="border-y border-zinc-100 bg-zinc-50/60">
+      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">
+          énergie Fitness Hoddesdon, July to September 2026
+        </p>
+        <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-white px-6 py-7">
+              <p className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-[28px]">{s.value}</p>
+              <p className="mt-2 text-sm font-medium text-zinc-700">{s.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-500">{s.note}</p>
+            </div>
+          ))}
         </div>
+        <p className="mt-4 text-xs text-zinc-500">
+          Every figure is pulled from the club&apos;s own data and explained, including the bad month, on the{' '}
+          <Link href="/hoddesdon" className="font-medium text-emerald-700 hover:text-emerald-800">Hoddesdon page</Link>.
+        </p>
       </div>
     </section>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/* STATS                                                              */
+/* A DAY AT THE CLUB                                                  */
 /* ------------------------------------------------------------------ */
 
-function Stats() {
-  const stats = [
-    { value: '£2,494', label: 'avg monthly revenue at risk per gym', note: 'across the gyms we’ve audited' },
-    { value: '72%', label: 'cancel-save rate', note: 'when AI handles the conversation' },
-    { value: '3×', label: 'faster lead response', note: 'vs. manual follow-up by staff' },
-    { value: '£4–6', label: 'AI cost per gym, per month', note: 'GPT-4o-mini + Claude Sonnet' },
+function Day() {
+  const slots = [
+    {
+      t: '06:00',
+      title: 'Morning brief on your phone',
+      body: 'Collected month to date, failure rate, overdue count, joins against target, projected month end banked, and the three things that matter today. Written, not charted. Reply to it and it answers.',
+    },
+    {
+      t: '06:20',
+      title: 'The staff board fills itself',
+      body: 'The top 12 overdue members to call, the top 6 billing faults to fix, every membership ending this week, and the standing daily jobs. Short on purpose. A tick sticks for three days, so nobody is asked to call the same person twice.',
+    },
+    {
+      t: '11:00',
+      title: 'Payments that can clear are retried',
+      body: 'Temporary shortfalls not attempted in the last two days, once per member, with the rules a careful human would use. Declined cards and dead mandates are routed to a named action instead of being hammered.',
+    },
+    {
+      t: '16:00',
+      title: 'Late warning',
+      body: 'Anything the board has not cleared, and on Wednesdays a cut off alert so arrears land on Friday’s payout rather than the one after.',
+    },
+    {
+      t: '22:00',
+      title: 'Evening close',
+      body: 'What changed since the morning, joins and leavers verified against the live roster, Friday’s credit forecast updated to the pound.',
+    },
+  ]
+  return (
+    <section id="day" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+      <div className="max-w-2xl">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">What it does</p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+          Not a dashboard to check. <span className="text-zinc-500">A colleague who has already checked.</span>
+        </h2>
+        <p className="mt-4 text-base leading-relaxed text-zinc-600">
+          Glofox has all the data. What it does not do is read it for you at six in the morning, work out what matters, and hand your team a list. That is the whole product.
+        </p>
+      </div>
+      <ol className="mt-12 grid grid-cols-1 gap-4 lg:grid-cols-5">
+        {slots.map((s) => (
+          <li key={s.t} className="rounded-2xl border border-zinc-200 bg-white p-6">
+            <span className="font-mono text-xs font-semibold tracking-wide text-emerald-700">{s.t}</span>
+            <h3 className="mt-2 text-base font-semibold tracking-tight text-zinc-900">{s.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600">{s.body}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* WHAT IT FINDS                                                      */
+/* ------------------------------------------------------------------ */
+
+function WhatItFinds() {
+  const items = [
+    {
+      title: 'Members on a rate they no longer qualify for',
+      body: 'At Hoddesdon: 47 students aged 19 and over still on the under 19 price, billing £970 a month short. It refills at about three members a month unless someone watches it.',
+    },
+    {
+      title: 'Memberships ending with no renewal booked',
+      body: '50 members whose term was quietly running out, worth £1,289 a month, handed to the desk as a list sorted by expiry with the ones still training marked priority.',
+    },
+    {
+      title: 'The payment method that is costing you',
+      body: 'Card payers failed at 2.4 times the Direct Debit rate. One migration campaign, no capital, about £530 a month.',
+    },
+    {
+      title: 'Prices nobody authorised',
+      body: 'A membership plan sold four times at a price the owner never launched. Flagged the day it was found.',
+    },
+    {
+      title: 'A price test that is quietly failing',
+      body: 'A new joiner rate trial was caught in five days when weekday sales fell to 1 against 8.4 expected, and reverted at a cost of six joins instead of a month’s worth.',
+    },
+    {
+      title: 'What Friday will actually pay',
+      body: 'Payout forecasts with a stated range, reconciled against the bank feed. The banked model checked out within 0.4% of the statements.',
+    },
+  ]
+  return (
+    <section id="found" className="border-y border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="max-w-2xl">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">What it finds</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+            The money hiding in your membership file.
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-zinc-600">
+            None of these needed a new member. All of them were sitting in Glofox already. These are the first quarter&apos;s finds at one club.
+          </p>
+        </div>
+        <ul className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((it) => (
+            <li key={it.title} className="bg-white p-6">
+              <p className="text-sm font-semibold text-zinc-900">{it.title}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">{it.body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* HOW IT CONNECTS                                                    */
+/* ------------------------------------------------------------------ */
+
+function Connect() {
+  const steps = [
+    {
+      title: 'Your club, your login',
+      body: 'Each club connects its own Glofox login. gymIQ reads the Memberships, Sales and Failed Payments reports the way you would, and writes nothing back. Franchise groups connect one club at a time; nothing is shared between clubs.',
+    },
+    {
+      title: 'Bank feed, optional',
+      body: 'Connect the club account through open banking and Friday’s payout is reconciled against what actually landed. The consent renews every 90 days, and the brief tells you when.',
+    },
+    {
+      title: 'A week of tuning',
+      body: 'The first week is gymIQ learning what normal looks like for your club: your seasonality, your payout pattern, your plan names. Forecasts sharpen from month two.',
+    },
+    {
+      title: 'Nothing for staff to learn',
+      body: 'Glofox stays exactly as it is. The board is one page on a tablet at the desk, opened with a PIN. Ticks are recorded to whoever made them.',
+    },
   ]
   return (
     <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-          The numbers that matter
-        </p>
+      <div className="max-w-2xl">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">How it connects</p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-          Independent gyms churn 30–50% a year.
-          <span className="text-zinc-500"> Almost nobody knows who, why, or when.</span>
+          Live in an evening. <span className="text-zinc-500">Useful by the second week.</span>
         </h2>
       </div>
-      <div className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-white px-6 py-8">
-            <p className="text-4xl font-semibold tracking-tight text-zinc-900 sm:text-[40px]">
-              {s.value}
-            </p>
-            <p className="mt-2 text-sm font-medium text-zinc-700">{s.label}</p>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-500">{s.note}</p>
-          </div>
+      <ol className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((s) => (
+          <li key={s.title} className="rounded-2xl border border-zinc-200 bg-white p-6">
+            <h3 className="text-base font-semibold tracking-tight text-zinc-900">{s.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-zinc-600">{s.body}</p>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/* AUDIT PREVIEW — what the report contains                           */
-/* ------------------------------------------------------------------ */
-
-function AuditPreview() {
-  const items = [
-    { title: 'Revenue at risk', body: 'Total monthly £ from members likely to cancel in the next 30 days, by risk band.' },
-    { title: 'Deep sleeper list', body: 'Every member 21–45 days without a visit — the sweet spot for a save call.' },
-    { title: 'Cohort churn curves', body: 'See where new joiners drop off. Spot the first-30-day, first-90-day gaps.' },
-    { title: 'Lead conversion gaps', body: 'How fast you respond, where leads stall, and what you should be saying.' },
-    { title: 'Auto-categorised reasons', body: 'AI tags leavers by reason: price, location, injury, unused, etc.' },
-    { title: 'A 30-day action plan', body: 'Ten concrete moves, ranked by expected revenue impact.' },
-  ]
-
-  return (
-    <section className="border-t border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8 sm:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
-          <div className="lg:col-span-5">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-              What you get
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-              A full retention audit of your gym, in 60 seconds.
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-zinc-600">
-              Upload an export from your CRM — even a messy spreadsheet. We score every member, surface who&apos;s about to leave, and email you a PDF you can hand to your team this afternoon.
-            </p>
-            <a
-              href="#audit"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
-            >
-              Run mine now
-              <ArrowUpRight className="h-4 w-4" />
-            </a>
-          </div>
-          <div className="lg:col-span-7">
-            <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2">
-              {items.map((it) => (
-                <li key={it.title} className="bg-white p-6">
-                  <p className="text-sm font-semibold text-zinc-900">{it.title}</p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">{it.body}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* FEATURES                                                           */
-/* ------------------------------------------------------------------ */
-
-function Features() {
-  const features = [
-    {
-      icon: LineChart,
-      title: 'Churn prediction that runs free',
-      body: 'A heuristic engine — not a black box — scores every member 0–100 by visit pattern, payment health, and engagement. Pure functions. Zero AI cost.',
-    },
-    {
-      icon: MessagesSquare,
-      title: 'Cancel-save AI conversations',
-      body: 'When a member tries to leave, AI handles the conversation: probes the reason, offers a freeze, a downgrade, or a recovery plan. 72% save in pilot.',
-    },
-    {
-      icon: PhoneCall,
-      title: 'AI voice receptionist',
-      body: 'Answer your gym phone 24/7. Book tours, answer FAQs, route urgent calls. Tone-matched to your brand, in your accent.',
-    },
-    {
-      icon: Workflow,
-      title: 'Instant lead follow-up',
-      body: 'Every enquiry gets a WhatsApp inside 60 seconds. A 9-stage pipeline tracks each lead from first ping to converted member.',
-    },
-    {
-      icon: FileSpreadsheet,
-      title: 'Bolts on. No migration.',
-      body: 'Glofox, Mindbody, ClubRight, IMAP CSV reports, or a spreadsheet. We import, normalise, and never ask you to switch CRM.',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Dry-run by default',
-      body: 'No outbound message leaves the system until you flip the switch per channel. See exactly what AI would have said.',
-    },
-  ]
-  return (
-    <section id="features" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-          The platform
-        </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-          Built for gyms.
-          <span className="text-zinc-500"> Not adapted from a generic CRM.</span>
-        </h2>
-      </div>
-      <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((f) => {
-          const Icon = f.icon
-          return (
-            <div
-              key={f.title}
-              className="group relative rounded-2xl border border-zinc-200 bg-white p-6 transition hover:border-zinc-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)]"
-            >
-              <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-                <Icon className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-semibold tracking-tight text-zinc-900">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-600">{f.body}</p>
-            </div>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* HOW IT WORKS                                                       */
-/* ------------------------------------------------------------------ */
-
-function HowItWorks() {
-  const steps = [
-    {
-      n: '01',
-      title: 'Connect or upload',
-      body: 'Hook up Glofox, Mindbody, or ClubRight in two clicks. No CRM? Drop a CSV — we handle the rest.',
-    },
-    {
-      n: '02',
-      title: 'AI scores every member',
-      body: 'The churn engine flags risk, classifies leavers by reason, and surfaces the deep-sleeper list daily at 2am.',
-    },
-    {
-      n: '03',
-      title: 'Intervene at the right time',
-      body: 'AI sends a friendly nudge at day 14. At day 21, it offers a save. Quiet hours and dry-run by default.',
-    },
-    {
-      n: '04',
-      title: 'Watch the dashboard',
-      body: 'Revenue saved, leads converted, members rescued, staff tasks completed. One screen instead of seven.',
-    },
-  ]
-  return (
-    <section id="how" className="border-y border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8 sm:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-            How it works
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-            Live in a day. Saving members by week two.
-          </h2>
-        </div>
-        <ol className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s) => (
-            <li key={s.n} className="relative rounded-2xl border border-zinc-200 bg-white p-6">
-              <span className="text-xs font-semibold tracking-[0.12em] text-emerald-700">{s.n}</span>
-              <h3 className="mt-3 text-base font-semibold tracking-tight text-zinc-900">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-600">{s.body}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* PRICING                                                            */
+/* PRICING: one set fee                                               */
 /* ------------------------------------------------------------------ */
 
 function Pricing() {
-  const tiers = [
-    {
-      name: 'Retention AI',
-      price: '£179',
-      desc: 'For gyms focused on keeping the members they already have.',
-      features: [
-        'Churn prediction for every member',
-        'Automated sleeper detection',
-        'Cancel-save AI conversations',
-        'Payment recovery sequences',
-        'Risk dashboard',
-        'Email + WhatsApp channels',
-        'Up to 4,000 members',
-        '500 WhatsApp messages / mo',
-        '200 AI conversations / mo',
-      ],
-      cta: 'Start free trial',
-      ctaHref: '/auth/signup',
-      highlight: false,
-    },
-    {
-      name: 'Lead Recovery AI',
-      price: '£179',
-      desc: 'For growing gyms that want to convert every enquiry.',
-      features: [
-        'AI lead nurturing (WhatsApp, Email, SMS)',
-        '30-second response time',
-        '5-touch follow-up sequence',
-        'Automated tour booking',
-        'Post-visit conversion tracking',
-        'Lead pipeline dashboard',
-        'Up to 500 leads / month',
-        '1,000 WhatsApp messages / mo',
-        '300 AI conversations / mo',
-      ],
-      cta: 'Start free trial',
-      ctaHref: '/auth/signup',
-      highlight: false,
-    },
-    {
-      name: 'GymIQ Complete',
-      price: '£299',
-      saving: 'Save £59/mo vs. buying both',
-      desc: 'The complete revenue-protection system. Both products, plus premium extras.',
-      features: [
-        'Everything in Retention AI',
-        'Everything in Lead Recovery AI',
-        'Priority support',
-        'Custom AI personality matched to your brand',
-        'Advanced analytics',
-        '4,000 members + unlimited leads',
-        '1,500 WhatsApp messages / mo',
-        '500 AI conversations / mo',
-      ],
-      cta: 'Start free trial',
-      ctaHref: '/auth/signup',
-      highlight: true,
-    },
+  const included = [
+    'Morning brief and evening close, seven days a week',
+    'Staff task board with the daily money hour',
+    'Failed payment retries and arrears triage, three runs a week',
+    'Price, age and plan audits every month',
+    'Friday payout and month end forecasts',
+    'Bank feed reconciliation (open banking)',
+    'Reply to any brief and get an answer',
+    'Set up and tuning included',
   ]
   return (
-    <section id="pricing" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-          Pricing
-        </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-          One member saved pays for it. <span className="text-zinc-500">Twice over.</span>
-        </h2>
-        <p className="mt-4 text-sm text-zinc-500">No setup fees. No contracts. Cancel anytime.</p>
-      </div>
-      <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {tiers.map((t) => (
-          <div
-            key={t.name}
-            className={`relative flex flex-col rounded-2xl border p-7 ${
-              t.highlight
-                ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_16px_40px_-16px_rgba(0,0,0,0.35)]'
-                : 'border-zinc-200 bg-white text-zinc-900'
-            }`}
-          >
-            {t.highlight && (
-              <span className="absolute -top-3 left-7 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
-                Most popular
-              </span>
-            )}
-            <p className={`text-sm font-semibold ${t.highlight ? 'text-emerald-300' : 'text-emerald-700'}`}>
-              {t.name}
-            </p>
+    <section id="pricing" className="border-y border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Pricing</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+            One set fee per club. <span className="text-zinc-500">Nothing to track, nothing to argue about.</span>
+          </h2>
+          <p className="mt-4 text-sm text-zinc-500">Monthly. No setup fee. No usage charges. Cancel with a month&apos;s notice.</p>
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-5">
+          <div className="relative flex flex-col rounded-2xl border border-zinc-900 bg-zinc-900 p-8 text-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_16px_40px_-16px_rgba(0,0,0,0.35)] lg:col-span-3">
+            <p className="text-sm font-semibold text-emerald-300">gymIQ for one club</p>
             <p className="mt-3 flex items-baseline gap-1.5">
-              <span className="text-4xl font-semibold tracking-tight">{t.price}</span>
-              <span className={`text-sm ${t.highlight ? 'text-zinc-400' : 'text-zinc-500'}`}>/ month</span>
+              <span className="text-5xl font-semibold tracking-tight">£{PRICE_PER_CLUB}</span>
+              <span className="text-sm text-zinc-400">a month, per club</span>
             </p>
-            {t.saving && (
-              <p className={`mt-2 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${t.highlight ? 'bg-emerald-500/20 text-emerald-200' : 'bg-emerald-50 text-emerald-700'}`}>
-                {t.saving}
-              </p>
-            )}
-            <p className={`mt-2 text-sm ${t.highlight ? 'text-zinc-300' : 'text-zinc-600'}`}>{t.desc}</p>
-            <ul className="mt-6 space-y-2.5">
-              {t.features.map((f) => (
+            <p className="mt-3 text-sm text-zinc-300">
+              On a 1,000 member club that is about 40p per member per month. A dozen recovered payments, or one member kept for a year, covers it.
+            </p>
+            <ul className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {included.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm">
-                  <Check
-                    className={`mt-0.5 h-4 w-4 flex-shrink-0 ${t.highlight ? 'text-emerald-400' : 'text-emerald-600'}`}
-                    strokeWidth={2.5}
-                  />
-                  <span className={t.highlight ? 'text-zinc-200' : 'text-zinc-700'}>{f}</span>
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" strokeWidth={2.5} />
+                  <span className="text-zinc-200">{f}</span>
                 </li>
               ))}
             </ul>
-            <Link
-              href={t.ctaHref}
-              className={`mt-7 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                t.highlight
-                  ? 'bg-white text-zinc-900 hover:bg-zinc-100'
-                  : 'bg-zinc-900 text-white hover:bg-zinc-800'
-              }`}
+            <a
+              href={WALKTHROUGH_HREF}
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100"
             >
-              {t.cta}
+              Book a walkthrough
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </a>
+          </div>
+
+          <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white p-8 lg:col-span-2">
+            <p className="text-sm font-semibold text-emerald-700">Groups and franchises</p>
+            <p className="mt-3 text-2xl font-semibold tracking-tight text-zinc-900">Per club, priced on numbers</p>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+              Each club keeps its own login and its own board. The owner or area manager gets one brief across all of them. Talk to us about three clubs or more.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-zinc-600">
+              énergie clubs: the Friday 80 per cent credit, the reconciliation on the fourth working day and the franchise fee are already modelled, so the cash forecast works from day one.
+            </p>
+            <a
+              href={`mailto:${CONTACT}?subject=gymIQ%20for%20a%20group`}
+              className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+            >
+              Talk about a group
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* FAQ: the honest answers                                            */
+/* ------------------------------------------------------------------ */
+
+function Faq() {
+  const qs = [
+    {
+      q: 'Does it replace Glofox?',
+      a: 'No. It reads Glofox and leaves it alone. Your team keeps working in Glofox exactly as they do now; gymIQ tells them which member to open first.',
+    },
+    {
+      q: 'Does it contact my members?',
+      a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside Glofox’s own rules. Any messaging to members is switched on per club, by you, in writing.',
+    },
+    {
+      q: 'What does it need from me?',
+      a: 'A Glofox login for the club, ideally a read only staff account created for gymIQ. Optionally an open banking connection to the club account for reconciliation. And an hour on a call so the brief is written the way you think.',
+    },
+    {
+      q: 'Will it work if my front desk is part time?',
+      a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.',
+    },
+    {
+      q: 'Is the retention result real?',
+      a: 'July at Hoddesdon was the lowest attrition month on record. August was not, because the club cleared its overdue book that month and the leavers show up all at once. Both months are on the Hoddesdon page with the workings, because a retention claim you cannot check is worth nothing.',
+    },
+    {
+      q: 'Who is behind it?',
+      a: 'Paul Airey, who owns and runs énergie Fitness Hoddesdon, a 1,600 member club in Hertfordshire. gymIQ was built to run that club first. You are talking to the person who uses it every day.',
+    },
+  ]
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+      <div className="max-w-2xl">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Straight answers</p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">The questions owners ask first.</h2>
+      </div>
+      <dl className="mt-12 grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
+        {qs.map((item) => (
+          <div key={item.q} className="border-t border-zinc-200 pt-5">
+            <dt className="text-base font-semibold tracking-tight text-zinc-900">{item.q}</dt>
+            <dd className="mt-2 text-sm leading-relaxed text-zinc-600">{item.a}</dd>
           </div>
         ))}
-      </div>
+      </dl>
+    </section>
+  )
+}
 
-      {/* Enterprise strip */}
-      <div className="mt-10 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 text-white">
-        <div className="flex flex-col items-start gap-6 px-7 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-8">
-          <div className="max-w-xl">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-300">
-              Enterprise
-            </p>
-            <h3 className="mt-1 text-xl font-semibold tracking-tight">
-              4,000+ members? Multi-site? Custom integrations?
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-              Custom pricing tailored to usage, dedicated account manager, and centralised analytics across every site.
-            </p>
-          </div>
-          <a
-            href="mailto:hello@gymiq.ai?subject=GymIQ Enterprise enquiry"
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100"
-          >
-            Talk to us
-            <ArrowRight className="h-4 w-4" />
-          </a>
+/* ------------------------------------------------------------------ */
+/* AUDIT: the existing upload widget as a lower commitment first step */
+/* ------------------------------------------------------------------ */
+
+function Audit() {
+  return (
+    <section id="audit" className="border-y border-zinc-100 bg-zinc-50/60 px-5 py-20 sm:px-8 sm:py-24">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="lg:col-span-5">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Not ready to connect?</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+            Start with an export.
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-zinc-600">
+            Download the Memberships report from Glofox and drop it here. You get a first read of your plan mix, tenure, sleepers and revenue at risk by email. No login, no call.
+          </p>
+        </div>
+        <div className="lg:col-span-7">
+          <AuditUpload variant="section" />
         </div>
       </div>
     </section>
@@ -558,21 +516,22 @@ function Pricing() {
 
 function FinalCta() {
   return (
-    <section className="px-5 pb-24 sm:px-8">
+    <section className="px-5 py-20 sm:px-8 sm:py-24">
       <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-emerald-50/60 px-8 py-14 text-center sm:px-12 sm:py-20">
         <h2 className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-          Find the £2,494 you&apos;re leaving on the table.
+          See your own club&apos;s first brief.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-zinc-600">
-          Upload a member export. Sixty seconds later, you have the full audit. No card. No sales call.
+          A 20 minute call, a Glofox login, and your first morning brief lands within a week. If it finds nothing, you will have lost twenty minutes.
         </p>
         <a
-          href="#audit"
+          href={WALKTHROUGH_HREF}
           className="mt-8 inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
         >
-          Run my free audit
+          Book a walkthrough
           <ArrowRight className="h-4 w-4" />
         </a>
+        <p className="mt-4 text-xs text-zinc-500">Or email {CONTACT}</p>
       </div>
     </section>
   )
@@ -588,13 +547,14 @@ function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-10 sm:flex-row sm:items-center sm:px-8">
         <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
           <Logo />
-          GymIQ
+          gymIQ
         </Link>
         <p className="text-xs text-zinc-500">
-          © {new Date().getFullYear()} GymIQ AI Ltd · Made in the UK · hello@gymiq.ai
+          © {new Date().getFullYear()} GymIQ AI Ltd · Made in Hertfordshire · {CONTACT}
         </p>
         <nav className="flex items-center gap-5 text-xs text-zinc-500">
-          <a href="#features" className="hover:text-zinc-900">Features</a>
+          <a href="#day" className="hover:text-zinc-900">What it does</a>
+          <Link href="/hoddesdon" className="hover:text-zinc-900">Hoddesdon</Link>
           <a href="#pricing" className="hover:text-zinc-900">Pricing</a>
           <Link href="/auth/login" className="hover:text-zinc-900">Sign in</Link>
         </nav>

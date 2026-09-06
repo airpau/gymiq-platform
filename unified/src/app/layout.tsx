@@ -10,23 +10,23 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'GymIQ — Predict gym churn. Save members. Grow revenue.',
+  title: 'gymIQ. The morning brief that runs your gym.',
   description:
-    'AI churn prediction, cancel-save conversations, and instant lead follow-up that bolts on to Glofox, Mindbody, ClubRight, or any spreadsheet. Run a free 60-second audit on your member export.',
+    'gymIQ reads your Glofox account and your bank feed, and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
   metadataBase: new URL('https://gymiq.ai'),
   openGraph: {
-    title: 'GymIQ — Predict gym churn. Save members. Grow revenue.',
+    title: 'gymIQ. The morning brief that runs your gym.',
     description:
-      'The average independent gym is bleeding £2,494/month in revenue it doesn’t know about. Find yours in 60 seconds.',
+      'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Live at énergie Fitness Hoddesdon.',
     url: 'https://gymiq.ai',
     siteName: 'GymIQ',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GymIQ — Predict gym churn. Save members. Grow revenue.',
+    title: 'gymIQ. The morning brief that runs your gym.',
     description:
-      'AI retention for independent gyms. Bolts on to your existing CRM. Free 60-second audit.',
+      'The morning brief that runs your gym. Built by a gym owner, live at énergie Fitness Hoddesdon.',
   },
 }
 
