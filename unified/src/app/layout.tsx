@@ -25,7 +25,7 @@ const mono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'gymIQ. The morning brief that runs your gym.',
+  title: 'gymIQ. The intelligence layer for your gym.',
   description:
     'gymIQ reads your gym management system and your bank feed, and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
   metadataBase: new URL('https://www.gymiq.ai'),
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Paul Airey' }],
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   openGraph: {
-    title: 'gymIQ. The morning brief that runs your gym.',
+    title: 'gymIQ. The intelligence layer for your gym.',
     description:
       'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Live at énergie Fitness Hoddesdon.',
     url: 'https://www.gymiq.ai',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'gymIQ. The morning brief that runs your gym.',
+    title: 'gymIQ. The intelligence layer for your gym.',
     description:
       'The morning brief that runs your gym. Built by a gym owner, live at énergie Fitness Hoddesdon.',
   },
@@ -71,8 +71,8 @@ const jsonLd = {
       operatingSystem: 'Web',
       url: 'https://www.gymiq.ai',
       description:
-        'Reads a gym’s management system and bank feed and delivers a written morning brief, a staff task board, payment retries and a cash forecast. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
-      offers: { '@type': 'Offer', price: '395', priceCurrency: 'GBP', description: 'Per club, per month. No setup fee.' },
+        'The intelligence layer for gyms: reads the club’s management system and bank feed and delivers a written morning brief, a staff task board, payment retries, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
+      offers: { '@type': 'Offer', price: '495', priceCurrency: 'GBP', description: 'Per club, per month, monthly business review included. No setup fee.' },
       provider: { '@id': 'https://www.gymiq.ai/#org' },
     },
     {

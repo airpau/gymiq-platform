@@ -528,7 +528,7 @@ function Cta({ i, gymName, auditId }: { i: AuditInsights; gymName: string; audit
         gymIQ does this every day at 06:00, puts the calls on a board your desk can clear, and tells you what Friday will pay.
       </h2>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate">
-        {i.money.totalMonthly > 0 ? `About ${gbp(i.money.totalMonthly)} a month is on this page. ` : ''}One set fee per club, £395 a month, no setup fee and no usage charges. Each club connects its own Glofox login, read only. Live within a week.
+        {i.money.totalMonthly > 0 ? `About ${gbp(i.money.totalMonthly)} a month is on this page. ` : ''}One set fee per club, £495 a month including a monthly business review, no setup fee and no usage charges. Each club connects its own Glofox login, read only. Live within a week.
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <a href={walkthrough(gymName)} className="inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-2">

@@ -140,7 +140,7 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
               Book a walkthrough
               <ArrowRight className="h-4 w-4" />
             </a>
-            <Link href="/#pricing" className="text-sm font-medium text-moss hover:text-moss">See pricing</Link>
+            <Link href="/impact" className="text-sm font-medium text-moss hover:text-moss-deep">What it made, line by line</Link>
           </div>
           <p className="mt-4 text-sm text-slate">Paul Airey, owner, énergie Fitness Hoddesdon · {CONTACT}</p>
         </div>

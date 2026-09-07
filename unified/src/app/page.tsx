@@ -1,17 +1,13 @@
 import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
-
-/** Set fee per club, per month. Change here and it updates everywhere on the page. */
-const PRICE_PER_CLUB = 395
-const CONTACT = 'paul@gymiq.ai'
-const WALKTHROUGH_HREF = `mailto:${CONTACT}?subject=gymIQ%20walkthrough&body=Hi%20Paul%2C%0A%0AClub%3A%20%0AMembers%3A%20%0AGym%20software%3A%20%0A%0ABest%20time%20for%20a%2020%20minute%20call%3A%20`
-const SYSTEMS = 'Glofox, ClubRight, Mindbody, PerfectGym, GymMaster and others'
+import { STORIES, impactTotals } from '@/lib/impact'
+import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF } from '@/lib/site'
 
 export const metadata = {
-  title: 'gymIQ. The morning brief that runs your gym.',
+  title: 'gymIQ. The intelligence layer for your gym.',
   description:
-    'gymIQ reads your gym management system and your bank feed, and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
+    'gymIQ reads your gym management system and your bank feed and runs the numbers a business analyst would: what came in, who is leaving, what is mispriced, what to do today. More sales, less waste, a written brief every morning and a review every month. Live at énergie Fitness Hoddesdon.',
 }
 
 export default function LandingPage() {
@@ -20,8 +16,10 @@ export default function LandingPage() {
       <Nav />
       <Hero />
       <Proof />
+      <Impact />
       <Day />
       <WhatItFinds />
+      <Replaces />
       <Connect />
       <Pricing />
       <Faq />
@@ -46,8 +44,8 @@ function Nav() {
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-slate md:flex">
           <a href="#day" className="transition hover:text-ink">What it does</a>
-          <a href="#found" className="transition hover:text-ink">What it finds</a>
-          <Link href="/hoddesdon" className="transition hover:text-ink">Hoddesdon numbers</Link>
+          <Link href="/impact" className="transition hover:text-ink">What it made</Link>
+          <Link href="/hoddesdon" className="transition hover:text-ink">Hoddesdon</Link>
           <a href="#pricing" className="transition hover:text-ink">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -88,10 +86,10 @@ function Hero() {
           <div className="lg:col-span-7">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Built by a gym owner · live at énergie Fitness Hoddesdon</p>
             <h1 className="mt-5 font-display text-[44px] font-extrabold leading-[0.98] tracking-tight text-ink sm:text-6xl lg:text-[72px]">
-              Your gym&apos;s numbers, on your phone, before you have had a coffee.
+              The intelligence layer for your gym.
             </h1>
             <p className="mt-7 max-w-xl text-xl leading-relaxed text-slate">
-              gymIQ reads your gym management system four times a day and your bank feed once a day. Every morning it tells you what came in, who is leaving, and what the desk should do about it today. Then it puts those jobs on a board your staff can actually clear.
+              gymIQ reads your gym software and your bank feed and does the job of a business analyst: what came in, who is leaving, what is mispriced, what the desk should do today, what Friday will pay. A written brief every morning, a board your staff can clear, and a review with us every month so it is always paying for itself.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <a
@@ -111,8 +109,8 @@ function Hero() {
             <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Bullet>Works with {SYSTEMS}. Nothing to migrate.</Bullet>
               <Bullet>Each club connects its own login. Read only.</Bullet>
-              <Bullet>£{PRICE_PER_CLUB} a month per club. Set fee, no usage charges.</Bullet>
-              <Bullet>Running in a 1,600 member club today.</Bullet>
+              <Bullet>£{PRICE_PER_CLUB} a month per club, monthly business review included.</Bullet>
+              <Bullet>£145,000 made and saved at one club in year one, on a conservative count.</Bullet>
             </ul>
           </div>
 
@@ -200,6 +198,83 @@ function Proof() {
           Every figure is from the club&apos;s own data and explained, bad months included, on the{' '}
           <Link href="/hoddesdon" className="text-lime underline-offset-4 hover:underline">Hoddesdon page</Link>. The club now clears its non payers from the roster every month on purpose, which is why the numbers are real.
         </p>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* IMPACT                                                             */
+/* ------------------------------------------------------------------ */
+
+function Impact() {
+  const t = impactTotals()
+  const gbp = (n: number) => `£${(Math.round(n / 1000) * 1000).toLocaleString('en-GB')}`
+  const picks = STORIES.slice(0, 3)
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="lg:col-span-5">
+          <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">What it made</p>
+          <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+            {gbp(t.conservative)} in year one, at one club.
+          </h2>
+          <p className="mt-5 text-lg leading-relaxed text-slate">
+            Collection, pricing, retention, a refit bought for £42,000 less, and the analyst the club no longer needs to hire. Counted line by line against the club&apos;s own records, with the assumption written next to every number. The central case is {gbp(t.central)}. The fee was £{(PRICE_PER_CLUB * 12).toLocaleString('en-GB')}.
+          </p>
+          <Link href="/impact" className="mt-7 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-ink-2">
+            See the whole ledger
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:col-span-7">
+          {picks.map((st) => (
+            <article key={st.title} className="rounded-3xl border border-mist bg-white p-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-display text-xl font-bold leading-tight text-ink">{st.title}</h3>
+                <span className="font-mono text-sm font-medium text-amber">{st.figure}</span>
+              </div>
+              <p className="mt-2 text-[15px] leading-relaxed text-slate">{st.body.split('. ').slice(0, 2).join('. ')}.</p>
+            </article>
+          ))}
+          <Link href="/impact" className="text-sm font-semibold text-moss hover:text-moss-deep">Three more, and the calculator for your club</Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* WHAT IT REPLACES                                                   */
+/* ------------------------------------------------------------------ */
+
+function Replaces() {
+  const rows = [
+    { what: 'A business analyst', cost: '£45,000 a year plus on costs', does: 'Monthly close, payout forecast, price and age audits, capex appraisal, the brief itself. gymIQ does all of it, every day, and a person reviews it with you monthly.' },
+    { what: 'A lead follow up tool', cost: '£100 to £300 a month', does: 'Every enquiry answered inside the hour, tours confirmed, no shows chased, the scoreboard on the wall. Part of the daily board.' },
+    { what: 'A member export and reporting add on', cost: '£50 to £200 a month', does: 'The roster, member by member, every day, with history. Not a spreadsheet emailed twice a day.' },
+    { what: 'Arrears chasing by hand', cost: 'half a day a week of a manager', does: 'Retries that can clear, run unattended three times a week. Everyone else routed to a named action on the board.' },
+    { what: 'The cash flow spreadsheet', cost: 'an evening a week of the owner', does: 'Friday credits forecast with a range, reconciled against the bank feed to the pound.' },
+  ]
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+      <div className="max-w-2xl">
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">What it replaces</p>
+        <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+          The analyst, the add ons, and the Sunday evening spreadsheet.
+        </h2>
+        <p className="mt-5 text-lg leading-relaxed text-slate">
+          Most clubs pay for pieces of this already, in tools or in the owner&apos;s time. gymIQ is one layer over the software you have, at less than the cost of any one of them.
+        </p>
+      </div>
+      <div className="mt-12 overflow-hidden rounded-3xl border border-mist bg-white">
+        {rows.map((r, idx) => (
+          <div key={r.what} className={`grid grid-cols-1 gap-2 px-6 py-5 md:grid-cols-[minmax(0,1fr)_200px_minmax(0,1.6fr)] md:gap-8 ${idx > 0 ? 'border-t border-mist' : ''}`}>
+            <h3 className="font-display text-lg font-bold text-ink">{r.what}</h3>
+            <p className="font-mono text-sm text-amber">{r.cost}</p>
+            <p className="text-[15px] leading-relaxed text-slate">{r.does}</p>
+          </div>
+        ))}
       </div>
     </section>
   )
@@ -322,10 +397,10 @@ function Pricing() {
     'Staff task board with the daily money hour',
     'Failed payment retries and arrears triage, three runs a week',
     'Price, age and plan audits every month',
-    'Payout and month end forecasts',
-    'Bank feed reconciliation (open banking)',
+    'Payout and month end forecasts, bank feed reconciled',
     'Reply to any brief and get an answer',
-    'Set up and tuning included',
+    'A 45 minute business review with us every month',
+    'Set up, tuning and the first month’s audit included',
   ]
   return (
     <section id="pricing" className="bg-ink text-paper">
@@ -333,20 +408,20 @@ function Pricing() {
         <div className="max-w-2xl">
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">Pricing</p>
           <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-paper sm:text-5xl">
-            One set fee per club. Nothing to track, nothing to argue about.
+            One set fee per club, and it has to pay for itself.
           </h2>
-          <p className="mt-4 text-base text-paper/60">Monthly. No setup fee. No usage charges. Cancel with a month&apos;s notice.</p>
+          <p className="mt-4 text-base text-paper/60">Monthly. No setup fee. No usage charges. Cancel with a month&apos;s notice. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="rounded-3xl border border-ink-3 bg-ink-2 p-8 lg:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">gymIQ for one club</p>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">gymIQ intelligence + monthly review</p>
             <p className="mt-4 flex items-baseline gap-2">
               <span className="font-display text-6xl font-extrabold tracking-tight text-paper">£{PRICE_PER_CLUB}</span>
               <span className="text-base text-paper/60">a month, per club</span>
             </p>
             <p className="mt-3 text-[15px] text-paper/70">
-              On a 1,000 member club that is about 40p per member per month. A dozen recovered payments, or one member kept for a year, covers it.
+              On a 1,000 member club that is about 50p per member per month. Sixteen recovered payments, or two members kept for a year, covers it. Hoddesdon&apos;s first year came to £145,000 on a conservative count.
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {included.map((f) => (
@@ -398,6 +473,7 @@ function Faq() {
     { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. Hoddesdon runs on Glofox, so that connection is the most worn in.` },
     { q: 'Does it contact my members?', a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside your system’s own rules. Any messaging to members is switched on per club, by you, in writing.' },
     { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. Optionally an open banking connection to the club account for reconciliation. And an hour on a call so the brief is written the way you think.' },
+    { q: 'What happens on the monthly review?', a: 'Forty five minutes with us, on the phone or a call. What the system found, what your team acted on, what it was worth, and the one or two decisions for next month: a price, a plan, a supplier, a hire. You leave with a number for the month and a plan. As the product matures the review will become optional, but early clubs keep it at no extra cost.' },
     { q: 'Will it work if my front desk is part time?', a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.' },
     { q: 'Is the retention result real?', a: 'July at Hoddesdon was the lowest attrition month on record. August was higher because the club now clears members who have stopped paying from the roster every month, on purpose, and those show up as leavers. Both months are on the Hoddesdon page with the workings.' },
     { q: 'Who is behind it?', a: 'Paul Airey, who owns and runs énergie Fitness Hoddesdon, a 1,600 member club in Hertfordshire. gymIQ was built to run that club first. You are talking to the person who uses it every day.' },

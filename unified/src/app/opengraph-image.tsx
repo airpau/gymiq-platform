@@ -26,12 +26,12 @@ export default function OpenGraphImage() {
           gymIQ
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2 }}>Your gym&apos;s numbers, on your phone, by 06:00.</div>
+          <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2 }}>The intelligence layer for your gym.</div>
           <div style={{ fontSize: 28, color: '#a7f3d0' }}>Reads your gym software and your bank feed. Morning brief, staff board, payment retries, Friday forecast.</div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, color: '#d4d4d8' }}>
           <span>Built by a gym owner. Live at énergie Fitness Hoddesdon.</span>
-          <span>£395 a month per club</span>
+          <span>£495 a month per club, review included</span>
         </div>
       </div>
     ),
