@@ -45,7 +45,7 @@ export default function AuditPreviewPage() {
 
   if (state.status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-zinc-500">
+      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-slate">
         Loading your audit…
       </div>
     )
@@ -54,17 +54,17 @@ export default function AuditPreviewPage() {
   if (state.status === 'empty') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white px-5">
-        <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-7 text-center shadow-sm">
-          <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+        <div className="w-full max-w-md rounded-2xl border border-mist bg-white p-7 text-center shadow-sm">
+          <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber">
             <AlertCircle className="h-5 w-5" />
           </div>
-          <h1 className="text-lg font-semibold text-zinc-900">No preview to display</h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">
+          <h1 className="text-lg font-semibold text-ink">No preview to display</h1>
+          <p className="mt-1.5 text-sm leading-relaxed text-slate">
             We couldn&apos;t find your audit in this browser. Preview reports only live in the tab where you ran them — head back to the homepage and run a new one.
           </p>
           <Link
             href="/#audit"
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ink-2"
           >
             Run a new audit
           </Link>

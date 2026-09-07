@@ -10,17 +10,17 @@ const UPDATED = '7 September 2026'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      <header className="border-b border-zinc-200/70">
+    <div className="min-h-screen bg-white text-ink antialiased">
+      <header className="border-b border-mist">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
           <Link href="/" className="text-sm font-semibold tracking-tight">gymIQ</Link>
-          <Link href="/terms" className="text-sm text-zinc-600 hover:text-zinc-900">Terms</Link>
+          <Link href="/terms" className="text-sm text-slate hover:text-ink">Terms</Link>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 text-[15px] leading-relaxed text-zinc-700">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Privacy</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">Privacy policy</h1>
-        <p className="mt-2 text-sm text-zinc-500">Last updated {UPDATED}. Controller: GymIQ AI Ltd, United Kingdom. Contact: paul@gymiq.ai.</p>
+      <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 text-[15px] leading-relaxed text-ink-3">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">Privacy</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Privacy policy</h1>
+        <p className="mt-2 text-sm text-slate">Last updated {UPDATED}. Controller: GymIQ AI Ltd, United Kingdom. Contact: paul@gymiq.ai.</p>
 
         <H>Who we are</H>
         <P>gymIQ is operated by GymIQ AI Ltd, a UK company. We provide reporting, task boards and payment follow up tooling to gyms, and a free membership file audit on this website. For the free audit and for enquiries we are the data controller. When a gym subscribes to gymIQ and connects its own systems, we process its members&apos; data on the gym&apos;s instructions and the gym is the controller; a data processing agreement forms part of the subscription.</P>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 }
 
 function H({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-10 text-xl font-semibold tracking-tight text-zinc-900">{children}</h2>
+  return <h2 className="mt-10 text-xl font-semibold tracking-tight text-ink">{children}</h2>
 }
 function P({ children }: { children: React.ReactNode }) {
   return <p className="mt-3">{children}</p>

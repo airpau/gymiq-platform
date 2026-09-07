@@ -187,18 +187,18 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className={`mx-auto w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] ${
+      className={`mx-auto w-full max-w-2xl rounded-2xl border border-mist bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] ${
         compact ? 'p-5 sm:p-6' : 'p-6 sm:p-8'
       }`}
     >
       <div className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-emerald-700">
+        <p className="text-xs font-medium uppercase tracking-wider text-moss">
           Free membership file audit
         </p>
-        <h3 className="mt-1 text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl">
+        <h3 className="mt-1 text-lg font-semibold tracking-tight text-ink sm:text-xl">
           Upload your Memberships export. See what is hiding in it.
         </h3>
-        <p className="mt-1.5 text-sm text-zinc-500">
+        <p className="mt-1.5 text-sm text-slate">
           Overdue by payment method, memberships ending unasked, members below current price, students past the age for their rate, who is drifting. Glofox, ClubRight, Mindbody or any spreadsheet. About a minute.
         </p>
       </div>
@@ -210,10 +210,10 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         onDragLeave={onDragLeave}
         className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-7 text-center transition ${
           dragActive
-            ? 'border-emerald-500 bg-emerald-50/60'
+            ? 'border-emerald-500 bg-moss-soft'
             : file
-            ? 'border-emerald-300 bg-emerald-50/40'
-            : 'border-zinc-300 bg-zinc-50/60 hover:border-zinc-400 hover:bg-zinc-50'
+            ? 'border-emerald-300 bg-moss-soft'
+            : 'border-mist bg-paper-2 hover:border-zinc-400 hover:bg-paper-2'
         }`}
       >
         {file ? (
@@ -221,21 +221,21 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white">
               <CheckCircle2 className="h-5 w-5" />
             </div>
-            <p className="text-sm font-medium text-zinc-900">{file.name}</p>
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="text-sm font-medium text-ink">{file.name}</p>
+            <p className="mt-0.5 text-xs text-slate">
               {(file.size / 1024).toFixed(0)} KB &middot; click to choose a different file
             </p>
           </>
         ) : (
           <>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-white">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white">
               <Upload className="h-5 w-5" />
             </div>
-            <p className="text-sm font-medium text-zinc-900">
+            <p className="text-sm font-medium text-ink">
               Drop your Memberships export here
-              <span className="ml-1 font-normal text-zinc-500">or click to browse</span>
+              <span className="ml-1 font-normal text-slate">or click to browse</span>
             </p>
-            <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-slate">
               <FileSpreadsheet className="h-3.5 w-3.5" />
               CSV, TSV, or Excel &middot; up to 20 MB
             </p>
@@ -295,12 +295,12 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
           error={errors.phone}
         />
         <div>
-          <label htmlFor="audit-software" className="block text-xs font-medium text-zinc-700">Gym software</label>
+          <label htmlFor="audit-software" className="block text-xs font-medium text-ink-3">Gym software</label>
           <select
             id="audit-software"
             value={software}
             onChange={(e) => setSoftware(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-1"
+            className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
           >
             <option value="">Choose</option>
             <option value="glofox">Glofox</option>
@@ -312,12 +312,12 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
           </select>
         </div>
         <div>
-          <label htmlFor="audit-members" className="block text-xs font-medium text-zinc-700">Members</label>
+          <label htmlFor="audit-members" className="block text-xs font-medium text-ink-3">Members</label>
           <select
             id="audit-members"
             value={members}
             onChange={(e) => setMembers(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-1"
+            className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
           >
             <option value="">Choose</option>
             <option value="under-300">Under 300</option>
@@ -332,7 +332,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-2 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? (
           <>
@@ -354,7 +354,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         </p>
       )}
 
-      <p className="mt-4 text-xs text-zinc-500">
+      <p className="mt-4 text-xs text-slate">
         Your file is read once and not stored. The report is kept at a private link so you can come back to it. We will email it to you and may call about a walkthrough; no mailing lists. See the <a href="/privacy" className="underline">privacy policy</a>.
       </p>
     </form>
@@ -391,7 +391,7 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label htmlFor={id} className="block text-xs font-medium text-zinc-700">
+      <label htmlFor={id} className="block text-xs font-medium text-ink-3">
         {label}
       </label>
       <input
@@ -400,10 +400,10 @@ function Field({
         autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`mt-1 block w-full rounded-lg border bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+        className={`mt-1 block w-full rounded-lg border bg-white px-3 py-2 text-sm text-ink placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
           error
             ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-            : 'border-zinc-300 focus:border-zinc-400 focus:ring-zinc-200'
+            : 'border-mist focus:border-moss focus:ring-moss/20'
         }`}
       />
       {error && <p className="mt-1 text-[11px] text-red-600">{error}</p>}

@@ -27,7 +27,7 @@ const walkthrough = (gym: string) =>
 
 export default function AuditInsightsView({ insights: i, gymName, firstName, createdAt, isPreview, auditId }: Props) {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 antialiased">
+    <div className="min-h-screen bg-white text-ink antialiased">
       <Nav gymName={gymName} />
       {isPreview && (
         <div className="border-b border-amber-200 bg-amber-50/80 px-5 py-2.5 text-center text-xs text-amber-900">
@@ -60,15 +60,15 @@ export default function AuditInsightsView({ insights: i, gymName, firstName, cre
 
 function Nav({ gymName }: { gymName: string }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-white/85 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-mist bg-white/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-2 text-base font-semibold tracking-tight text-zinc-900">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-emerald-700 text-[11px] font-bold text-white shadow-sm">IQ</span>
+        <Link href="/" className="flex items-center gap-2 text-base font-semibold tracking-tight text-ink">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-moss to-moss-deep text-[11px] font-bold text-white shadow-sm">IQ</span>
           gymIQ
         </Link>
         <a
           href={walkthrough(gymName)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-ink-2"
         >
           Get this every morning
           <ArrowRight className="h-3.5 w-3.5" />
@@ -81,9 +81,9 @@ function Nav({ gymName }: { gymName: string }) {
 function Header({ i, gymName, firstName, createdAt }: { i: AuditInsights; gymName: string; firstName: string; createdAt: Date }) {
   return (
     <section className="pt-12 sm:pt-16">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Membership file audit</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">{gymName}</h1>
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">Membership file audit</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{gymName}</h1>
+      <p className="mt-2 text-sm text-slate">
         For {firstName}, {createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}. {i.basis.rows.toLocaleString('en-GB')} rows read,{' '}
         {i.membership.roster.toLocaleString('en-GB')} live members. Private link.
       </p>
@@ -94,29 +94,29 @@ function Header({ i, gymName, firstName, createdAt }: { i: AuditInsights; gymNam
 function H2({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
     <div className="mt-16 max-w-3xl">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{title}</h2>
-      {sub && <p className="mt-3 text-base leading-relaxed text-zinc-600">{sub}</p>}
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">{eyebrow}</p>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{title}</h2>
+      {sub && <p className="mt-3 text-base leading-relaxed text-slate">{sub}</p>}
     </div>
   )
 }
 
 function NotComputed({ what, needs }: { what: string; needs: string }) {
   return (
-    <p className="mt-6 max-w-3xl rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-5 py-4 text-sm text-zinc-600">
-      {what} was not computed because the export has no {needs} column. In Glofox, Reports, Memberships, choose the full column set before downloading and it will appear.
+    <p className="mt-6 max-w-3xl rounded-xl border border-dashed border-mist bg-paper-2 px-5 py-4 text-sm text-slate">
+      {what} was not computed because the export has no {needs} column. Export the memberships report with every column selected (in Glofox that is Reports, Memberships) and it will appear.
     </p>
   )
 }
 
 function Tiles({ items }: { items: Array<{ label: string; value: string; hint?: string; sense?: Sense }> }) {
   return (
-    <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 md:grid-cols-4">
+    <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-mist bg-mist md:grid-cols-4">
       {items.map((t) => (
         <div key={t.label} className="bg-white px-5 py-5">
-          <p className={`text-2xl font-semibold tracking-tight ${t.sense === 'good' ? 'text-emerald-700' : t.sense === 'bad' ? 'text-red-700' : 'text-zinc-900'}`}>{t.value}</p>
-          <p className="mt-1 text-sm font-medium text-zinc-700">{t.label}</p>
-          {t.hint && <p className="mt-1 text-xs leading-relaxed text-zinc-500">{t.hint}</p>}
+          <p className={`text-2xl font-semibold tracking-tight ${t.sense === 'good' ? 'text-moss' : t.sense === 'bad' ? 'text-signal' : 'text-ink'}`}>{t.value}</p>
+          <p className="mt-1 text-sm font-medium text-ink-3">{t.label}</p>
+          {t.hint && <p className="mt-1 text-xs leading-relaxed text-slate">{t.hint}</p>}
         </div>
       ))}
     </div>
@@ -125,20 +125,20 @@ function Tiles({ items }: { items: Array<{ label: string; value: string; hint?: 
 
 function Table({ head, rows, align = [] }: { head: string[]; rows: Array<Array<string | number>>; align?: Array<'l' | 'r'> }) {
   return (
-    <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200">
-      <table className="min-w-full divide-y divide-zinc-100 text-sm">
-        <thead className="bg-zinc-50/60 text-left text-xs uppercase tracking-wide text-zinc-500">
+    <div className="mt-6 overflow-x-auto rounded-2xl border border-mist">
+      <table className="min-w-full divide-y divide-mist text-sm">
+        <thead className="bg-paper-2 text-left text-xs uppercase tracking-wide text-slate">
           <tr>
             {head.map((h, idx) => (
               <th key={h} className={`px-5 py-2.5 font-medium ${align[idx] === 'r' ? 'text-right' : ''}`}>{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 bg-white">
+        <tbody className="divide-y divide-mist bg-white">
           {rows.map((r, ri) => (
             <tr key={ri}>
               {r.map((c, ci) => (
-                <td key={ci} className={`px-5 py-2.5 ${align[ci] === 'r' ? 'text-right font-mono tabular-nums text-zinc-900' : 'text-zinc-700'}`}>{c}</td>
+                <td key={ci} className={`px-5 py-2.5 ${align[ci] === 'r' ? 'text-right font-mono tabular-nums text-ink' : 'text-ink-3'}`}>{c}</td>
               ))}
             </tr>
           ))}
@@ -154,13 +154,13 @@ function Bars({ rows, max }: { rows: Array<{ label: string; value: number; sub?:
     <div className="mt-6 space-y-2.5">
       {rows.map((r) => (
         <div key={r.label} className="grid grid-cols-[1fr_auto] items-center gap-3 sm:grid-cols-[220px_1fr_auto]">
-          <div className="text-sm text-zinc-700">{r.label}</div>
-          <div className="col-span-2 h-2.5 overflow-hidden rounded-full bg-zinc-100 sm:col-span-1">
+          <div className="text-sm text-ink-3">{r.label}</div>
+          <div className="col-span-2 h-2.5 overflow-hidden rounded-full bg-paper-2 sm:col-span-1">
             <div className={`h-full rounded-full ${r.tone ?? 'bg-emerald-600'}`} style={{ width: `${Math.max(2, (r.value / m) * 100)}%` }} />
           </div>
-          <div className="text-right font-mono text-sm tabular-nums text-zinc-900">
+          <div className="text-right font-mono text-sm tabular-nums text-ink">
             {r.value.toLocaleString('en-GB')}
-            {r.sub && <span className="ml-2 text-xs text-zinc-500">{r.sub}</span>}
+            {r.sub && <span className="ml-2 text-xs text-slate">{r.sub}</span>}
           </div>
         </div>
       ))}
@@ -182,14 +182,14 @@ function Verdict({ i }: { i: AuditInsights }) {
     lines.push(`${dormant.toLocaleString('en-GB')} paying members have not visited in 30 days or more. They are not lost, but they are how attrition starts.`)
   }
   return (
-    <section className="mt-10 rounded-2xl bg-zinc-900 p-7 text-white sm:p-9">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-300">Verdict</p>
+    <section className="mt-10 rounded-2xl bg-ink p-7 text-white sm:p-9">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-lime">Verdict</p>
       <div className="mt-3 space-y-3 text-lg leading-relaxed">
         {lines.map((l, idx) => (
-          <p key={idx} className={idx === 0 ? 'font-semibold text-white' : 'text-zinc-200'}>{l}</p>
+          <p key={idx} className={idx === 0 ? 'font-semibold text-white' : 'text-paper/85'}>{l}</p>
         ))}
       </div>
-      <p className="mt-5 text-xs text-zinc-400">
+      <p className="mt-5 text-xs text-slate">
         Data confidence {i.basis.confidence}. {i.basis.columnsMissing.length ? `Missing: ${i.basis.columnsMissing.join(', ')}.` : 'Every column gymIQ looks for was present.'}
       </p>
     </section>
@@ -223,7 +223,7 @@ function Membership({ i }: { i: AuditInsights }) {
           { label: 'Active share', value: pct(m.activeShare, 1), hint: 'Active as a share of live. 93% is the target.', sense: m.activeShare >= 0.93 ? 'good' : m.activeShare >= 0.9 ? 'mid' : 'bad' },
         ]}
       />
-      <p className="mt-5 max-w-3xl text-sm leading-relaxed text-zinc-600">
+      <p className="mt-5 max-w-3xl text-sm leading-relaxed text-slate">
         One point of monthly attrition on this roster is {gbp(m.valueOfOnePoint)} a month of billing that has to be re-sold. {m.concessionCount > 0 && `${m.concessionCount} members (${gbp(m.concessionMonthly)} a month) are on a concession: student, corporate, staff or similar.`} {m.annualUpfront > 0 && `${m.annualUpfront} paid annually up front, counted here at ${gbp(m.annualUpfrontMonthly)} a month.`}
       </p>
       <Table
@@ -352,7 +352,7 @@ function Age({ i }: { i: AuditInsights }) {
 
 function Engagement({ i }: { i: AuditInsights }) {
   const e = i.engagement
-  const tone: Record<string, string> = { healthy: 'bg-emerald-600', drifting: 'bg-amber-500', atRisk: 'bg-orange-500', dormant: 'bg-red-500', sleeper: 'bg-red-700', never: 'bg-zinc-500', noData: 'bg-zinc-300' }
+  const tone: Record<string, string> = { healthy: 'bg-emerald-600', drifting: 'bg-amber-500', atRisk: 'bg-orange-500', dormant: 'bg-red-500', sleeper: 'bg-red-700', never: 'bg-paper-20', noData: 'bg-zinc-300' }
   return (
     <section>
       <H2 eyebrow="Engagement" title="Who is drifting, measured against their own habit." sub="A flat 30 day rule calls a twice a year member dormant and a daily member healthy after three weeks away. gymIQ measures each member against their own pattern." />
@@ -410,7 +410,7 @@ function JoinChart({ rows }: { rows: Array<{ label: string; joins: number }> }) 
   const max = Math.max(1, ...rows.map((r) => r.joins))
   const bw = (w - pad * 2) / rows.length
   return (
-    <figure className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white p-4">
+    <figure className="mt-6 overflow-x-auto rounded-2xl border border-mist bg-white p-4">
       <svg viewBox={`0 0 ${w} ${h}`} className="block h-auto w-full min-w-[520px]" role="img" aria-label="Joiners by month, last twelve months">
         {rows.map((r, idx) => {
           const bh = (r.joins / max) * (h - pad * 2)
@@ -426,7 +426,7 @@ function JoinChart({ rows }: { rows: Array<{ label: string; joins: number }> }) 
         })}
         <line x1={pad} y1={h - pad} x2={w - pad} y2={h - pad} stroke="#D4D4D8" />
       </svg>
-      <figcaption className="mt-2 text-xs text-zinc-500">The current month is partial and shown in grey.</figcaption>
+      <figcaption className="mt-2 text-xs text-slate">The current month is partial and shown in grey.</figcaption>
     </figure>
   )
 }
@@ -451,12 +451,12 @@ function TenureAndLeavers({ i }: { i: AuditInsights }) {
           />
           <Bars rows={t.bands.map((b) => ({ label: b.label, value: b.count, sub: gbp(b.monthly) }))} />
           {l.twelveMonthSurvival !== null && (
-            <p className="mt-4 max-w-3xl text-sm text-zinc-600">Of members who joined 12 to 15 months ago, {l.twelveMonthSurvival}% are still on the books.</p>
+            <p className="mt-4 max-w-3xl text-sm text-slate">Of members who joined 12 to 15 months ago, {l.twelveMonthSurvival}% are still on the books.</p>
           )}
         </>
       )}
       {i.paused.count > 0 && (
-        <p className="mt-6 max-w-3xl rounded-xl bg-zinc-50 px-5 py-4 text-sm text-zinc-700">
+        <p className="mt-6 max-w-3xl rounded-xl bg-paper-2 px-5 py-4 text-sm text-ink-3">
           <strong>Paused.</strong> {i.paused.count} memberships on hold, {gbp(i.paused.monthly)} a month. {i.paused.resumingNext30} resume within 30 days; {i.paused.noEndDate} have no end date on the pause, which is usually a cancellation nobody processed.
         </p>
       )}
@@ -465,13 +465,13 @@ function TenureAndLeavers({ i }: { i: AuditInsights }) {
 }
 
 function Benchmarks({ i }: { i: AuditInsights }) {
-  const senseClass: Record<Sense, string> = { good: 'text-emerald-700', mid: 'text-amber-700', bad: 'text-red-700', na: 'text-zinc-500' }
+  const senseClass: Record<Sense, string> = { good: 'text-moss', mid: 'text-amber', bad: 'text-signal', na: 'text-slate' }
   return (
     <section>
       <H2 eyebrow="Benchmarks" title="Against a live club and the industry." sub="Hoddesdon is énergie Fitness Hoddesdon, a 1,600 member franchise club running gymIQ since July 2026. Every figure is from its own data." />
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200">
-        <table className="min-w-full divide-y divide-zinc-100 text-sm">
-          <thead className="bg-zinc-50/60 text-left text-xs uppercase tracking-wide text-zinc-500">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-mist">
+        <table className="min-w-full divide-y divide-mist text-sm">
+          <thead className="bg-paper-2 text-left text-xs uppercase tracking-wide text-slate">
             <tr>
               <th className="px-5 py-2.5 font-medium">Metric</th>
               <th className="px-5 py-2.5 font-medium">You</th>
@@ -480,14 +480,14 @@ function Benchmarks({ i }: { i: AuditInsights }) {
               <th className="px-5 py-2.5 font-medium">Read</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 bg-white">
+          <tbody className="divide-y divide-mist bg-white">
             {i.benchmarks.map((b) => (
               <tr key={b.metric}>
-                <td className="px-5 py-3 font-medium text-zinc-900">{b.metric}</td>
+                <td className="px-5 py-3 font-medium text-ink">{b.metric}</td>
                 <td className={`px-5 py-3 font-mono tabular-nums ${senseClass[b.sense]}`}>{b.yours}</td>
-                <td className="px-5 py-3 text-zinc-600">{b.hoddesdon}</td>
-                <td className="px-5 py-3 text-zinc-600">{b.industry}</td>
-                <td className="px-5 py-3 text-zinc-600">{b.hint}</td>
+                <td className="px-5 py-3 text-slate">{b.hoddesdon}</td>
+                <td className="px-5 py-3 text-slate">{b.industry}</td>
+                <td className="px-5 py-3 text-slate">{b.hint}</td>
               </tr>
             ))}
           </tbody>
@@ -503,15 +503,15 @@ function Actions({ i }: { i: AuditInsights }) {
       <H2 eyebrow="What to do" title="This week, in order." sub="Each of these is a named list on this page. Money hour first, every day, before 10:30." />
       <ol className="mt-6 space-y-3">
         {i.actions.map((a, idx) => (
-          <li key={a.title} className="grid grid-cols-[auto_1fr] gap-4 rounded-2xl border border-zinc-200 bg-white p-5">
-            <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">{idx + 1}</span>
+          <li key={a.title} className="grid grid-cols-[auto_1fr] gap-4 rounded-2xl border border-mist bg-white p-5">
+            <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">{idx + 1}</span>
             <div>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-base font-semibold tracking-tight text-zinc-900">{a.title}</h3>
-                {a.monthly !== null && a.monthly > 0 && <span className="font-mono text-sm tabular-nums text-emerald-700">about {gbp(a.monthly)} a month</span>}
+                <h3 className="text-base font-semibold tracking-tight text-ink">{a.title}</h3>
+                {a.monthly !== null && a.monthly > 0 && <span className="font-mono text-sm tabular-nums text-moss">about {gbp(a.monthly)} a month</span>}
               </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-zinc-600">{a.body}</p>
-              <p className="mt-2 text-xs text-zinc-500">{a.who} · {a.when}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate">{a.body}</p>
+              <p className="mt-2 text-xs text-slate">{a.who} · {a.when}</p>
             </div>
           </li>
         ))}
@@ -522,25 +522,25 @@ function Actions({ i }: { i: AuditInsights }) {
 
 function Cta({ i, gymName, auditId }: { i: AuditInsights; gymName: string; auditId?: string }) {
   return (
-    <section className="mt-16 rounded-3xl border border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-emerald-50/60 p-8 sm:p-12">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">This was one morning</p>
-      <h2 className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+    <section className="mt-16 rounded-3xl border border-mist bg-gradient-to-br from-zinc-50 via-white to-emerald-50/60 p-8 sm:p-12">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">This was one morning</p>
+      <h2 className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
         gymIQ does this every day at 06:00, puts the calls on a board your desk can clear, and tells you what Friday will pay.
       </h2>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600">
+      <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate">
         {i.money.totalMonthly > 0 ? `About ${gbp(i.money.totalMonthly)} a month is on this page. ` : ''}One set fee per club, £395 a month, no setup fee and no usage charges. Each club connects its own Glofox login, read only. Live within a week.
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <a href={walkthrough(gymName)} className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800">
+        <a href={walkthrough(gymName)} className="inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-2">
           Book a 20 minute walkthrough
           <ArrowRight className="h-4 w-4" />
         </a>
         {auditId && (
-          <Link href={`/auth/signup?audit=${auditId}`} className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50">
+          <Link href={`/auth/signup?audit=${auditId}`} className="inline-flex items-center gap-2 rounded-xl border border-mist bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-paper-2">
             Have gymIQ work these lists
           </Link>
         )}
-        <Link href="/hoddesdon" className="text-sm font-medium text-emerald-700 hover:text-emerald-800">See the Hoddesdon numbers</Link>
+        <Link href="/hoddesdon" className="text-sm font-medium text-moss hover:text-moss">See the Hoddesdon numbers</Link>
       </div>
     </section>
   )
@@ -548,7 +548,7 @@ function Cta({ i, gymName, auditId }: { i: AuditInsights; gymName: string; audit
 
 function Basis({ i }: { i: AuditInsights }) {
   return (
-    <section className="mt-12 text-xs text-zinc-500">
+    <section className="mt-12 text-xs text-slate">
       <p>
         Read from {i.basis.rows.toLocaleString('en-GB')} rows on {new Date(i.basis.asOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}. Columns found: {i.basis.columnsFound.join(', ') || 'none'}.
         {i.basis.columnsMissing.length > 0 && ` Not found: ${i.basis.columnsMissing.join(', ')}.`}

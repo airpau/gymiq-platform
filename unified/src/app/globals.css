@@ -1,8 +1,31 @@
 @import "tailwindcss";
 
+/*
+  gymIQ design tokens.
+  A morning brief for gym owners: dark "brief" surfaces with luminous numbers,
+  warm paper for reading, one moss green accent, amber for money that needs
+  chasing. Display type is Bricolage Grotesque, body is Source Sans 3, figures
+  are IBM Plex Mono. Fonts are loaded in layout.tsx via next/font.
+*/
 @theme {
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: var(--font-body), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font-display), var(--font-body), 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, Menlo, Consolas, monospace;
+
+  --color-ink: #0F1614;
+  --color-ink-2: #1B2622;
+  --color-ink-3: #2A3833;
+  --color-paper: #F6F6F2;
+  --color-paper-2: #ECEDE7;
+  --color-mist: #DCDFD8;
+  --color-slate: #5E6B66;
+  --color-moss: #0F6E63;
+  --color-moss-deep: #0A4D45;
+  --color-moss-soft: #DDEDE9;
+  --color-lime: #C9F27A;
+  --color-amber: #E0A94A;
+  --color-amber-soft: #F7EBD3;
+  --color-signal: #B03A2E;
 }
 
 html, body {
@@ -10,15 +33,26 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
-/* Slightly tighten letter-spacing on big headings for that premium feel. */
 h1, h2, h3 {
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
-/* Subtle scrollbar polish for desktop. */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgb(212 212 216) transparent;
+}
+
+/* Digits line up in every table and tile. */
+.tabular, table, .font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }

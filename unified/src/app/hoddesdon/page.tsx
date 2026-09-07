@@ -23,24 +23,24 @@ const MONTHS = [
 
 export default function HoddesdonPage() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 antialiased">
-      <header className="border-b border-zinc-200/70 bg-white/85 backdrop-blur">
+    <div className="min-h-screen bg-white text-ink antialiased">
+      <header className="border-b border-mist bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <Link href="/" className="text-sm font-semibold tracking-tight text-zinc-900">gymIQ</Link>
-          <Link href="/#pricing" className="text-sm font-medium text-emerald-700 hover:text-emerald-800">Pricing</Link>
+          <Link href="/" className="text-sm font-semibold tracking-tight text-ink">gymIQ</Link>
+          <Link href="/#pricing" className="text-sm font-medium text-moss hover:text-moss">Pricing</Link>
         </div>
       </header>
 
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12">
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Client story</p>
-        <h1 className="mt-3 text-4xl font-semibold leading-[1.08] tracking-tight text-zinc-900 sm:text-5xl">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">Client story</p>
+        <h1 className="mt-3 text-4xl font-semibold leading-[1.08] tracking-tight text-ink sm:text-5xl">
           One club. Ninety days. Every number in the owner&apos;s pocket by 06:00.
         </h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-zinc-600">
-          How énergie Fitness Hoddesdon put an AI operating layer over Glofox and its bank feed, and what it found in the first quarter.
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate">
+          How énergie Fitness Hoddesdon put an AI operating layer over its gym software and its bank feed, and what it found in the first quarter.
         </p>
 
-        <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-2 border-t border-zinc-200 pt-5 text-sm text-zinc-500 sm:grid-cols-2">
+        <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-2 border-t border-mist pt-5 text-sm text-slate sm:grid-cols-2">
           <Meta k="Club" v="énergie Fitness Hoddesdon, Hertfordshire" />
           <Meta k="Size" v="1,617 on roster, 1,472 active paying" />
           <Meta k="Platform" v="Glofox, HSBC via open banking" />
@@ -49,7 +49,7 @@ export default function HoddesdonPage() {
 
         <H2>The problem every owner already knows</H2>
         <P>
-          A 1,600 member club produces roughly £47,000 of billing a month, and none of it arrives cleanly. Direct Debits bounce, cards expire, members drift, and Glofox reports each piece in a different screen. The owner finds out at month end, from a spreadsheet, what had already gone wrong three weeks earlier.
+          A 1,600 member club produces roughly £47,000 of billing a month, and none of it arrives cleanly. Direct Debits bounce, cards expire, members drift, and the software reports each piece in a different screen. The owner finds out at month end, from a spreadsheet, what had already gone wrong three weeks earlier.
         </P>
         <P>
           At Hoddesdon the owner runs the club alongside other businesses. He needed to know three things every morning without logging in anywhere: what came in, who is leaving, and what to do about it today.
@@ -60,12 +60,13 @@ export default function HoddesdonPage() {
 
         <H3>Collection</H3>
         <Ledger rows={[
-          ['Payment failure rate', 'August whole month, then 1 to 6 September', '9.55% to 6.77%', 'good'],
-          ['Overdue members', 'Peak in late August, then 6 September', '77 to 58', 'good'],
-          ['Collection rate, 1 to 6 September', 'Successful as a share of submitted', '87.8%'],
+          ['Payment failure rate before gymIQ', 'The failed book the club was carrying when the routine started, August 2026', 'about 10%', 'warn'],
+          ['Payment failure rate, July settled', 'Failed as a share of submitted once the month cleared: 48,633 collected on 50,427', '3.6%', 'good'],
+          ['Collection rate, July and August once settled', 'Both months clear to over 99% of what was billed', '99.4%', 'good'],
+          ['Overdue members', '10 August, then 6 September', '76 to 58', 'good'],
           ['September arrears identified for the Wednesday cut off', '47 live members, worth on Friday’s credit', '£1,884 to £1,507'],
         ]} />
-        <Cap>The retry routine runs unattended three times a week. It retries only temporary shortfalls not attempted in the last two days, once per member, and routes everything else to a named action: new card, mandate to re-set, or a cancellation to review.</Cap>
+        <Cap>The retry routine runs unattended three times a week. It retries only temporary shortfalls not attempted in the last two days, once per member, and routes everything else to a named action: new card, mandate to re-set, or a cancellation to review. A month reads worse on the day it closes than a week later, because pending Direct Debits take days to settle; the settled figure is the true one.</Cap>
 
         <H3>Money that was hiding in the membership file</H3>
         <Ledger rows={[
@@ -88,7 +89,7 @@ export default function HoddesdonPage() {
           ['Roster, 1 to 6 September', 'Grew six days running', '1,611 to 1,617', 'good'],
         ]} />
         <Note>
-          <strong>How we count.</strong> Attrition is leavers divided by the opening roster. August is shown in full because a club that clears its overdue book will always see a spike, and hiding it would be the wrong way to earn trust. Glofox&apos;s own lost members report puts August at 136 leavers, 8.1%. On a 1,600 member club every point of monthly attrition is 16 members, or about £490 a month of billing that then has to be re-sold.
+          <strong>How we count.</strong> Attrition is leavers divided by the opening roster. August is shown in full because the club now clears members who have stopped paying from the roster every month, on purpose, and they show up as leavers the month they are processed. Before gymIQ they stayed on the roster as overdue and nobody chased them; now they are found, chased, and if they will not pay, removed. The system&apos;s own lost members report puts August at 136 leavers, 8.1%. On a 1,600 member club every point of monthly attrition is 16 members, or about £490 a month of billing that then has to be re-sold.
         </Note>
 
         <H3>Cash</H3>
@@ -101,7 +102,7 @@ export default function HoddesdonPage() {
 
         <H2>What the owner actually sees</H2>
         <P>The Sunday evening close, as it landed on the owner&apos;s phone on 6 September 2026.</P>
-        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-zinc-900 p-5 font-mono text-[13px] leading-relaxed text-zinc-200">{`Hoddesdon evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
+        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink p-5 font-mono text-[13px] leading-relaxed text-paper/85">{`Hoddesdon evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
 
 TOP 3
 1. Retention is good. 7 leavers this month against 19 over the same six days of August, and the roster has GROWN six days running, 1,611 to 1,617.
@@ -117,31 +118,31 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
 
         <H2>What it took to run</H2>
         <P>
-          No new software for staff to learn. Glofox stays exactly as it is. gymIQ reads it through the club&apos;s own login, keeps its own history, and writes to a one page task board the front desk opens on a tablet. Set up took an evening for the data connection and a week of tuning the brief to how the owner thinks.
+          No new software for staff to learn. The club&apos;s gym software (Glofox, in Hoddesdon&apos;s case) stays exactly as it is. gymIQ reads it through the club&apos;s own login, keeps its own history, and writes to a one page task board the front desk opens on a tablet. Set up took an evening for the data connection and a week of tuning the brief to how the owner thinks.
         </P>
         <P>
           Three things to be honest about. The retention calls only work if someone makes them, so the board is capped at a list a small desk can clear in an hour and reports back who cleared what. The bank feed relies on a 90 day open banking consent that the owner has to renew. And the first month is mostly gymIQ learning what &ldquo;normal&rdquo; looks like for your club, so the forecasts sharpen from month two.
         </P>
         <Note>
-          <strong>For énergie clubs specifically.</strong> The payout model, the Friday 80 per cent credit and the fourth working day reconciliation, the franchise fee and the Glofox setup are the same as Hoddesdon&apos;s, so the cash forecasting works from day one without re-modelling. Each club connects its own Glofox login; nothing is shared between clubs.
+          <strong>For énergie clubs specifically.</strong> The payout model, the Friday 80 per cent credit and the fourth working day reconciliation, the franchise fee and the software setup are the same as Hoddesdon&apos;s, so the cash forecasting works from day one without re-modelling. Each club connects its own Glofox login; nothing is shared between clubs.
         </Note>
 
-        <div className="mt-14 rounded-2xl border border-zinc-200 bg-zinc-50 p-7">
-          <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">See your own club&apos;s numbers</h2>
-          <p className="mt-3 text-base leading-relaxed text-zinc-600">
-            A read only Glofox login is enough for a first brief: your failure rate by payment method, your overdue book with a recommended action per member, your expiring terms, and anyone on a rate they no longer qualify for.
+        <div className="mt-14 rounded-2xl border border-mist bg-paper-2 p-7">
+          <h2 className="text-2xl font-semibold tracking-tight text-ink">See your own club&apos;s numbers</h2>
+          <p className="mt-3 text-base leading-relaxed text-slate">
+            A read only login to your gym software is enough for a first brief: your failure rate by payment method, your overdue book with a recommended action per member, your expiring terms, and anyone on a rate they no longer qualify for.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <a
               href={`mailto:${CONTACT}?subject=gymIQ%20walkthrough`}
-              className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-2"
             >
               Book a walkthrough
               <ArrowRight className="h-4 w-4" />
             </a>
-            <Link href="/#pricing" className="text-sm font-medium text-emerald-700 hover:text-emerald-800">See pricing</Link>
+            <Link href="/#pricing" className="text-sm font-medium text-moss hover:text-moss">See pricing</Link>
           </div>
-          <p className="mt-4 text-sm text-zinc-500">Paul Airey, owner, énergie Fitness Hoddesdon · {CONTACT}</p>
+          <p className="mt-4 text-sm text-slate">Paul Airey, owner, énergie Fitness Hoddesdon · {CONTACT}</p>
         </div>
       </main>
     </div>
@@ -153,31 +154,31 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
 function Meta({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex gap-2">
-      <dt className="font-semibold text-zinc-900">{k}</dt>
+      <dt className="font-semibold text-ink">{k}</dt>
       <dd>{v}</dd>
     </div>
   )
 }
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-14 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{children}</h2>
+  return <h2 className="mt-14 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{children}</h2>
 }
 
 function H3({ children }: { children: React.ReactNode }) {
-  return <h3 className="mt-8 text-lg font-semibold tracking-tight text-zinc-900">{children}</h3>
+  return <h3 className="mt-8 text-lg font-semibold tracking-tight text-ink">{children}</h3>
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600">{children}</p>
+  return <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate">{children}</p>
 }
 
 function Cap({ children }: { children: React.ReactNode }) {
-  return <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-500">{children}</p>
+  return <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate">{children}</p>
 }
 
 function Note({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-6 max-w-2xl rounded-r-lg border-l-[3px] border-emerald-600 bg-emerald-50 px-5 py-4 text-sm leading-relaxed text-zinc-700">
+    <div className="mt-6 max-w-2xl rounded-r-lg border-l-[3px] border-moss bg-moss-soft px-5 py-4 text-sm leading-relaxed text-ink-3">
       {children}
     </div>
   )
@@ -187,16 +188,16 @@ type Row = [string, string, string, ('good' | 'warn')?]
 
 function Ledger({ rows }: { rows: Row[] }) {
   return (
-    <div className="mt-4 border-t border-zinc-200">
+    <div className="mt-4 border-t border-mist">
       {rows.map(([label, sub, value, tone]) => (
-        <div key={label} className="grid grid-cols-1 items-baseline gap-1 border-b border-zinc-200 py-3 sm:grid-cols-[1fr_auto] sm:gap-6">
-          <div className="text-sm text-zinc-700">
+        <div key={label} className="grid grid-cols-1 items-baseline gap-1 border-b border-mist py-3 sm:grid-cols-[1fr_auto] sm:gap-6">
+          <div className="text-sm text-ink-3">
             {label}
-            <span className="block text-xs text-zinc-500">{sub}</span>
+            <span className="block text-xs text-slate">{sub}</span>
           </div>
           <div
             className={`font-mono text-sm font-medium tabular-nums sm:text-right ${
-              tone === 'good' ? 'text-emerald-700' : tone === 'warn' ? 'text-amber-700' : 'text-zinc-900'
+              tone === 'good' ? 'text-moss' : tone === 'warn' ? 'text-amber' : 'text-ink'
             }`}
           >
             {value}
@@ -244,7 +245,7 @@ function Chart() {
           )
         })}
       </svg>
-      <figcaption className="mt-2 text-sm text-zinc-500">
+      <figcaption className="mt-2 text-sm text-slate">
         Monthly attrition on the roster, Feb to Aug 2026. January is excluded as an overdue clean up month. August&apos;s dashed line shows the rate with the 19 to 21 August overdue clean up removed, about 41 members who had already stopped paying and were processed in three days.
       </figcaption>
     </figure>
