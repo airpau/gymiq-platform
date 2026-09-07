@@ -16,9 +16,11 @@ export default function LandingPage() {
       <Nav />
       <Hero />
       <Proof />
+      <Tools />
       <Impact />
       <Day />
       <WhatItFinds />
+      <Reaches />
       <Replaces />
       <Connect />
       <Pricing />
@@ -43,7 +45,7 @@ function Nav() {
           <span>gymIQ</span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-slate md:flex">
-          <a href="#day" className="transition hover:text-ink">What it does</a>
+          <Link href="/demo" className="transition hover:text-ink">Try the tools</Link>
           <Link href="/impact" className="transition hover:text-ink">What it made</Link>
           <Link href="/hoddesdon" className="transition hover:text-ink">Hoddesdon</Link>
           <a href="#pricing" className="transition hover:text-ink">Pricing</a>
@@ -100,17 +102,17 @@ function Hero() {
                 <ArrowRight className="h-4 w-4" />
               </a>
               <Link
-                href="/hoddesdon"
+                href="/demo"
                 className="inline-flex items-center gap-2 rounded-full border border-ink/20 bg-transparent px-6 py-3.5 text-base font-semibold text-ink transition hover:border-ink/50"
               >
-                See the Hoddesdon numbers
+                Try every tool
               </Link>
             </div>
             <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Bullet>Works with {SYSTEMS}. Nothing to migrate.</Bullet>
               <Bullet>Each club connects its own login. Read only.</Bullet>
               <Bullet>£{PRICE_PER_CLUB} a month per club, monthly business review included.</Bullet>
-              <Bullet>£145,000 made and saved at one club in year one, on a conservative count.</Bullet>
+              <Bullet>Six figures made and saved at one club in its first year. Every line shown.</Bullet>
             </ul>
           </div>
 
@@ -204,12 +206,93 @@ function Proof() {
 }
 
 /* ------------------------------------------------------------------ */
+/* TOOLS                                                              */
+/* ------------------------------------------------------------------ */
+
+function Tools() {
+  const tools = [
+    { id: 'leads', title: 'Lead assistant', body: 'Answers every enquiry in seconds and books the trial when the person names a time.' },
+    { id: 'brief', title: 'Morning brief', body: 'The club in writing at 06:00, 16:00 and 22:00. Reply to it and it answers.' },
+    { id: 'board', title: 'Staff board', body: 'A task list rewritten every morning from the live roster, per person, capped so it gets finished.' },
+    { id: 'retention', title: 'Retention radar', body: 'Who is drifting, measured against their own habit rather than a flat 30 days.' },
+    { id: 'pulse', title: 'Sales pulse', body: 'Joins today against what today should do, with the alert when a day goes off the model.' },
+    { id: 'retries', title: 'Payment routine', body: 'Every failed payment decided the way a careful person would, three times a week.' },
+    { id: 'cash', title: 'Friday forecast', body: 'What lands on Friday, to the pound, before it lands.' },
+    { id: 'alerts', title: 'Alerts by role', body: 'WhatsApp, Telegram, email or SMS. Owner, manager and desk each see their part.' },
+  ]
+  return (
+    <section className="bg-paper-2">
+      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Try the tools</p>
+            <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">Eight tools. Every one of them clicks.</h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate">Not a video. A fictional club you can press: create a lead and talk to it, tick the board, run the payment routine, ask the brief a question.</p>
+          </div>
+          <Link href="/demo" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-ink-2">
+            Open the demo
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {tools.map((t) => (
+            <Link key={t.id} href={`/demo#${t.id}`} className="group rounded-3xl border border-mist bg-white p-6 transition hover:border-moss">
+              <h3 className="font-display text-lg font-bold text-ink">{t.title}</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-slate">{t.body}</p>
+              <p className="mt-4 text-sm font-semibold text-moss group-hover:text-moss-deep">Try it</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* REACHES YOU                                                        */
+/* ------------------------------------------------------------------ */
+
+function Reaches() {
+  const roles = [
+    { who: 'Owner', sees: 'Collected, banked, the Friday forecast, failure rate, joins against target, the board by name, the monthly review pack.' },
+    { who: 'Manager', sees: 'Joins, leavers, overdue count, the board and who cleared it, the drifting list. No bank balances, no fees.' },
+    { who: 'Front desk', sees: 'Today only: who to call, who is ending, tours to confirm, leads to ring. No revenue, no forecasts.' },
+  ]
+  return (
+    <section className="bg-ink text-paper">
+      <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-5">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">Where it reaches you</p>
+            <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">WhatsApp, Telegram, email or SMS. Nobody logs in to find out.</h2>
+            <p className="mt-5 text-lg leading-relaxed text-paper/75">
+              Every update about the club comes to the person who needs it, on the app they already use, and they can reply to it. Three levels of staff see three cuts of the same read. The task list works alongside your existing CRM, or stands on its own, and it is rewritten every morning for each member of staff as the club changes.
+            </p>
+            <Link href="/demo#alerts" className="mt-7 inline-flex items-center gap-2 text-base font-semibold text-lime">
+              See who gets what
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-ink-3 bg-ink-3 lg:col-span-7">
+            {roles.map((r) => (
+              <div key={r.who} className="bg-ink-2 p-6">
+                <h3 className="font-display text-xl font-bold text-paper">{r.who}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-paper/70">{r.sees}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* IMPACT                                                             */
 /* ------------------------------------------------------------------ */
 
 function Impact() {
   const t = impactTotals()
-  const gbp = (n: number) => `£${(Math.round(n / 1000) * 1000).toLocaleString('en-GB')}`
   const picks = STORIES.slice(0, 3)
   return (
     <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
@@ -217,10 +300,10 @@ function Impact() {
         <div className="lg:col-span-5">
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">What it made</p>
           <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-            {gbp(t.conservative)} in year one, at one club.
+            Six figures in year one, at one club.
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-slate">
-            Collection, pricing, retention, a refit bought for £42,000 less, and the analyst the club no longer needs to hire. Counted line by line against the club&apos;s own records, with the assumption written next to every number. The central case is {gbp(t.central)}. The fee was £{(PRICE_PER_CLUB * 12).toLocaleString('en-GB')}.
+            Collection, pricing, retention, a refit bought for tens of thousands less, and the analyst the club no longer needs to hire. Counted line by line against the club&apos;s own records, with the assumption written next to every number, and a calculator for what it would find in yours. The fee for the year was under £6,000; the conservative count came to more than {Math.floor(t.conservative / (PRICE_PER_CLUB * 12) / 5) * 5} times that.
           </p>
           <Link href="/impact" className="mt-7 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-ink-2">
             See the whole ledger

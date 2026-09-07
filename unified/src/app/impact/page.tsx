@@ -36,14 +36,14 @@ export default function ImpactPage() {
         <div className="mx-auto max-w-6xl px-5 pb-16 pt-16 sm:px-8 sm:pt-24">
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">{CLUB.name} · since {CLUB.since}</p>
           <h1 className="mt-4 max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight sm:text-7xl">
-            {gbp(t.conservative)} in the first year. From one club, on a conservative count.
+            Six figures in the first year. From one club, on a conservative count.
           </h1>
           <p className="mt-6 max-w-2xl text-xl leading-relaxed text-paper/75">
-            That is what the intelligence layer has made and saved at a 1,617 member franchise gym, measured against the club&apos;s own records, with the assumption written next to every line. The central case is {gbp(t.central)}. The fee was {gbpExact(PRICE_PER_CLUB * 12)}.
+            That is what the intelligence layer has made and saved at a 1,617 member franchise gym, measured against the club&apos;s own records, with the assumption written next to every line. The fee for the year was {gbpExact(PRICE_PER_CLUB * 12)}. The workings are below, so the number can be argued line by line rather than taken on trust.
           </p>
           <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <Big v={gbp(t.recurringConservative)} l="a year, recurring" s="collection, pricing, retention, the analyst" />
-            <Big v={gbp(t.oneOffConservative)} l="one off, this year" s="refit supplier, price test" />
+            <Big v={`${Math.floor(t.recurringConservative / 10000) * 10}k+`} l="a year, recurring" s="collection, pricing, retention, the analyst" />
+            <Big v={`${Math.floor(t.oneOffConservative / 10000) * 10}k+`} l="one off, this year" s="refit supplier, price test" />
             <Big v={`${Math.round(t.conservative / (PRICE_PER_CLUB * 12))}x`} l="the fee, conservative" s={`${gbpExact(PRICE_PER_CLUB)} a month`} />
             <Big v="3.6%" l="failed payments, July settled" s="from about 10%" />
           </div>
