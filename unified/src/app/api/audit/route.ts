@@ -8,7 +8,7 @@
  * Everything runs in a Node serverless function (NOT edge) because xlsx
  * isn't edge-compatible.
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { parseMemberFile } from '@/lib/csv/parse-members'
 import { analyseAudit } from '@/lib/services/audit-analysis'
@@ -96,80 +96,60 @@ export async function POST(req: NextRequest) {
 
     const reportId = inserted.id as string
 
-    // Ad attribution, server side. Never blocks the response.
-    sendMetaLead({
-      email,
-      phone,
-      firstName,
-      eventId,
-      sourceUrl,
-      userAgent: req.headers.get('user-agent'),
-      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
-      fbp,
-      fbc,
-    }).then((r) => {
-      if (!r.sent && r.error !== 'not configured') console.warn('[audit] Meta CAPI:', r.error)
-    })
+    // Everything below runs AFTER the response is sent, via next/server after().
+    // Vercel freezes the function once the response returns, so a plain
+    // fire-and-forget promise was silently killed: audit emails never went out.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `${req.nextUrl.protocol}//${req.nextUrl.host}`
+    const userAgent = req.headers.get('user-agent')
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
 
-    // Upsert the lead row (handles the edge case of a fast submit before the
-    // debounced lead-capture fired). Best-effort — never block the redirect.
-    supabase
-      .from('leads')
-      .upsert(
-        {
-          email,
-          first_name: firstName,
-          gym_name: gymName,
-          phone: phone ?? undefined,
-          metadata: {
-            software,
-            members: memberBand,
-            rows: report.totals.rowsParsed,
-            mrr: report.insights?.membership.mrr ?? null,
-            money_on_table_monthly: report.insights?.money.totalMonthly ?? null,
-            overdue: report.insights?.membership.overdue ?? null,
+    after(async () => {
+      // Lead row, with what the audit found attached so the follow up call has context.
+      try {
+        const { error: leadErr } = await supabase.from('leads').upsert(
+          {
+            email,
+            first_name: firstName,
+            gym_name: gymName,
+            phone: phone ?? undefined,
+            metadata: {
+              software,
+              members: memberBand,
+              rows: report.totals.rowsParsed,
+              mrr: report.insights?.membership.mrr ?? null,
+              money_on_table_monthly: report.insights?.money.totalMonthly ?? null,
+              overdue: report.insights?.membership.overdue ?? null,
+            },
+            source: 'audit_form',
+            stage: 'audit_completed',
+            audit_id: reportId,
+            updated_at: new Date().toISOString(),
           },
-          source: 'audit_form',
-          stage: 'audit_completed',
-          audit_id: reportId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'email,source' },
-      )
-      .then(() => undefined, (err: unknown) => {
-        console.warn('[audit] lead upsert failed:', err)
-      })
+          { onConflict: 'email,source' },
+        )
+        if (leadErr) console.warn('[audit] lead upsert failed:', leadErr)
+      } catch (err) {
+        console.warn('[audit] lead upsert threw:', err)
+      }
 
-    // 3. Fire-and-forget the email (don't block the user's redirect on it).
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      `${req.nextUrl.protocol}//${req.nextUrl.host}`
+      // Ad attribution, server side, deduplicated against the browser pixel by eventId.
+      const meta = await sendMetaLead({ email, phone, firstName, eventId, sourceUrl, userAgent, ip, fbp, fbc })
+      if (!meta.sent && meta.error !== 'not configured') console.warn('[audit] Meta CAPI:', meta.error)
 
-    sendAuditEmail({
-      to: email,
-      firstName,
-      gymName,
-      reportId,
-      report,
-      appUrl,
-    })
-      .then(async (result) => {
+      // The report email.
+      try {
+        const result = await sendAuditEmail({ to: email, firstName, gymName, reportId, report, appUrl })
         if (result.sent) {
-          await supabase
-            .from('audits')
-            .update({ email_sent_at: new Date().toISOString() })
-            .eq('id', reportId)
+          await supabase.from('audits').update({ email_sent_at: new Date().toISOString() }).eq('id', reportId)
         } else {
-          await supabase
-            .from('audits')
-            .update({ email_error: result.error })
-            .eq('id', reportId)
+          await supabase.from('audits').update({ email_error: result.error }).eq('id', reportId)
           console.warn('[audit] Email send failed:', result.error)
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('[audit] Email send threw:', err)
-      })
+        await supabase.from('audits').update({ email_error: err instanceof Error ? err.message : 'threw' }).eq('id', reportId)
+      }
+    })
 
     return NextResponse.json({ reportId })
   } catch (err) {
