@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
+import AdTracking from '@/components/analytics/AdTracking'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-GB" className={inter.variable}>
       <body className="min-h-screen bg-white text-zinc-900 antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <AdTracking />
         <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>

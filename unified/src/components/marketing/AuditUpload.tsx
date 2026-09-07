@@ -10,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react'
+import { trackLead } from '@/components/analytics/AdTracking'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -134,6 +135,12 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       fd.append('phone', phone.trim())
       fd.append('software', software)
       fd.append('members', members)
+      // Attribution for the server side Meta event, deduplicated against the pixel by eventId.
+      const eventId = `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      fd.append('eventId', eventId)
+      fd.append('fbp', readCookie('_fbp') ?? '')
+      fd.append('fbc', readCookie('_fbc') ?? '')
+      fd.append('sourceUrl', window.location.href)
 
       const res = await fetch('/api/audit', { method: 'POST', body: fd })
       if (!res.ok) {
@@ -144,6 +151,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         reportId: string
         previewReport?: unknown
       }
+      trackLead({ email: email.trim(), gymName: gymName.trim() })
 
       // In-memory preview path: when SUPABASE_SERVICE_ROLE_KEY isn't configured,
       // the API returns the full report inline so we can still show the user
@@ -351,6 +359,15 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       </p>
     </form>
   )
+}
+
+function readCookie(name: string): string | null {
+  try {
+    const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'))
+    return m ? decodeURIComponent(m[1]) : null
+  } catch {
+    return null
+  }
 }
 
 function Field({

@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js'
 import { parseMemberFile } from '@/lib/csv/parse-members'
 import { analyseAudit } from '@/lib/services/audit-analysis'
 import { sendAuditEmail } from '@/lib/email/send-audit'
+import { sendMetaLead } from '@/lib/analytics/meta-capi'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -29,6 +30,10 @@ export async function POST(req: NextRequest) {
     const phone = (formData.get('phone') as string | null)?.trim() || null
     const software = (formData.get('software') as string | null)?.trim() || null
     const memberBand = (formData.get('members') as string | null)?.trim() || null
+    const eventId = (formData.get('eventId') as string | null)?.trim() || `audit-${Date.now()}`
+    const fbp = (formData.get('fbp') as string | null)?.trim() || null
+    const fbc = (formData.get('fbc') as string | null)?.trim() || null
+    const sourceUrl = (formData.get('sourceUrl') as string | null)?.trim() || req.nextUrl.origin
 
     if (!(file instanceof File)) {
       return badRequest('Missing file in upload.')
@@ -90,6 +95,21 @@ export async function POST(req: NextRequest) {
     }
 
     const reportId = inserted.id as string
+
+    // Ad attribution, server side. Never blocks the response.
+    sendMetaLead({
+      email,
+      phone,
+      firstName,
+      eventId,
+      sourceUrl,
+      userAgent: req.headers.get('user-agent'),
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+      fbp,
+      fbc,
+    }).then((r) => {
+      if (!r.sent && r.error !== 'not configured') console.warn('[audit] Meta CAPI:', r.error)
+    })
 
     // Upsert the lead row (handles the edge case of a fast submit before the
     // debounced lead-capture fired). Best-effort — never block the redirect.
