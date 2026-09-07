@@ -22,6 +22,7 @@
  *   re-marketing belongs in a separate win-back flow with a longer cooldown.
  */
 import { scoreChurnRisk, type ChurnScore } from './churn-engine'
+import { buildInsights, type AuditInsights } from './audit-insights'
 import type { ParsedMember, ParseSummary } from '@/lib/csv/parse-members'
 
 // Industry default if the export has no monthly-value column and no
@@ -149,6 +150,9 @@ export interface AuditReport {
 
   // Diagnostics
   parseSummary: ParseSummary
+
+  /** The deep read: payments by method, endings, pricing, age, engagement, joiners, money. Absent on reports saved before September 2026. */
+  insights?: AuditInsights
 }
 
 export interface PlanBucket {
@@ -553,6 +557,7 @@ export function analyseAudit(members: ParsedMember[], parseSummary: ParseSummary
     topFrozen,
     actionPlan,
     parseSummary,
+    insights: buildInsights(members, now),
   }
 }
 

@@ -10,7 +10,8 @@ const PAGE = 50
 interface Props {
   title: string
   subtitle: string
-  Icon: React.ComponentType<{ className?: string }>
+  /** A rendered icon element. Components cannot cross the server to client boundary. */
+  icon: React.ReactNode
   members: ScoredMember[]
   column: 'daysSinceLastVisit' | 'daysOverdue' | 'riskScore'
   columnLabel: string
@@ -19,7 +20,7 @@ interface Props {
 export default function ExpandableList({
   title,
   subtitle,
-  Icon,
+  icon,
   members,
   column,
   columnLabel,
@@ -32,7 +33,7 @@ export default function ExpandableList({
     return (
       <div className="rounded-2xl border border-zinc-200 bg-white p-6">
         <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-          <Icon className="h-4 w-4 text-zinc-400" />
+          {icon}
           {title}
         </div>
         <p className="mt-1.5 text-sm text-zinc-500">{subtitle}</p>
@@ -47,7 +48,7 @@ export default function ExpandableList({
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
       <div className="border-b border-zinc-100 p-5">
         <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-          <Icon className="h-4 w-4 text-zinc-400" />
+          {icon}
           {title}
           <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-600">
             {total.toLocaleString('en-GB')}

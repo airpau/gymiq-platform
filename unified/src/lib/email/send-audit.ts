@@ -32,7 +32,7 @@ export async function sendAuditEmail(
     const result = await resend.emails.send({
       from,
       to: p.to,
-      subject: `${p.gymName} — your retention audit is ready`,
+      subject: `${p.gymName}: your membership file audit`,
       html: htmlBody(p, reportUrl),
       text: textBody(p, reportUrl),
     })
@@ -54,12 +54,13 @@ function gbp(n: number): string {
 
 function htmlBody(p: SendAuditEmailParams, reportUrl: string): string {
   const r = p.report
+  const i = r.insights
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>${escapeHtml(p.gymName)} — retention audit</title>
+<title>${escapeHtml(p.gymName)}: membership file audit</title>
 </head>
 <body style="margin:0;padding:0;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Inter,'Segoe UI',Roboto,sans-serif;color:#18181b;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 16px;">
@@ -74,33 +75,33 @@ function htmlBody(p: SendAuditEmailParams, reportUrl: string): string {
         <tr><td style="padding:24px 32px 0;">
           <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#047857;">Your audit is ready</p>
           <h1 style="margin:0;font-size:28px;line-height:1.15;letter-spacing:-0.02em;font-weight:600;color:#18181b;">
-            Hi ${escapeHtml(p.firstName)} — here&rsquo;s what we found at ${escapeHtml(p.gymName)}.
+            Hi ${escapeHtml(p.firstName)}, here is what we found at ${escapeHtml(p.gymName)}.
           </h1>
         </td></tr>
         <tr><td style="padding:24px 32px 0;">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:separate;border-spacing:0 0;border:1px solid #e4e4e7;border-radius:12px;overflow:hidden;">
             <tr>
               <td style="padding:18px 20px;border-bottom:1px solid #e4e4e7;">
-                <div style="font-size:12px;color:#71717a;">Monthly revenue at risk</div>
-                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${gbp(r.revenue.monthlyRevenueAtRisk)}</div>
+                <div style="font-size:12px;color:#71717a;">Money on the table, a month</div>
+                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${gbp(i ? i.money.totalMonthly : r.revenue.monthlyRevenueAtRisk)} <span style="font-size:14px;color:#71717a;font-weight:400;">${i ? gbp(i.money.totalAnnual) + ' a year' : ''}</span></div>
               </td>
             </tr>
             <tr>
               <td style="padding:18px 20px;border-bottom:1px solid #e4e4e7;">
-                <div style="font-size:12px;color:#71717a;">Members in high-risk band</div>
-                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${r.risk.high.toLocaleString('en-GB')} <span style="font-size:14px;color:#71717a;font-weight:400;">of ${(r.totals.activeMembers + r.totals.frozenMembers + r.totals.sleeperMembers).toLocaleString('en-GB')} live members</span></div>
+                <div style="font-size:12px;color:#71717a;">Live members and monthly run rate</div>
+                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${(i ? i.membership.roster : r.totals.liveMembers).toLocaleString('en-GB')} <span style="font-size:14px;color:#71717a;font-weight:400;">${gbp(i ? i.membership.mrr : r.revenue.totalMonthlyRevenue)} a month</span></div>
               </td>
             </tr>
             <tr>
               <td style="padding:18px 20px;border-bottom:1px solid #e4e4e7;">
-                <div style="font-size:12px;color:#71717a;">Deep sleepers (21–45 days) — most savable</div>
-                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${r.sleepers.deep.toLocaleString('en-GB')}</div>
+                <div style="font-size:12px;color:#71717a;">Overdue members</div>
+                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${(i ? i.payments.overdueCount : r.payments.overdueCount).toLocaleString('en-GB')} <span style="font-size:14px;color:#71717a;font-weight:400;">${gbp(i ? i.payments.overdueMonthly : r.revenue.monthlyRevenueOverdue)} outstanding</span></div>
               </td>
             </tr>
             <tr>
               <td style="padding:18px 20px;">
-                <div style="font-size:12px;color:#71717a;">Payment overdue accounts</div>
-                <div style="font-size:24px;font-weight:600;color:#18181b;margin-top:4px;">${r.payments.overdueCount.toLocaleString('en-GB')} <span style="font-size:14px;color:#71717a;font-weight:400;">${gbp(r.revenue.monthlyRevenueOverdue)} outstanding</span></div>
+                <div style="font-size:12px;color:#71717a;">Biggest single item</div>
+                <div style="font-size:18px;font-weight:600;color:#18181b;margin-top:4px;">${escapeHtml(i && i.money.items[0] ? i.money.items[0].label : `${r.sleepers.deep} members 21 to 45 days since a visit`)}</div>
               </td>
             </tr>
           </table>
@@ -108,7 +109,7 @@ function htmlBody(p: SendAuditEmailParams, reportUrl: string): string {
         <tr><td style="padding:28px 32px 8px;">
           <a href="${escapeAttr(reportUrl)}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 22px;border-radius:10px;">Open my full audit &rarr;</a>
           <p style="margin:16px 0 0;font-size:13px;color:#52525b;">
-            Your private report includes the deep-sleeper list, payment recovery plan, new-member dropout cohort, and a ranked action plan with estimated revenue impact.
+            The report has the named lists: overdue by payment method, memberships ending unasked, members below current price, students past the age for their rate, who is drifting, and what to do this week in order.
           </p>
         </td></tr>
         <tr><td style="padding:24px 32px 32px;">
@@ -125,15 +126,15 @@ function htmlBody(p: SendAuditEmailParams, reportUrl: string): string {
 
 function textBody(p: SendAuditEmailParams, reportUrl: string): string {
   const r = p.report
+  const i = r.insights
   return [
     `Hi ${p.firstName},`,
     ``,
     `Here's what GymIQ found at ${p.gymName}:`,
     ``,
-    `• Monthly revenue at risk: ${gbp(r.revenue.monthlyRevenueAtRisk)}`,
-    `• High-risk members: ${r.risk.high}`,
-    `• Deep sleepers (21–45 days, most savable): ${r.sleepers.deep}`,
-    `• Payment overdue: ${r.payments.overdueCount} accounts (${gbp(r.revenue.monthlyRevenueOverdue)} outstanding)`,
+    `Money on the table: ${gbp(i ? i.money.totalMonthly : r.revenue.monthlyRevenueAtRisk)} a month`,
+    `Live members: ${(i ? i.membership.roster : r.totals.liveMembers)} billing ${gbp(i ? i.membership.mrr : r.revenue.totalMonthlyRevenue)} a month`,
+    `Overdue: ${(i ? i.payments.overdueCount : r.payments.overdueCount)} members, ${gbp(i ? i.payments.overdueMonthly : r.revenue.monthlyRevenueOverdue)} outstanding`,
     ``,
     `Open the full report: ${reportUrl}`,
     ``,

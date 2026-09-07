@@ -556,6 +556,8 @@ function Footer() {
           <a href="#day" className="hover:text-zinc-900">What it does</a>
           <Link href="/hoddesdon" className="hover:text-zinc-900">Hoddesdon</Link>
           <a href="#pricing" className="hover:text-zinc-900">Pricing</a>
+          <Link href="/privacy" className="hover:text-zinc-900">Privacy</Link>
+          <Link href="/terms" className="hover:text-zinc-900">Terms</Link>
           <Link href="/auth/login" className="hover:text-zinc-900">Sign in</Link>
         </nav>
       </div>

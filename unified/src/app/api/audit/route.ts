@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
     const firstName = (formData.get('firstName') as string | null)?.trim()
     const gymName = (formData.get('gymName') as string | null)?.trim()
     const email = (formData.get('email') as string | null)?.trim().toLowerCase()
+    const phone = (formData.get('phone') as string | null)?.trim() || null
+    const software = (formData.get('software') as string | null)?.trim() || null
+    const memberBand = (formData.get('members') as string | null)?.trim() || null
 
     if (!(file instanceof File)) {
       return badRequest('Missing file in upload.')
@@ -97,6 +100,15 @@ export async function POST(req: NextRequest) {
           email,
           first_name: firstName,
           gym_name: gymName,
+          phone: phone ?? undefined,
+          metadata: {
+            software,
+            members: memberBand,
+            rows: report.totals.rowsParsed,
+            mrr: report.insights?.membership.mrr ?? null,
+            money_on_table_monthly: report.insights?.money.totalMonthly ?? null,
+            overdue: report.insights?.membership.overdue ?? null,
+          },
           source: 'audit_form',
           stage: 'audit_completed',
           audit_id: reportId,

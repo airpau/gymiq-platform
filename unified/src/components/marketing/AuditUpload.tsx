@@ -13,7 +13,7 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-type FieldErrors = Partial<Record<'file' | 'firstName' | 'gymName' | 'email', string>>
+type FieldErrors = Partial<Record<'file' | 'firstName' | 'gymName' | 'email' | 'phone', string>>
 
 interface AuditUploadProps {
   /** "hero" sits in the hero block (compact). "section" is full-width with more breathing room. */
@@ -27,6 +27,9 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
   const [firstName, setFirstName] = useState('')
   const [gymName, setGymName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [software, setSoftware] = useState('')
+  const [members, setMembers] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -43,6 +46,9 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       email: email.trim().toLowerCase(),
       firstName: firstName.trim() || null,
       gymName: gymName.trim() || null,
+      phone: phone.trim() || null,
+      software: software || null,
+      members: members || null,
     })
     if (snapshot === lastLeadSnapshotRef.current) return
     lastLeadSnapshotRef.current = snapshot
@@ -56,6 +62,8 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
           email: email.trim().toLowerCase(),
           firstName: firstName.trim() || null,
           gymName: gymName.trim() || null,
+          phone: phone.trim() || null,
+          metadata: { software: software || null, members: members || null },
           source: 'audit_form',
           referrer: typeof document !== 'undefined' ? document.referrer || null : null,
         }),
@@ -65,7 +73,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       })
     }, 700)
     return () => clearTimeout(t)
-  }, [email, firstName, gymName])
+  }, [email, firstName, gymName, phone, software, members])
 
   function validateFile(f: File): string | null {
     const max = 20 * 1024 * 1024 // 20 MB
@@ -112,6 +120,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
     if (!firstName.trim()) next.firstName = 'Required'
     if (!gymName.trim()) next.gymName = 'Required'
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = 'Use a valid work email.'
+    if (phone.trim() && phone.replace(/\D/g, '').length < 10) next.phone = 'That number looks short.'
     setErrors(next)
     if (Object.keys(next).length) return
 
@@ -122,6 +131,9 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       fd.append('firstName', firstName.trim())
       fd.append('gymName', gymName.trim())
       fd.append('email', email.trim())
+      fd.append('phone', phone.trim())
+      fd.append('software', software)
+      fd.append('members', members)
 
       const res = await fetch('/api/audit', { method: 'POST', body: fd })
       if (!res.ok) {
@@ -173,13 +185,13 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
     >
       <div className="mb-5">
         <p className="text-xs font-medium uppercase tracking-wider text-emerald-700">
-          Free 60-second audit
+          Free membership file audit
         </p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl">
-          Upload your member export. Get the revenue you&apos;re bleeding.
+          Upload your Memberships export. See what is hiding in it.
         </h3>
         <p className="mt-1.5 text-sm text-zinc-500">
-          Drop a CSV from Glofox, Mindbody, ClubRight, or any spreadsheet. Private, takes ~60 seconds.
+          Overdue by payment method, memberships ending unasked, members below current price, students past the age for their rate, who is drifting. Glofox, ClubRight, Mindbody or any spreadsheet. About a minute.
         </p>
       </div>
 
@@ -212,7 +224,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
               <Upload className="h-5 w-5" />
             </div>
             <p className="text-sm font-medium text-zinc-900">
-              Drop your member export here
+              Drop your Memberships export here
               <span className="ml-1 font-normal text-zinc-500">or click to browse</span>
             </p>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
@@ -264,6 +276,50 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         error={errors.email}
         className="mt-3"
       />
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Field
+          id="audit-phone"
+          label="Mobile (for the walkthrough)"
+          type="tel"
+          value={phone}
+          onChange={setPhone}
+          autoComplete="tel"
+          error={errors.phone}
+        />
+        <div>
+          <label htmlFor="audit-software" className="block text-xs font-medium text-zinc-700">Gym software</label>
+          <select
+            id="audit-software"
+            value={software}
+            onChange={(e) => setSoftware(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-1"
+          >
+            <option value="">Choose</option>
+            <option value="glofox">Glofox</option>
+            <option value="clubright">ClubRight</option>
+            <option value="mindbody">Mindbody</option>
+            <option value="perfectgym">PerfectGym</option>
+            <option value="gymmaster">GymMaster</option>
+            <option value="other">Other or spreadsheet</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="audit-members" className="block text-xs font-medium text-zinc-700">Members</label>
+          <select
+            id="audit-members"
+            value={members}
+            onChange={(e) => setMembers(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-1"
+          >
+            <option value="">Choose</option>
+            <option value="under-300">Under 300</option>
+            <option value="300-800">300 to 800</option>
+            <option value="800-1500">800 to 1,500</option>
+            <option value="1500-3000">1,500 to 3,000</option>
+            <option value="3000+">Over 3,000</option>
+          </select>
+        </div>
+      </div>
 
       <button
         type="submit"
@@ -273,11 +329,11 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
         {submitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Running your audit...
+            Reading your file...
           </>
         ) : (
           <>
-            Run my free audit
+            Show me what is in it
             <ArrowRight className="h-4 w-4" />
           </>
         )}
@@ -291,7 +347,7 @@ export default function AuditUpload({ variant = 'hero' }: AuditUploadProps) {
       )}
 
       <p className="mt-4 text-xs text-zinc-500">
-        We never share your data. The audit runs locally on your file — we only keep aggregate stats and your contact details.
+        Your file is read once and not stored. The report is kept at a private link so you can come back to it. We will email it to you and may call about a walkthrough; no mailing lists. See the <a href="/privacy" className="underline">privacy policy</a>.
       </p>
     </form>
   )

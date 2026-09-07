@@ -26,6 +26,7 @@ import type {
   TenureBucket,
 } from '@/lib/services/audit-analysis'
 import ExpandableList from './ExpandableMemberList'
+import AuditInsightsView from './AuditInsightsView'
 
 interface Props {
   report: AuditReport
@@ -39,6 +40,20 @@ interface Props {
 }
 
 export default function AuditReportView({ report, gymName, firstName, createdAt, isPreview, auditId }: Props) {
+  // Reports produced from September 2026 carry the deep read; render that.
+  // Older stored reports fall through to the original layout.
+  if (report.insights) {
+    return (
+      <AuditInsightsView
+        insights={report.insights}
+        gymName={gymName}
+        firstName={firstName}
+        createdAt={createdAt}
+        isPreview={isPreview}
+        auditId={auditId}
+      />
+    )
+  }
   return (
     <div className="min-h-screen bg-white text-zinc-900 antialiased">
       <ReportNav />
@@ -765,7 +780,7 @@ function List({
     <ExpandableList
       title={title}
       subtitle={subtitle}
-      Icon={Icon}
+      icon={<Icon className="h-4 w-4 text-zinc-400" />}
       members={members}
       column={column}
       columnLabel={columnLabel}

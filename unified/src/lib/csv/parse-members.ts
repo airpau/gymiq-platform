@@ -27,6 +27,24 @@ export interface ParsedMember extends MemberInput {
   membershipType: string | null
   monthlyValue: number | null
   tenureDays: number | null
+  /** Raw status text from the export, e.g. ACTIVE, OVERDUE, PAUSED, EXPIRED. */
+  rawStatus: string | null
+  /** Plan name as exported (e.g. "12 Month Paid In Full"), separate from the membership name. */
+  planName: string | null
+  /** Payment method as exported: DIRECT_DEBIT, CARD, CASH, FLEXIBLE, or null. */
+  paymentType: string | null
+  /** Lifetime visits where the export carries them. */
+  totalVisits: number | null
+  dateOfBirth: Date | null
+  /** Membership end date where set: term ending or cancellation serving notice. */
+  endDate: Date | null
+  discountName: string | null
+  pausedFrom: Date | null
+  pausedTo: Date | null
+  /** Price as exported, before spreading annual upfront plans over 12 months. */
+  priceRaw: number | null
+  /** True when the plan is a 12 month paid in full or similar upfront product. */
+  isAnnualUpfront: boolean
   /**
    * True when something other than nextPayment indicates the member is in
    * arrears — e.g. an "Outstanding Balance" column, a "Payment Status" of
@@ -69,6 +87,14 @@ interface ColumnMap {
   joinDate: string | null
   membershipType: string | null
   monthlyValue: string | null
+  planName: string | null
+  paymentType: string | null
+  totalVisits: string | null
+  dateOfBirth: string | null
+  endDate: string | null
+  discountName: string | null
+  pausedFrom: string | null
+  pausedTo: string | null
 }
 
 const HEADER_PATTERNS: Record<keyof ColumnMap, RegExp[]> = {
@@ -95,16 +121,42 @@ const HEADER_PATTERNS: Record<keyof ColumnMap, RegExp[]> = {
     /\b(next[_\s-]?payment|payment[_\s-]?due|next[_\s-]?bill|next[_\s-]?billing)\b/i,
   ],
   joinDate: [
-    /^(join[_\s-]?date|joined|joined[_\s-]?on|start[_\s-]?date|member[_\s-]?since|sign[_\s-]?up[_\s-]?date|signup[_\s-]?date|date[_\s-]?joined|enrolled|enrolled[_\s-]?on|registered|registration[_\s-]?date|created[_\s-]?at|created[_\s-]?on|member[_\s-]?from)$/i,
+    /^(join[_\s-]?date|joined|joined[_\s-]?on|start[_\s-]?date|member[_\s-]?since|sign[_\s-]?up[_\s-]?date|signup[_\s-]?date|date[_\s-]?joined|enrolled|enrolled[_\s-]?on|registered|registration[_\s-]?date|created[_\s-]?at|created[_\s-]?on|member[_\s-]?from|commenced[_\s-]?at|commenced|commencement[_\s-]?date|local[_\s-]?commenced[_\s-]?at)$/i,
     /\b(join|enrolled|signup|sign[_\s-]?up|registered)[_\s-]?date\b/i,
     /\bmember[_\s-]?since\b/i,
   ],
   membershipType: [
-    /^(membership|membership[_\s-]?(type|name|plan)|plan|plan[_\s-]?name|tier|product|package|subscription|subscription[_\s-]?name|category)$/i,
-    /\b(membership|plan|subscription)\b/i,
+    /^(membership|membership[_\s-]?(type|name)|tier|product|package|subscription|subscription[_\s-]?name|category)$/i,
+    /\b(membership[_\s-]?(type|name)|subscription)\b/i,
   ],
+  planName: [
+    /^(plan|plan[_\s-]?name|membership[_\s-]?plan|price[_\s-]?plan|payment[_\s-]?plan)$/i,
+    /\bplan[_\s-]?name\b/i,
+  ],
+  paymentType: [
+    /^(payment[_\s-]?(type|method|mode)|pay[_\s-]?method|billing[_\s-]?method|method[_\s-]?of[_\s-]?payment|collection[_\s-]?method)$/i,
+    /\bpayment[_\s-]?(type|method)\b/i,
+  ],
+  totalVisits: [
+    /^(total[_\s-]?visits(?:[_\s-]?all[_\s-]?time)?(?:[_\s-]?\(?all[_\s-]?branches\)?)?|visits[_\s-]?all[_\s-]?time|lifetime[_\s-]?visits|total[_\s-]?check[_\s-]?ins|visits|attendances|total[_\s-]?attendance)$/i,
+    /\btotal[_\s-]?visits\b/i,
+  ],
+  dateOfBirth: [
+    /^(date[_\s-]?of[_\s-]?birth|dob|birth|birthday|birth[_\s-]?date|born)$/i,
+    /\b(date[_\s-]?of[_\s-]?birth|birth[_\s-]?date|dob)\b/i,
+  ],
+  endDate: [
+    /^(end[_\s-]?date|ended[_\s-]?at|ends|ends[_\s-]?on|expiry|expiry[_\s-]?date|expires|expires[_\s-]?on|expiration[_\s-]?date|cancellation[_\s-]?date|cancel(?:led)?[_\s-]?(?:on|date|at)|local[_\s-]?ended[_\s-]?at|membership[_\s-]?end|finish[_\s-]?date|termination[_\s-]?date)$/i,
+    /\b(end[_\s-]?date|ended[_\s-]?at|expiry[_\s-]?date)\b/i,
+  ],
+  discountName: [
+    /^(discount|discount[_\s-]?name|promo|promotion|promo[_\s-]?code|offer|voucher)$/i,
+    /\bdiscount[_\s-]?name\b/i,
+  ],
+  pausedFrom: [/^(paused[_\s-]?from|freeze[_\s-]?start|frozen[_\s-]?from|pause[_\s-]?start|hold[_\s-]?from)$/i],
+  pausedTo: [/^(paused[_\s-]?to|paused[_\s-]?until|freeze[_\s-]?end|frozen[_\s-]?until|pause[_\s-]?end|hold[_\s-]?until)$/i],
   monthlyValue: [
-    /^(monthly|monthly[_\s-]?(fee|value|price|amount|cost|charge|payment|due|rate|subscription)|recurring[_\s-]?(fee|amount|charge|price)|price|cost|amount|rate|fee|charge|membership[_\s-]?(price|cost|fee)|plan[_\s-]?price|subscription[_\s-]?(fee|price|cost)|total[_\s-]?price|standing[_\s-]?order)$/i,
+    /^(monthly|monthly[_\s-]?(fee|value|price|amount|cost|charge|payment|due|rate|subscription|equivalent)|recurring[_\s-]?(fee|amount|charge|price)|price|price[_\s-]?paid|cost|amount|rate|fee|charge|membership[_\s-]?(price|cost|fee)|plan[_\s-]?price|subscription[_\s-]?(fee|price|cost)|total[_\s-]?price|standing[_\s-]?order)$/i,
     /\b(price|amount|fee|cost|recurring|monthly)\b/i,
   ],
 }
@@ -113,6 +165,9 @@ const ACTIVE_STATUS_WORDS = ['active', 'current', 'open', 'paying', 'live', 'enr
 const CANCELLED_STATUS_WORDS = ['cancelled', 'canceled', 'terminated', 'expired', 'lapsed', 'churned', 'left', 'ended']
 const FROZEN_STATUS_WORDS = ['frozen', 'freeze', 'on hold', 'paused', 'suspended', 'hold']
 const SLEEPER_STATUS_WORDS = ['sleeper', 'inactive', 'dormant', 'lapsing']
+const OVERDUE_STATUS_WORDS = ['overdue', 'arrears', 'past due', 'unpaid', 'failed', 'declined']
+
+const ANNUAL_UPFRONT = /(12|twelve)\s*month[s]?\s*(paid\s*in\s*full|pif|upfront|up\s*front)|paid\s*in\s*full|\bpif\b|\bannual\b|\byearly\b|12\s*month\s*(single|one[-\s]?off)/i
 
 // Plan-name → monthly price patterns we look for inside membership-type values
 // when there is no dedicated price column. Examples we want to catch:
@@ -261,14 +316,30 @@ function mapColumns(headers: string[]): ColumnMap {
     joinDate: null,
     membershipType: null,
     monthlyValue: null,
+    planName: null,
+    paymentType: null,
+    totalVisits: null,
+    dateOfBirth: null,
+    endDate: null,
+    discountName: null,
+    pausedFrom: null,
+    pausedTo: null,
   }
-  for (const header of headers) {
-    if (!header) continue
-    for (const key of Object.keys(HEADER_PATTERNS) as (keyof ColumnMap)[]) {
-      if (map[key]) continue
-      if (HEADER_PATTERNS[key].some((re) => re.test(header))) {
-        map[key] = header
-        break
+  // Two passes: exact header matches first (the first pattern of each field),
+  // then the looser word matches. Otherwise "Payment Status" can be claimed as
+  // the status column before the real "Status" header is reached.
+  const taken = new Set<string>()
+  for (const pass of [0, 1] as const) {
+    for (const header of headers) {
+      if (!header || taken.has(header)) continue
+      for (const key of Object.keys(HEADER_PATTERNS) as (keyof ColumnMap)[]) {
+        if (map[key]) continue
+        const patterns = pass === 0 ? HEADER_PATTERNS[key].slice(0, 1) : HEADER_PATTERNS[key].slice(1)
+        if (patterns.some((re) => re.test(header))) {
+          map[key] = header
+          taken.add(header)
+          break
+        }
       }
     }
   }
@@ -380,7 +451,8 @@ function rowToMember(
   const externalId = pickString(cells, map.externalId)
   if (!fullName && !email && !externalId) return null
 
-  const status = normaliseStatus(pickString(cells, map.status))
+  const rawStatus = pickString(cells, map.status)
+  const status = normaliseStatus(rawStatus)
   const lastVisit = parseFlexibleDate(cells[map.lastVisit ?? ''])
   const nextPayment = parseFlexibleDate(cells[map.nextPayment ?? ''])
   const joinDate = parseFlexibleDate(cells[map.joinDate ?? ''])
@@ -389,11 +461,30 @@ function rowToMember(
 
   // Membership type and monthly value — try the dedicated price column first,
   // then fall back to extracting a price from the plan-name text.
-  const membershipType = pickString(cells, map.membershipType)
-  let monthlyValue = parseMonthly(cells[map.monthlyValue ?? ''])
+  const membershipType = pickString(cells, map.membershipType) ?? pickString(cells, map.planName)
+  const planName = pickString(cells, map.planName)
+  const priceRaw = parseMonthly(cells[map.monthlyValue ?? ''])
+  let monthlyValue = priceRaw
   if (monthlyValue === null && membershipType) {
     monthlyValue = extractPriceFromText(membershipType)
   }
+  // Annual upfront plans export the ANNUAL price. Spread it over 12 so every
+  // money figure in the audit is a monthly run rate.
+  const isAnnualUpfront = ANNUAL_UPFRONT.test(`${planName ?? ''} ${membershipType ?? ''}`)
+  if (isAnnualUpfront && monthlyValue !== null && monthlyValue > 120) {
+    monthlyValue = Math.round((monthlyValue / 12) * 100) / 100
+  }
+  const paymentType = normalisePaymentType(pickString(cells, map.paymentType))
+  const totalVisitsRaw = cells[map.totalVisits ?? '']
+  const totalVisits =
+    totalVisitsRaw === null || totalVisitsRaw === undefined || totalVisitsRaw === ''
+      ? null
+      : parseInt30d(totalVisitsRaw)
+  const dateOfBirth = parseFlexibleDate(cells[map.dateOfBirth ?? ''])
+  const endDate = parseFlexibleDate(cells[map.endDate ?? ''])
+  const discountName = pickString(cells, map.discountName)
+  const pausedFrom = parseFlexibleDate(cells[map.pausedFrom ?? ''])
+  const pausedTo = parseFlexibleDate(cells[map.pausedTo ?? ''])
 
   const tenureDays = joinDate
     ? Math.floor((now.getTime() - joinDate.getTime()) / 86_400_000)
@@ -417,8 +508,30 @@ function rowToMember(
     membershipType,
     monthlyValue,
     tenureDays,
-    paymentFailed,
+    rawStatus,
+    planName,
+    paymentType,
+    totalVisits,
+    dateOfBirth,
+    endDate,
+    discountName,
+    pausedFrom,
+    pausedTo,
+    priceRaw,
+    isAnnualUpfront,
+    paymentFailed: paymentFailed || status === 'overdue',
   }
+}
+
+function normalisePaymentType(raw: string | null): string | null {
+  if (!raw) return null
+  const l = raw.toLowerCase()
+  if (/direct|debit|\bdd\b|gocardless|mandate|bacs|sepa/.test(l)) return 'DIRECT_DEBIT'
+  if (/card|stripe|visa|mastercard|amex/.test(l)) return 'CARD'
+  if (/cash/.test(l)) return 'CASH'
+  if (/flex|none|manual|invoice|bank\s*transfer|other/.test(l)) return 'FLEXIBLE'
+  if (/comp|free/.test(l)) return 'COMPLIMENTARY'
+  return raw.toUpperCase().replace(/\s+/g, '_')
 }
 
 function detectPaymentFailure(
@@ -476,6 +589,7 @@ function joinName(first: string | null, last: string | null): string | null {
 function normaliseStatus(raw: string | null): string {
   if (!raw) return 'active'
   const lower = raw.toLowerCase()
+  if (OVERDUE_STATUS_WORDS.some((w) => lower.includes(w))) return 'overdue'
   if (CANCELLED_STATUS_WORDS.some((w) => lower.includes(w))) return 'cancelled'
   if (FROZEN_STATUS_WORDS.some((w) => lower.includes(w))) return 'frozen'
   if (SLEEPER_STATUS_WORDS.some((w) => lower.includes(w))) return 'sleeper'
@@ -584,6 +698,14 @@ function emptyResult(warnings: string[] = []): ParseResult {
         joinDate: null,
         membershipType: null,
         monthlyValue: null,
+        planName: null,
+        paymentType: null,
+        totalVisits: null,
+        dateOfBirth: null,
+        endDate: null,
+        discountName: null,
+        pausedFrom: null,
+        pausedTo: null,
       },
       pricingSource: 'estimate',
       paymentStatusColumn: null,
