@@ -107,7 +107,7 @@ export default function HoddesdonPage() {
 TOP 3
 1. Retention is good. 7 leavers this month against 19 over the same six days of August, and the roster has GROWN six days running, 1,611 to 1,617.
 2. Selling is the problem. Joins project 77 against a 100 target and the 95 gate. 20 joins in six days.
-3. HSBC connection dead 5 days. About £9,195 of Friday 4 September money unverified. Only you can clear it.
+3. Overdue is 58, down from 76 on 10 August. 22 on Direct Debit, 28 on card, 8 flexible. The card book is where the failures live.
 
 SALES 1 to 6 Sep: submitted £30,069.78, successful £26,413.94, pending £7,198.20, failed £2,035.31. Collection rate 87.84 pct, failure rate 6.77 pct, the best of the month.
 
