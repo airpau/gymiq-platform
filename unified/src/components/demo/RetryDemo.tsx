@@ -77,7 +77,7 @@ export default function RetryDemo() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-slate">Retries run unattended Monday, Wednesday and Friday. Anything that needs a message or a cancellation is drafted and put in front of a person, never sent on its own. This routine took Hoddesdon&apos;s failed book from about 10% to 3.6%.</p>
+      <p className="text-sm text-slate">Retries run unattended Monday, Wednesday and Friday. Anything that needs a message or a cancellation is drafted and put in front of a person, never sent on its own. This routine took the Hertfordshire club&apos;s failed book from about 10% to 3.6%.</p>
     </div>
   )
 }

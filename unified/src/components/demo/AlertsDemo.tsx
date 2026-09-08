@@ -36,7 +36,7 @@ const MESSAGES: Record<Role, Record<'morning' | 'alert' | 'evening', string>> = 
 
 const CHANNELS: Array<{ key: Channel; label: string; note: string }> = [
   { key: 'whatsapp', label: 'WhatsApp', note: 'One to one to named staff. Group posting is not offered by the official API, so groups use Telegram.' },
-  { key: 'telegram', label: 'Telegram', note: 'Owner and staff group. Reply to any message and get an answer. Where Hoddesdon runs.' },
+  { key: 'telegram', label: 'Telegram', note: 'Owner and staff group. Reply to any message and get an answer. Where the Hertfordshire club runs.' },
   { key: 'email', label: 'Email', note: 'The full brief with the workings, and the monthly review pack.' },
   { key: 'sms', label: 'SMS', note: 'Alerts only, no full briefs. For a manager who does not use messaging apps.' },
 ]

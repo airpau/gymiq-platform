@@ -468,14 +468,14 @@ function Benchmarks({ i }: { i: AuditInsights }) {
   const senseClass: Record<Sense, string> = { good: 'text-moss', mid: 'text-amber', bad: 'text-signal', na: 'text-slate' }
   return (
     <section>
-      <H2 eyebrow="Benchmarks" title="Against a live club and the industry." sub="Hoddesdon is énergie Fitness Hoddesdon, a 1,600 member franchise club running gymIQ since July 2026. Every figure is from its own data." />
+      <H2 eyebrow="Benchmarks" title="Against a live club and the industry." sub="The live club is an énergie Fitness franchise in Hertfordshire with 1,600 members, running gymIQ since July 2026. Every figure is from its own data." />
       <div className="mt-6 overflow-x-auto rounded-2xl border border-mist">
         <table className="min-w-full divide-y divide-mist text-sm">
           <thead className="bg-paper-2 text-left text-xs uppercase tracking-wide text-slate">
             <tr>
               <th className="px-5 py-2.5 font-medium">Metric</th>
               <th className="px-5 py-2.5 font-medium">You</th>
-              <th className="px-5 py-2.5 font-medium">Hoddesdon</th>
+              <th className="px-5 py-2.5 font-medium">Live club</th>
               <th className="px-5 py-2.5 font-medium">Industry</th>
               <th className="px-5 py-2.5 font-medium">Read</th>
             </tr>
@@ -540,7 +540,7 @@ function Cta({ i, gymName, auditId }: { i: AuditInsights; gymName: string; audit
             Have gymIQ work these lists
           </Link>
         )}
-        <Link href="/hoddesdon" className="text-sm font-medium text-moss hover:text-moss">See the Hoddesdon numbers</Link>
+        <Link href="/case-study" className="text-sm font-medium text-moss hover:text-moss">See the live club&apos;s numbers</Link>
       </div>
     </section>
   )

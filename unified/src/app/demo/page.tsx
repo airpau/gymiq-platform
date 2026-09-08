@@ -163,7 +163,7 @@ export default function DemoPage() {
           <span>© {new Date().getFullYear()} GymIQ AI Ltd · demo club data is fictional</span>
           <nav className="flex gap-5">
             <Link href="/impact" className="hover:text-ink">What it made</Link>
-            <Link href="/hoddesdon" className="hover:text-ink">Hoddesdon</Link>
+            <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
           </nav>
         </div>

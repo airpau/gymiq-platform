@@ -30,7 +30,7 @@ export default function OpenGraphImage() {
           <div style={{ fontSize: 28, color: '#a7f3d0' }}>Reads your gym software. Morning brief, staff board, payment retries, Friday forecast.</div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, color: '#d4d4d8' }}>
-          <span>Built by a gym owner. Live at énergie Fitness Hoddesdon.</span>
+          <span>Built by a gym owner. Live at an énergie Fitness club in Hertfordshire.</span>
           <span>£495 a month per club, review included</span>
         </div>
       </div>

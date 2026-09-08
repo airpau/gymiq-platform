@@ -76,7 +76,7 @@ export default function RetentionDemo() {
         </table>
       </div>
       <p className="text-sm text-slate">
-        Notice Dev and Harry: a flat rule calls them dormant and a call would likely prompt a cancellation. Notice Ben, Emma and Jack: under a flat rule they are fine, and by the time they cross 30 days the habit is gone. The habit rule is what runs at Hoddesdon; the calls land on the board every morning.
+        Notice Dev and Harry: a flat rule calls them dormant and a call would likely prompt a cancellation. Notice Ben, Emma and Jack: under a flat rule they are fine, and by the time they cross 30 days the habit is gone. The habit rule is what runs at the Hertfordshire club; the calls land on the board every morning.
       </p>
     </div>
   )

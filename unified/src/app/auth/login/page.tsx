@@ -50,7 +50,7 @@ export default function LoginPage() {
             The brief is already on your phone. This is where the board, the lists and the settings live.
           </p>
           <div className="mt-8 rounded-2xl bg-ink p-5 font-mono text-[12px] leading-relaxed text-paper/80">
-            <p className="text-paper/50">06:00 · Hoddesdon</p>
+            <p className="text-paper/50">06:00 · the club</p>
             <p className="mt-2 text-lime">£26,414 collected MTD · 1,472 active paying</p>
             <p className="mt-2">1. Retention is good. 7 leavers against 19 this time last month.</p>
             <p>2. Selling is the problem. Joins project 77 against 100.</p>

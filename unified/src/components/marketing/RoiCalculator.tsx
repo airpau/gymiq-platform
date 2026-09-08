@@ -3,7 +3,7 @@
 /**
  * What gymIQ is worth to a club, from four numbers the owner knows.
  *
- * Every rate is the conservative one from Hoddesdon and is shown on the page,
+ * Every rate is the conservative one from the Hertfordshire club and is shown on the page,
  * so the sum can be argued with line by line rather than taken on trust.
  */
 import { useMemo, useState } from 'react'
@@ -27,7 +27,7 @@ export default function RoiCalculator({ pricePerMonth }: Props) {
     // Retention: one point of monthly attrition, each saved member worth 7.55 months.
     const retentionMembers = Math.min(1, Math.max(0, attrition - 3.5)) / 100 * members
     const retention = retentionMembers * arpu * 7.55 * 12
-    // Pricing: 1.5% of billing sits below list or on an outgrown rate at a typical club (Hoddesdon: 2.6%).
+    // Pricing: 1.5% of billing sits below list or on an outgrown rate at a typical club (the Hertfordshire club: 2.6%).
     const pricing = billed * 0.015 * 12
     // Renewals: 3% of members have a term ending each quarter; three in ten renew when asked.
     const renewals = members * 0.03 * 0.3 * arpu * 12
@@ -54,13 +54,13 @@ export default function RoiCalculator({ pricePerMonth }: Props) {
           <dl className="mt-6 divide-y divide-ink-3 border-t border-ink-3 text-sm">
             <Row k={`Failed payments brought to 4%`} v={gbp(r.collection)} sub={`on ${gbp(r.billed)} billed a month`} />
             <Row k="One point of attrition, members kept" v={gbp(r.retention)} sub={`${Math.round(r.retentionMembers)} members a month, 7.55 months each`} />
-            <Row k="Outgrown rates and legacy prices corrected" v={gbp(r.pricing)} sub="1.5% of billing; Hoddesdon found 2.6%" />
+            <Row k="Outgrown rates and legacy prices corrected" v={gbp(r.pricing)} sub="1.5% of billing; the Hertfordshire club found 2.6%" />
             <Row k="Renewals asked for instead of lapsing" v={gbp(r.renewals)} sub="3% of members a quarter, three in ten say yes" />
             <Row k="Reporting and chasing you stop doing" v={gbp(r.time)} sub="half a day a week at £25 an hour" />
           </dl>
         </div>
         <p className="mt-3 text-xs text-slate">
-          Rates are the conservative case from énergie Fitness Hoddesdon and are stated on each line. Nothing here counts capital decisions, which at Hoddesdon were worth more than everything above combined.
+          Rates are the conservative case from an énergie Fitness club in Hertfordshire and are stated on each line. Nothing here counts capital decisions, which at that club were worth more than everything above combined.
         </p>
       </div>
     </div>

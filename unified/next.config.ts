@@ -7,12 +7,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     // One canonical host. Vercel already sends the apex to www; this covers the
     // .co.uk domains and app.gymiq.ai so search engines see a single site.
-    return ['gymiq.co.uk', 'www.gymiq.co.uk', 'app.gymiq.ai'].map((host) => ({
-      source: '/:path*',
-      has: [{ type: 'host' as const, value: host }],
-      destination: `https://${CANONICAL_HOST}/:path*`,
-      permanent: true,
-    }))
+    return [
+      ...['gymiq.co.uk', 'www.gymiq.co.uk', 'app.gymiq.ai'].map((host) => ({
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: host }],
+        destination: `https://${CANONICAL_HOST}/:path*`,
+        permanent: true,
+      })),
+      // The case study used to live at /hoddesdon.
+      { source: '/hoddesdon', destination: '/case-study', permanent: true },
+    ]
   },
   async headers() {
     return [

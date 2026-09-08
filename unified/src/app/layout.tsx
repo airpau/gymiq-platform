@@ -27,7 +27,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
   description:
-    'gymIQ reads your gym management system and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
+    'gymIQ reads your gym management system and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at an énergie Fitness club in Hertfordshire.',
   metadataBase: new URL('https://www.gymiq.ai'),
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'gymIQ. The intelligence layer for your gym.',
     description:
-      'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Live at énergie Fitness Hoddesdon.',
+      'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Live at an énergie Fitness club in Hertfordshire.',
     url: 'https://www.gymiq.ai',
     siteName: 'gymIQ',
     type: 'website',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'gymIQ. The intelligence layer for your gym.',
     description:
-      'The morning brief that runs your gym. Built by a gym owner, live at énergie Fitness Hoddesdon.',
+      'The morning brief that runs your gym. Built by a gym owner, live at an énergie Fitness club in Hertfordshire.',
   },
 }
 

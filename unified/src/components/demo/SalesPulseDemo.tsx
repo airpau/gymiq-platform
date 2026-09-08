@@ -63,7 +63,7 @@ export default function SalesPulseDemo() {
         <p className="font-mono text-[11px] uppercase tracking-wider text-paper/50">Hourly pulse, to the owner&apos;s phone</p>
         <p className="mt-2 min-h-[48px] font-mono text-[12px] leading-relaxed text-paper/85">{alert ?? 'Quiet. Nothing fires while the day is on pace; you only hear about it when something has moved.'}</p>
       </div>
-      <p className="text-sm text-slate">This is how a price test at Hoddesdon was caught in five days rather than seven weeks: weekday sales at 1 against 8.4 expected, odds of about 1 in 450 on the club&apos;s own model, and the owner reverted before the weekend.</p>
+      <p className="text-sm text-slate">This is how a price test at the Hertfordshire club was caught in five days rather than seven weeks: weekday sales at 1 against 8.4 expected, odds of about 1 in 450 on the club&apos;s own model, and the owner reverted before the weekend.</p>
     </div>
   )
 }

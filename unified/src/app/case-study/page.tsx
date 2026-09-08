@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata = {
-  title: 'gymIQ at énergie Fitness Hoddesdon',
-  alternates: { canonical: '/hoddesdon' },
+  title: 'gymIQ at an énergie Fitness club in Hertfordshire',
+  alternates: { canonical: '/case-study' },
   description:
     'What gymIQ found in its first quarter at a 1,600 member franchise gym: collection, hidden money, retention and cash, with the workings.',
 }
@@ -21,7 +21,7 @@ const MONTHS = [
   { m: 'Aug', rate: 8.47, adjusted: 6.0 },
 ]
 
-export default function HoddesdonPage() {
+export default function CaseStudyPage() {
   return (
     <div className="min-h-screen bg-white text-ink antialiased">
       <header className="border-b border-mist bg-white/85 backdrop-blur">
@@ -37,11 +37,11 @@ export default function HoddesdonPage() {
           One club. Ninety days. Every number in the owner&apos;s pocket by 06:00.
         </h1>
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate">
-          How énergie Fitness Hoddesdon put an AI operating layer over its gym software, and what it found in the first quarter.
+          How an énergie Fitness club in Hertfordshire put an AI operating layer over its gym software, and what it found in the first quarter.
         </p>
 
         <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-2 border-t border-mist pt-5 text-sm text-slate sm:grid-cols-2">
-          <Meta k="Club" v="énergie Fitness Hoddesdon, Hertfordshire" />
+          <Meta k="Club" v="énergie Fitness franchise, Hertfordshire" />
           <Meta k="Size" v="1,617 on roster, 1,472 active paying" />
           <Meta k="Platform" v="Glofox" />
           <Meta k="Period" v="July to September 2026" />
@@ -52,7 +52,7 @@ export default function HoddesdonPage() {
           A 1,600 member club produces roughly £47,000 of billing a month, and none of it arrives cleanly. Direct Debits bounce, cards expire, members drift, and the software reports each piece in a different screen. The owner finds out at month end, from a spreadsheet, what had already gone wrong three weeks earlier.
         </P>
         <P>
-          At Hoddesdon the owner runs the club alongside other businesses. He needed to know three things every morning without logging in anywhere: what came in, who is leaving, and what to do about it today.
+          At this club the owner runs it alongside other businesses. He needed to know three things every morning without logging in anywhere: what came in, who is leaving, and what to do about it today.
         </P>
 
         <H2>What it found in the first quarter</H2>
@@ -102,7 +102,7 @@ export default function HoddesdonPage() {
 
         <H2>What the owner actually sees</H2>
         <P>The Sunday evening close, as it landed on the owner&apos;s phone on 6 September 2026.</P>
-        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink p-5 font-mono text-[13px] leading-relaxed text-paper/85">{`Hoddesdon evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
+        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink p-5 font-mono text-[13px] leading-relaxed text-paper/85">{`Evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
 
 TOP 3
 1. Retention is good. 7 leavers this month against 19 over the same six days of August, and the roster has GROWN six days running, 1,611 to 1,617.
@@ -118,13 +118,13 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
 
         <H2>What it took to run</H2>
         <P>
-          No new software for staff to learn. The club&apos;s gym software (Glofox, in Hoddesdon&apos;s case) stays exactly as it is. gymIQ reads it through the club&apos;s own login, keeps its own history, and writes to a one page task board the front desk opens on a tablet. Set up took an evening for the data connection and a week of tuning the brief to how the owner thinks.
+          No new software for staff to learn. The club&apos;s gym software (Glofox, in this club&apos;s case) stays exactly as it is. gymIQ reads it through the club&apos;s own login, keeps its own history, and writes to a one page task board the front desk opens on a tablet. Set up took an evening for the data connection and a week of tuning the brief to how the owner thinks.
         </P>
         <P>
           Three things to be honest about. The retention calls only work if someone makes them, so the board is capped at a list a small desk can clear in an hour and reports back who cleared what. The payout model is checked against the bank statements by hand each month until the direct bank connection is approved. And the first month is mostly gymIQ learning what &ldquo;normal&rdquo; looks like for your club, so the forecasts sharpen from month two.
         </P>
         <Note>
-          <strong>For énergie clubs specifically.</strong> The payout model, the Friday 80 per cent credit and the fourth working day reconciliation, the franchise fee and the software setup are the same as Hoddesdon&apos;s, so the cash forecasting works from day one without re-modelling. Each club connects its own Glofox login; nothing is shared between clubs.
+          <strong>For énergie clubs specifically.</strong> The payout model, the Friday 80 per cent credit and the fourth working day reconciliation, the franchise fee and the software setup are the same as this club&apos;s, so the cash forecasting works from day one without re-modelling. Each club connects its own Glofox login; nothing is shared between clubs.
         </Note>
 
         <div className="mt-14 rounded-2xl border border-mist bg-paper-2 p-7">
@@ -142,7 +142,7 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
             </a>
             <Link href="/impact" className="text-sm font-medium text-moss hover:text-moss-deep">What it made, line by line</Link>
           </div>
-          <p className="mt-4 text-sm text-slate">Paul Airey, owner, énergie Fitness Hoddesdon · {CONTACT}</p>
+          <p className="mt-4 text-sm text-slate">Paul Airey, énergie Fitness franchisee, Hertfordshire · {CONTACT}</p>
         </div>
       </main>
     </div>
@@ -213,7 +213,7 @@ function Chart() {
   const scale = 21 // px per percentage point
   return (
     <figure className="mt-6">
-      <svg viewBox="0 0 720 300" className="block h-auto w-full" role="img" aria-label="Monthly attrition at Hoddesdon, February to August 2026. July at 3.65 percent is the lowest on record.">
+      <svg viewBox="0 0 720 300" className="block h-auto w-full" role="img" aria-label="Monthly attrition at the club, February to August 2026. July at 3.65 percent is the lowest on record.">
         {[10, 7.5, 5, 2.5].map((v) => (
           <g key={v}>
             <line x1="60" y1={base - v * scale} x2="700" y2={base - v * scale} stroke="#E4E4E7" strokeWidth="1" />

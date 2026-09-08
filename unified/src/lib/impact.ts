@@ -1,5 +1,5 @@
 /**
- * What gymIQ has made and saved at énergie Fitness Hoddesdon.
+ * What gymIQ has made and saved at an énergie Fitness club in Hertfordshire.
  *
  * Every line carries its basis. "measured" means the figure is read from the
  * club's own records (gymIQ tables, Glofox, bank statements, quotes). "estimated"
@@ -33,12 +33,12 @@ export interface ImpactLine {
 }
 
 export const CLUB = {
-  name: 'énergie Fitness Hoddesdon',
+  name: 'an énergie Fitness club in Hertfordshire',
   roster: 1617,
   activePaying: 1472,
   billedPerMonth: 50427,
   arpu: 30.74,
-  /** What a saved member is worth: months paid in year one at Hoddesdon. */
+  /** What a saved member is worth: months paid in year one at the Hertfordshire club. */
   monthsPaidYearOne: 7.55,
   since: 'July 2026',
 }

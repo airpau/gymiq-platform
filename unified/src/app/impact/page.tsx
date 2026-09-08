@@ -7,7 +7,7 @@ import { PRICE_PER_CLUB, WALKTHROUGH_HREF } from '@/lib/site'
 export const metadata = {
   title: 'What gymIQ has made at one club',
   description:
-    'A line by line account of what the intelligence layer has made and saved at énergie Fitness Hoddesdon, measured against the club’s own records, and a calculator for yours.',
+    'A line by line account of what the intelligence layer has made and saved at an énergie Fitness club in Hertfordshire, measured against the club’s own records, and a calculator for yours.',
   alternates: { canonical: '/impact' },
 }
 
@@ -137,7 +137,7 @@ export default function ImpactPage() {
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Your club</p>
             <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">Four numbers you already know.</h2>
-            <p className="mt-5 text-lg leading-relaxed text-slate">Move the sliders. The rates are Hoddesdon&apos;s conservative ones and every line says which.</p>
+            <p className="mt-5 text-lg leading-relaxed text-slate">Move the sliders. The rates are the Hertfordshire club&apos;s conservative ones and every line says which.</p>
           </div>
           <div className="mt-10">
             <RoiCalculator pricePerMonth={PRICE_PER_CLUB} />
@@ -166,7 +166,7 @@ export default function ImpactPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-xs text-slate sm:flex-row sm:items-center sm:px-8">
           <span>© {new Date().getFullYear()} GymIQ AI Ltd · figures from the club&apos;s own records, September 2026</span>
           <nav className="flex gap-5">
-            <Link href="/hoddesdon" className="hover:text-ink">Hoddesdon case study</Link>
+            <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
           </nav>

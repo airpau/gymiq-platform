@@ -7,7 +7,7 @@ import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF } from '@/lib/site'
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
   description:
-    'gymIQ reads your gym management system and runs the numbers a business analyst would: what came in, who is leaving, what is mispriced, what to do today. More sales, less waste, a written brief every morning and a review every month. Live at énergie Fitness Hoddesdon.',
+    'gymIQ reads your gym management system and runs the numbers a business analyst would: what came in, who is leaving, what is mispriced, what to do today. More sales, less waste, a written brief every morning and a review every month. Live at an énergie Fitness club in Hertfordshire.',
 }
 
 export default function LandingPage() {
@@ -47,7 +47,7 @@ function Nav() {
         <nav className="hidden items-center gap-7 text-sm text-slate md:flex">
           <Link href="/demo" className="transition hover:text-ink">Try the tools</Link>
           <Link href="/impact" className="transition hover:text-ink">What it made</Link>
-          <Link href="/hoddesdon" className="transition hover:text-ink">Hoddesdon</Link>
+          <Link href="/case-study" className="transition hover:text-ink">Case study</Link>
           <a href="#pricing" className="transition hover:text-ink">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ function Hero() {
       <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Built by a gym owner · live at énergie Fitness Hoddesdon</p>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Built by a gym owner · live at an énergie Fitness club in Hertfordshire</p>
             <h1 className="mt-5 font-display text-[44px] font-extrabold leading-[0.98] tracking-tight text-ink sm:text-6xl lg:text-[72px]">
               The intelligence layer for your gym.
             </h1>
@@ -135,7 +135,7 @@ function BriefPhone() {
             <span>06:00</span>
           </div>
           <p className="mt-4 font-display text-[15px] font-bold leading-snug text-paper">
-            Hoddesdon morning brief, Mon 7 Sep
+            Morning brief, Mon 7 Sep
           </p>
           <p className="mt-1 font-mono text-[12px] text-lime">£26,414 collected MTD · 1,472 active paying</p>
           <pre className="mt-4 whitespace-pre-wrap font-mono text-[12px] leading-[1.6] text-paper/85">{`TOP 3
@@ -186,7 +186,7 @@ function Proof() {
   return (
     <section className="bg-ink text-paper">
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/50">énergie Fitness Hoddesdon, 1,617 members, July to September 2026</p>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/50">An énergie Fitness club in Hertfordshire, 1,617 members, July to September 2026</p>
         <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label}>
@@ -198,7 +198,7 @@ function Proof() {
         </div>
         <p className="mt-10 max-w-3xl text-sm leading-relaxed text-paper/60">
           Every figure is from the club&apos;s own data and explained, bad months included, on the{' '}
-          <Link href="/hoddesdon" className="text-lime underline-offset-4 hover:underline">Hoddesdon page</Link>. The club now clears its non payers from the roster every month on purpose, which is why the numbers are real.
+          <Link href="/case-study" className="text-lime underline-offset-4 hover:underline">case study page</Link>. The club now clears its non payers from the roster every month on purpose, which is why the numbers are real.
         </p>
       </div>
     </section>
@@ -504,7 +504,7 @@ function Pricing() {
               <span className="text-base text-paper/60">a month, per club</span>
             </p>
             <p className="mt-3 text-[15px] text-paper/70">
-              On a 1,000 member club that is about 50p per member per month. Sixteen recovered payments, or two members kept for a year, covers it. Hoddesdon&apos;s first year came to £145,000 on a conservative count.
+              On a 1,000 member club that is about 50p per member per month. Sixteen recovered payments, or two members kept for a year, covers it. The Hertfordshire club&apos;s first year came to six figures on a conservative count.
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {included.map((f) => (
@@ -553,13 +553,13 @@ function Pricing() {
 function Faq() {
   const qs = [
     { q: 'Does it replace my gym software?', a: 'No. It reads your system and leaves it alone. Your team keeps working in it exactly as they do now; gymIQ tells them which member to open first.' },
-    { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. Hoddesdon runs on Glofox, so that connection is the most worn in.` },
+    { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. The Hertfordshire club runs on Glofox, so that connection is the most worn in.` },
     { q: 'Does it contact my members?', a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside your system’s own rules. Any messaging to members is switched on per club, by you, in writing.' },
     { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. And an hour on a call so the brief is written the way you think.' },
     { q: 'What happens on the monthly review?', a: 'Forty five minutes with us, on the phone or a call. What the system found, what your team acted on, what it was worth, and the one or two decisions for next month: a price, a plan, a supplier, a hire. You leave with a number for the month and a plan. As the product matures the review will become optional, but early clubs keep it at no extra cost.' },
     { q: 'Will it work if my front desk is part time?', a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.' },
-    { q: 'Is the retention result real?', a: 'July at Hoddesdon was the lowest attrition month on record. August was higher because the club now clears members who have stopped paying from the roster every month, on purpose, and those show up as leavers. Both months are on the Hoddesdon page with the workings.' },
-    { q: 'Who is behind it?', a: 'Paul Airey, who owns and runs énergie Fitness Hoddesdon, a 1,600 member club in Hertfordshire. gymIQ was built to run that club first. You are talking to the person who uses it every day.' },
+    { q: 'Is the retention result real?', a: 'July at the Hertfordshire club was the lowest attrition month on record. August was higher because the club now clears members who have stopped paying from the roster every month, on purpose, and those show up as leavers. Both months are on the case study page with the workings.' },
+    { q: 'Who is behind it?', a: 'Paul Airey, who owns and runs an énergie Fitness club in Hertfordshire with 1,600 members. gymIQ was built to run that club first. You are talking to the person who uses it every day.' },
   ]
   return (
     <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
@@ -643,7 +643,7 @@ function Footer() {
         <p className="text-xs text-slate">© {new Date().getFullYear()} GymIQ AI Ltd · Made in Hertfordshire · {CONTACT}</p>
         <nav className="flex items-center gap-5 text-xs text-slate">
           <a href="#day" className="hover:text-ink">What it does</a>
-          <Link href="/hoddesdon" className="hover:text-ink">Hoddesdon</Link>
+          <Link href="/case-study" className="hover:text-ink">Case study</Link>
           <a href="#pricing" className="hover:text-ink">Pricing</a>
           <Link href="/privacy" className="hover:text-ink">Privacy</Link>
           <Link href="/terms" className="hover:text-ink">Terms</Link>
