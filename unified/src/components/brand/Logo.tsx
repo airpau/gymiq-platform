@@ -1,21 +1,20 @@
 import Link from 'next/link'
 
 /**
- * The gymIQ mark: a speech bubble (the brief, on your phone) holding three
- * rising bars (the numbers). Wordmark set in the display face with "IQ" in
- * moss on paper, lime on ink. One source for every header, the favicon and
- * the share image.
+ * The gymIQ mark ("signal"): a line that rises, and the point it found.
+ * Wordmark set in the display face with "IQ" in moss on paper, lime on ink.
+ * One source for every header, the favicon, the share image and the social
+ * profile assets (scripts/brand-assets).
  */
 export function LogoMark({ size = 28, onDark = false, className = '' }: { size?: number; onDark?: boolean; className?: string }) {
-  const bubble = onDark ? '#C9F27A' : '#0F6E63'
-  const bar = onDark ? '#0F1614' : '#C9F27A'
-  const tall = onDark ? '#0F6E63' : '#F6F6F2'
+  const tile = onDark ? '#C9F27A' : '#0F6E63'
+  const line = onDark ? '#0F1614' : '#C9F27A'
+  const dot = onDark ? '#0F6E63' : '#F6F6F2'
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" className={className}>
-      <path d="M8 6h24a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H18l-7 6v-6H8a5 5 0 0 1-5-5V11a5 5 0 0 1 5-5z" fill={bubble} />
-      <rect x="11" y="18" width="4" height="8" rx="1.5" fill={bar} />
-      <rect x="18" y="14" width="4" height="12" rx="1.5" fill={bar} />
-      <rect x="25" y="9" width="4" height="17" rx="1.5" fill={tall} />
+      <rect width="40" height="40" rx="10" fill={tile} />
+      <path d="M8 28h6l4-8 4 5 5-11" fill="none" stroke={line} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="31" cy="11" r="3.2" fill={dot} />
     </svg>
   )
 }

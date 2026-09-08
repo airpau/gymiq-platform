@@ -23,10 +23,9 @@ export default function OpenGraphImage() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: 40, fontWeight: 800, letterSpacing: -1.5 }}>
           <svg width="56" height="56" viewBox="0 0 40 40">
-            <path d="M8 6h24a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H18l-7 6v-6H8a5 5 0 0 1-5-5V11a5 5 0 0 1 5-5z" fill="#C9F27A" />
-            <rect x="11" y="18" width="4" height="8" rx="1.5" fill="#0F1614" />
-            <rect x="18" y="14" width="4" height="12" rx="1.5" fill="#0F1614" />
-            <rect x="25" y="9" width="4" height="17" rx="1.5" fill="#0F6E63" />
+            <rect width="40" height="40" rx="10" fill="#C9F27A" />
+            <path d="M8 28h6l4-8 4 5 5-11" fill="none" stroke="#0F1614" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="31" cy="11" r="3.2" fill="#0F6E63" />
           </svg>
           <div style={{ display: 'flex' }}>gym<span style={{ color: '#C9F27A' }}>IQ</span></div>
         </div>
