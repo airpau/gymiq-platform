@@ -27,7 +27,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
   description:
-    'gymIQ reads your gym management system and your bank feed, and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
+    'gymIQ reads your gym management system and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at énergie Fitness Hoddesdon.',
   metadataBase: new URL('https://www.gymiq.ai'),
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
@@ -71,7 +71,7 @@ const jsonLd = {
       operatingSystem: 'Web',
       url: 'https://www.gymiq.ai',
       description:
-        'The intelligence layer for gyms: reads the club’s management system and bank feed and delivers a written morning brief, a staff task board, payment retries, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
+        'The intelligence layer for gyms: reads the club’s management system and delivers a written morning brief, a staff task board, payment retries, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
       offers: { '@type': 'Offer', price: '495', priceCurrency: 'GBP', description: 'Per club, per month, monthly business review included. No setup fee.' },
       provider: { '@id': 'https://www.gymiq.ai/#org' },
     },

@@ -37,13 +37,13 @@ export default function HoddesdonPage() {
           One club. Ninety days. Every number in the owner&apos;s pocket by 06:00.
         </h1>
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate">
-          How énergie Fitness Hoddesdon put an AI operating layer over its gym software and its bank feed, and what it found in the first quarter.
+          How énergie Fitness Hoddesdon put an AI operating layer over its gym software, and what it found in the first quarter.
         </p>
 
         <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-2 border-t border-mist pt-5 text-sm text-slate sm:grid-cols-2">
           <Meta k="Club" v="énergie Fitness Hoddesdon, Hertfordshire" />
           <Meta k="Size" v="1,617 on roster, 1,472 active paying" />
-          <Meta k="Platform" v="Glofox, HSBC via open banking" />
+          <Meta k="Platform" v="Glofox" />
           <Meta k="Period" v="July to September 2026" />
         </dl>
 
@@ -121,7 +121,7 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
           No new software for staff to learn. The club&apos;s gym software (Glofox, in Hoddesdon&apos;s case) stays exactly as it is. gymIQ reads it through the club&apos;s own login, keeps its own history, and writes to a one page task board the front desk opens on a tablet. Set up took an evening for the data connection and a week of tuning the brief to how the owner thinks.
         </P>
         <P>
-          Three things to be honest about. The retention calls only work if someone makes them, so the board is capped at a list a small desk can clear in an hour and reports back who cleared what. The bank feed relies on a 90 day open banking consent that the owner has to renew. And the first month is mostly gymIQ learning what &ldquo;normal&rdquo; looks like for your club, so the forecasts sharpen from month two.
+          Three things to be honest about. The retention calls only work if someone makes them, so the board is capped at a list a small desk can clear in an hour and reports back who cleared what. The payout model is checked against the bank statements by hand each month until the direct bank connection is approved. And the first month is mostly gymIQ learning what &ldquo;normal&rdquo; looks like for your club, so the forecasts sharpen from month two.
         </P>
         <Note>
           <strong>For énergie clubs specifically.</strong> The payout model, the Friday 80 per cent credit and the fourth working day reconciliation, the franchise fee and the software setup are the same as Hoddesdon&apos;s, so the cash forecasting works from day one without re-modelling. Each club connects its own Glofox login; nothing is shared between clubs.

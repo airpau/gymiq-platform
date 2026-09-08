@@ -7,7 +7,7 @@ import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF } from '@/lib/site'
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
   description:
-    'gymIQ reads your gym management system and your bank feed and runs the numbers a business analyst would: what came in, who is leaving, what is mispriced, what to do today. More sales, less waste, a written brief every morning and a review every month. Live at énergie Fitness Hoddesdon.',
+    'gymIQ reads your gym management system and runs the numbers a business analyst would: what came in, who is leaving, what is mispriced, what to do today. More sales, less waste, a written brief every morning and a review every month. Live at énergie Fitness Hoddesdon.',
 }
 
 export default function LandingPage() {
@@ -91,7 +91,7 @@ function Hero() {
               The intelligence layer for your gym.
             </h1>
             <p className="mt-7 max-w-xl text-xl leading-relaxed text-slate">
-              gymIQ reads your gym software and your bank feed and does the job of a business analyst: what came in, who is leaving, what is mispriced, what the desk should do today, what Friday will pay. A written brief every morning, a board your staff can clear, and a review with us every month so it is always paying for itself.
+              gymIQ reads your gym software and does the job of a business analyst: what came in, who is leaving, what is mispriced, what the desk should do today, what Friday will pay. A written brief every morning, a board your staff can clear, and a review with us every month so it is always paying for itself.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <a
@@ -337,7 +337,7 @@ function Replaces() {
     { what: 'A lead follow up tool', cost: '£100 to £300 a month', does: 'Every enquiry answered inside the hour, tours confirmed, no shows chased, the scoreboard on the wall. Part of the daily board.' },
     { what: 'A member export and reporting add on', cost: '£50 to £200 a month', does: 'The roster, member by member, every day, with history. Not a spreadsheet emailed twice a day.' },
     { what: 'Arrears chasing by hand', cost: 'half a day a week of a manager', does: 'Retries that can clear, run unattended three times a week. Everyone else routed to a named action on the board.' },
-    { what: 'The cash flow spreadsheet', cost: 'an evening a week of the owner', does: 'Friday credits forecast with a range, reconciled against the bank feed to the pound.' },
+    { what: 'The cash flow spreadsheet', cost: 'an evening a week of the owner', does: 'Friday credits forecast with a range, and checked against the statements at the monthly review.' },
   ]
   return (
     <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
@@ -410,7 +410,7 @@ function WhatItFinds() {
     { what: 'The payment method that is costing you', found: 'Card payers failed at 2.4 times the Direct Debit rate. One migration campaign, no capital.', worth: 'about £530 a month' },
     { what: 'Prices nobody authorised', found: 'A membership plan sold four times at a price the owner never launched. Flagged the day it was found.', worth: 'found' },
     { what: 'A price test that was quietly failing', found: 'A new joiner rate trial caught in five days when weekday sales fell to 1 against 8.4 expected. Reverted at a cost of six joins instead of a month’s worth.', worth: 'a month of joins' },
-    { what: 'What Friday will actually pay', found: 'Payout forecasts with a stated range, reconciled against the bank feed. The banked model checked out within 0.4% of the statements.', worth: 'no surprises' },
+    { what: 'What Friday will actually pay', found: 'Payout forecasts with a stated range. The banked model checked out within 0.4% of six months of statements.', worth: 'no surprises' },
   ]
   return (
     <section id="found" className="bg-paper-2">
@@ -445,7 +445,7 @@ function WhatItFinds() {
 function Connect() {
   const steps = [
     { n: '1', title: 'Your club, your login', body: `Each club connects its own login to its gym software (${SYSTEMS}). gymIQ reads the memberships, sales and failed payment reports the way you would, and writes nothing back. Groups connect one club at a time; nothing is shared between clubs.` },
-    { n: '2', title: 'Bank feed, optional', body: 'Connect the club account through open banking and the payout is reconciled against what actually landed. The consent renews every 90 days, and the brief tells you when.' },
+    { n: '2', title: 'Bank feed, coming soon', body: 'A direct connection to the club account, through a regulated open banking provider, is going through approval now. When it is live the Friday credit is reconciled against what actually landed, automatically. Until then the forecast is checked against your statements at the monthly review.' },
     { n: '3', title: 'A week of tuning', body: 'The first week is gymIQ learning what normal looks like for your club: your seasonality, your payout pattern, your plan names. Forecasts sharpen from month two.' },
     { n: '4', title: 'Nothing for staff to learn', body: 'Your software stays exactly as it is. The board is one page on a tablet at the desk, opened with a PIN. Ticks are recorded to whoever made them.' },
   ]
@@ -480,7 +480,7 @@ function Pricing() {
     'Staff task board with the daily money hour',
     'Failed payment retries and arrears triage, three runs a week',
     'Price, age and plan audits every month',
-    'Payout and month end forecasts, bank feed reconciled',
+    'Payout and month end forecasts, checked at the monthly review',
     'Reply to any brief and get an answer',
     'A 45 minute business review with us every month',
     'Set up, tuning and the first month’s audit included',
@@ -555,7 +555,7 @@ function Faq() {
     { q: 'Does it replace my gym software?', a: 'No. It reads your system and leaves it alone. Your team keeps working in it exactly as they do now; gymIQ tells them which member to open first.' },
     { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. Hoddesdon runs on Glofox, so that connection is the most worn in.` },
     { q: 'Does it contact my members?', a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside your system’s own rules. Any messaging to members is switched on per club, by you, in writing.' },
-    { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. Optionally an open banking connection to the club account for reconciliation. And an hour on a call so the brief is written the way you think.' },
+    { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. And an hour on a call so the brief is written the way you think.' },
     { q: 'What happens on the monthly review?', a: 'Forty five minutes with us, on the phone or a call. What the system found, what your team acted on, what it was worth, and the one or two decisions for next month: a price, a plan, a supplier, a hire. You leave with a number for the month and a plan. As the product matures the review will become optional, but early clubs keep it at no extra cost.' },
     { q: 'Will it work if my front desk is part time?', a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.' },
     { q: 'Is the retention result real?', a: 'July at Hoddesdon was the lowest attrition month on record. August was higher because the club now clears members who have stopped paying from the roster every month, on purpose, and those show up as leavers. Both months are on the Hoddesdon page with the workings.' },

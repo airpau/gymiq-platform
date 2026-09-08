@@ -128,7 +128,7 @@ export default function DemoPage() {
           id="cash"
           eyebrow="Friday forecast"
           title="What lands on Friday, to the pound, before it lands."
-          blurb="The club is paid 80% of what settled by Wednesday, on Friday, and the balance next month. gymIQ forecasts each credit with a range, reconciles it against the bank feed when it arrives, and on Wednesday afternoon warns what has not been retried yet. The banked model was verified within 0.4% against six months of statements."
+          blurb="The club is paid 80% of what settled by Wednesday, on Friday, and the balance next month. gymIQ forecasts each credit with a range and on Wednesday afternoon warns what has not been retried yet. The banked model was verified within 0.4% against six months of statements. Automatic reconciliation against a live bank feed is coming soon."
           tries={['Move the arrears slider and watch Friday move', 'Drop the pending clearance to 85%']}
         >
           <CashDemo />
