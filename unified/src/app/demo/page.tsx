@@ -67,9 +67,9 @@ export default function DemoPage() {
         <DemoFrame
           id="leads"
           eyebrow="Lead assistant"
-          title="Every enquiry answered in seconds, booked in a sentence."
-          blurb="A lead comes in from the website, a trial form or an abandoned online join. The assistant sends the first message within seconds, answers questions honestly from the club's own facts, and the moment the person names a day and a time of day, it books the trial, sends the calendar invite to the club inbox and tells the team. It never pretends to be a person, hands over the moment someone is unhappy, and honours STOP. After the visit, staff mark showed, no show or joined, and the right follow up goes out."
-          tries={['Create a lead, then reply "how much is it?"', 'Reply "tomorrow evening" or "Saturday about 10"', 'Reply "are you a bot?"', 'Reply "I want to speak to a manager"', 'After booking, mark Showed or No show']}
+          title="Every enquiry answered in seconds, booked when the lead says yes, and remembered."
+          blurb="A lead comes in from the website, a trial form or an abandoned online join. The assistant sends the first message within seconds and answers questions honestly from the club's own facts. When the person names a day and time it checks the club's real availability, offers the slot and asks for a yes before anything is written down. Say &quot;can I do 8am instead&quot; and it reads the stored booking, checks the new time and moves it once you confirm; the old slot is released and the team told. It remembers what you asked, what you told it, and every visit outcome, so it never books twice or contradicts what was agreed. It never pretends to be a person, hands over when someone is unhappy, and honours STOP."
+          tries={['Create a lead, then reply "tomorrow morning" and "yes"', 'Now reply "can I do 8am instead?" then "yes"', 'Try "tomorrow at 6pm" (that slot is full) or "5am" (closed)', 'Reply "I need to cancel, I hurt my knee" then "yes"', 'After booking, mark No show, then reply "sunday morning"']}
         >
           <LeadEngineDemo />
         </DemoFrame>
