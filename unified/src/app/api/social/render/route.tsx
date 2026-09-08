@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         {!photo && theme === 'ink' && (
           <div style={{ position: 'absolute', right: -220, top: -220, width: 640, height: 640, borderRadius: 640, background: 'rgba(15,110,99,0.55)', display: 'flex' }} />
         )}
-        <div style={{ position: 'absolute', top: pad, left: pad, display: 'flex', alignItems: 'center', gap: 14, fontSize: 26, letterSpacing: 3, textTransform: 'uppercase', color: photo || dark ? '#C9F27A' : '#0F6E63' }}>
+        <div style={{ position: 'absolute', top: pad, left: pad, display: 'flex', alignItems: 'center', gap: 14, fontSize: 24, letterSpacing: 3, textTransform: 'uppercase', color: photo || dark ? '#C9F27A' : '#0F6E63', background: photo ? 'rgba(15,22,20,0.72)' : 'transparent', padding: photo ? '10px 18px' : 0, borderRadius: 999 }}>
           {kicker}
         </div>
         <div style={{ position: 'absolute', left: pad, right: pad, bottom: pad + 96, display: 'flex', flexDirection: 'column', gap: 22 }}>
