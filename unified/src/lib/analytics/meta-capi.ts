@@ -6,8 +6,9 @@
  * NEXT_PUBLIC_META_PIXEL_ID and META_CAPI_TOKEN are set.
  */
 import { createHash } from 'crypto'
+import { META_PIXEL_ID } from '@/lib/site'
 
-const PIXEL = process.env.NEXT_PUBLIC_META_PIXEL_ID
+const PIXEL = META_PIXEL_ID
 const TOKEN = process.env.META_CAPI_TOKEN
 
 const sha256 = (v: string) => createHash('sha256').update(v.trim().toLowerCase()).digest('hex')
@@ -43,7 +44,7 @@ export async function sendMetaLead(params: {
         event_source_url: params.sourceUrl,
         action_source: 'website',
         user_data: userData,
-        custom_data: { currency: 'GBP', value: params.value ?? 395, content_name: 'membership_file_audit' },
+        custom_data: { currency: 'GBP', value: params.value ?? 495, content_name: 'membership_file_audit' },
       },
     ],
   }

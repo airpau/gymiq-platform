@@ -13,8 +13,9 @@
  * Conversions API when META_CAPI_TOKEN is set.
  */
 import Script from 'next/script'
+import { META_PIXEL_ID } from '@/lib/site'
 
-const PIXEL = process.env.NEXT_PUBLIC_META_PIXEL_ID
+const PIXEL = META_PIXEL_ID
 const ADS = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID
 
 declare global {
@@ -49,10 +50,10 @@ export default function AdTracking() {
 export function trackLead(params: { email?: string; gymName?: string; value?: number }) {
   try {
     if (typeof window === 'undefined') return
-    window.fbq?.('track', 'Lead', { content_name: 'membership_file_audit', value: params.value ?? 395, currency: 'GBP' })
+    window.fbq?.('track', 'Lead', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' })
     const label = process.env.NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL
     if (ADS && label) {
-      window.gtag?.('event', 'conversion', { send_to: `${ADS}/${label}`, value: params.value ?? 395, currency: 'GBP' })
+      window.gtag?.('event', 'conversion', { send_to: `${ADS}/${label}`, value: params.value ?? 495, currency: 'GBP' })
     }
     window.gtag?.('event', 'generate_lead', { method: 'audit', gym: params.gymName ?? '' })
   } catch {
