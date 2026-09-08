@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
-import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF } from '@/lib/site'
+import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
@@ -514,13 +514,21 @@ function Pricing() {
                 </li>
               ))}
             </ul>
-            <a
-              href={WALKTHROUGH_HREF}
-              className="mt-9 inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper"
-            >
-              Book a walkthrough
-              <ArrowRight className="h-4 w-4" />
-            </a>
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <a
+                href={START_HREF}
+                className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper"
+              >
+                Start at £{PRICE_PER_CLUB} a month
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href={WALKTHROUGH_HREF}
+                className="inline-flex items-center gap-2 rounded-full border border-paper/30 px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-paper/10"
+              >
+                Book a walkthrough first
+              </a>
+            </div>
           </div>
 
           <div className="flex flex-col rounded-3xl border border-ink-3 p-8 lg:col-span-2">
@@ -533,7 +541,7 @@ function Pricing() {
               énergie clubs: the Friday credit, the monthly reconciliation and the franchise fee are already modelled, so the cash forecast works from day one.
             </p>
             <a
-              href={`mailto:${CONTACT}?subject=gymIQ%20for%20a%20group`}
+              href="/book?intent=walkthrough"
               className="mt-auto inline-flex items-center gap-2 pt-8 text-base font-semibold text-lime"
             >
               Talk about a group
@@ -644,6 +652,7 @@ function Footer() {
         <nav className="flex items-center gap-5 text-xs text-slate">
           <a href="#day" className="hover:text-ink">What it does</a>
           <Link href="/case-study" className="hover:text-ink">Case study</Link>
+          <Link href="/book" className="hover:text-ink">Contact</Link>
           <a href="#pricing" className="hover:text-ink">Pricing</a>
           <Link href="/privacy" className="hover:text-ink">Privacy</Link>
           <Link href="/terms" className="hover:text-ink">Terms</Link>

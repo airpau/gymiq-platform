@@ -134,7 +134,7 @@ BIGGEST LEVER: £1,958.35 of September dated arrears across 48 members, worth ab
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <a
-              href={`mailto:${CONTACT}?subject=gymIQ%20walkthrough`}
+              href="/book"
               className="inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-2"
             >
               Book a walkthrough

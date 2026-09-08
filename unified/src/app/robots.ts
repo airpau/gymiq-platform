@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/case-study', '/impact', '/demo', '/privacy', '/terms'],
+        allow: ['/', '/case-study', '/impact', '/demo', '/book', '/privacy', '/terms'],
         // Private by design: individual audit reports, sign in, onboarding and the dashboard.
         disallow: ['/audit/', '/auth/', '/onboard/', '/api/', '/overview', '/members', '/retention', '/conversations', '/leads', '/settings', '/cancel-save'],
       },
