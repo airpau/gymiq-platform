@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Terms, gymIQ',
+  title: 'Terms',
   description: 'Terms for the free audit and the gymIQ subscription.',
   alternates: { canonical: '/terms' },
 }

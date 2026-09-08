@@ -25,19 +25,19 @@ const mono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'gymIQ. The intelligence layer for your gym.',
+  title: { default: 'gymIQ | AI gym management software for gym owners', template: '%s | gymIQ' },
   description:
-    'gymIQ reads your gym management system and puts what came in, who is leaving and what to do today on your phone by 06:00. Built by a gym owner, running live at an énergie Fitness club in Hertfordshire.',
+    'AI for gym owners. gymIQ reads the gym software you already use (Glofox, ClubRight, Mindbody, PerfectGym and more) and puts what came in, who is leaving, which payments to retry and what your staff should do today on your phone by 06:00. Built by a UK gym owner, live at an énergie Fitness club in Hertfordshire.',
   metadataBase: new URL('https://www.gymiq.ai'),
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
-  keywords: ['gym management', 'Glofox', 'ClubRight', 'Mindbody', 'PerfectGym', 'gym retention', 'failed payments gym', 'gym owner dashboard', 'gym cash forecast', 'énergie Fitness'],
+  keywords: ['AI gym management software', 'AI for gym owners', 'gym management AI', 'gym business intelligence', 'gym retention software', 'failed payments gym', 'gym owner dashboard', 'gym cash forecast', 'gym lead follow up', 'Glofox', 'ClubRight', 'Mindbody', 'PerfectGym', 'énergie Fitness'],
   authors: [{ name: 'Paul Airey' }],
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   openGraph: {
-    title: 'gymIQ. The intelligence layer for your gym.',
+    title: 'gymIQ | AI gym management software for gym owners',
     description:
-      'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Live at an énergie Fitness club in Hertfordshire.',
+      'Your gym’s numbers on your phone by 06:00, and a staff board your front desk can actually clear. Works with the gym software you already use. Live at an énergie Fitness club in Hertfordshire.',
     url: 'https://www.gymiq.ai',
     siteName: 'gymIQ',
     type: 'website',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'gymIQ. The intelligence layer for your gym.',
+    title: 'gymIQ | AI gym management software for gym owners',
     description:
       'The morning brief that runs your gym. Built by a gym owner, live at an énergie Fitness club in Hertfordshire.',
   },
@@ -67,11 +67,15 @@ const jsonLd = {
     {
       '@type': 'SoftwareApplication',
       name: 'gymIQ',
+      alternateName: 'gymIQ AI gym management software',
       applicationCategory: 'BusinessApplication',
+      applicationSubCategory: 'Gym management software',
       operatingSystem: 'Web',
       url: 'https://www.gymiq.ai',
       description:
-        'The intelligence layer for gyms: reads the club’s management system and delivers a written morning brief, a staff task board, payment retries, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
+        'AI gym management software for gym owners: reads the club’s existing management system and delivers a written morning brief, a staff task board, a retention radar, a failed payment routine, a lead assistant, a member assistant, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
+      featureList: ['Morning brief by 06:00', 'Staff task board with assignment', 'Retention radar measured against each member’s own habit', 'Failed payment routine', 'Lead assistant that books trials', 'Member assistant chatbot', 'Sales pulse alerts', 'Friday cash forecast', 'Monthly business review'],
+      audience: { '@type': 'BusinessAudience', audienceType: 'Gym owners, health club operators, boutique studios, personal trainers' },
       offers: { '@type': 'Offer', price: '295', priceCurrency: 'GBP', description: 'Per club, per month, monthly business review included. No setup fee.' },
       provider: { '@id': 'https://www.gymiq.ai/#org' },
     },

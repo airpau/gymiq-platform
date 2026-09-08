@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata = {
-  title: 'gymIQ at an énergie Fitness club in Hertfordshire',
+  title: 'Case study: AI running an énergie Fitness club in Hertfordshire',
   alternates: { canonical: '/case-study' },
   description:
     'What gymIQ found in its first quarter at a 1,600 member franchise gym: collection, hidden money, retention and cash, with the workings.',

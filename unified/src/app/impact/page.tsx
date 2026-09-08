@@ -5,7 +5,7 @@ import RoiCalculator from '@/components/marketing/RoiCalculator'
 import { PRICE_PER_CLUB, WALKTHROUGH_HREF } from '@/lib/site'
 
 export const metadata = {
-  title: 'What gymIQ has made at one club',
+  title: 'What AI has made at one gym, month by month',
   description:
     'A line by line account of what the intelligence layer has made and saved at an énergie Fitness club in Hertfordshire, measured against the club’s own records, and a calculator for yours.',
   alternates: { canonical: '/impact' },

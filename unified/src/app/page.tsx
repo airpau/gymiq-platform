@@ -3,6 +3,7 @@ import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
 import { PRICE_PER_CLUB, FOUNDING_PRICE, FOUNDING_SLOTS, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { FAQ, faqJsonLd } from '@/lib/faq'
 
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
@@ -560,18 +561,10 @@ function Pricing() {
 /* ------------------------------------------------------------------ */
 
 function Faq() {
-  const qs = [
-    { q: 'Does it replace my gym software?', a: 'No. It reads your system and leaves it alone. Your team keeps working in it exactly as they do now; gymIQ tells them which member to open first.' },
-    { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. The Hertfordshire club runs on Glofox, so that connection is the most worn in.` },
-    { q: 'Does it contact my members?', a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside your system’s own rules. Any messaging to members is switched on per club, by you, in writing.' },
-    { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. And an hour on a call so the brief is written the way you think.' },
-    { q: 'What happens on the monthly review?', a: 'Forty five minutes with us, on the phone or a call. What the system found, what your team acted on, what it was worth, and the one or two decisions for next month: a price, a plan, a supplier, a hire. You leave with a number for the month and a plan. As the product matures the review will become optional, but early clubs keep it at no extra cost.' },
-    { q: 'Will it work if my front desk is part time?', a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.' },
-    { q: 'Is the retention result real?', a: 'July at the Hertfordshire club was the lowest attrition month on record. August was higher because the club now clears members who have stopped paying from the roster every month, on purpose, and those show up as leavers. Both months are on the case study page with the workings.' },
-    { q: 'Who is behind it?', a: 'Paul Airey, who owns and runs an énergie Fitness club in Hertfordshire with 1,600 members. gymIQ was built to run that club first. You are talking to the person who uses it every day.' },
-  ]
+  const qs = FAQ
   return (
-    <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+    <section id="faq" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Straight answers</p>
         <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">The questions owners ask first.</h2>
@@ -652,6 +645,7 @@ function Footer() {
         <p className="text-xs text-slate">© {new Date().getFullYear()} GymIQ AI Ltd · Made in Hertfordshire · {CONTACT}</p>
         <nav className="flex items-center gap-5 text-xs text-slate">
           <a href="#day" className="hover:text-ink">What it does</a>
+          <Link href="/ai-gym-management-software" className="hover:text-ink">AI for gym owners</Link>
           <Link href="/case-study" className="hover:text-ink">Case study</Link>
           <Link href="/book" className="hover:text-ink">Contact</Link>
           <a href="#pricing" className="hover:text-ink">Pricing</a>

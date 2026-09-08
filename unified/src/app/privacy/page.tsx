@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Privacy policy, gymIQ',
+  title: 'Privacy policy',
   description: 'How gymIQ handles the data in a membership export, lead details, and analytics.',
   alternates: { canonical: '/privacy' },
 }

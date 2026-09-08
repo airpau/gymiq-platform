@@ -14,7 +14,7 @@ import { DemoStoreProvider } from '@/components/demo/DemoStore'
 import { WALKTHROUGH_HREF, FOUNDING_PRICE, FOUNDING_SLOTS } from '@/lib/site'
 
 export const metadata = {
-  title: 'Try every gymIQ tool',
+  title: 'Try every tool: live AI gym management demo',
   description:
     'Click through every tool in gymIQ: the lead assistant, the morning brief you can talk to, the staff board, the retention radar, the sales pulse, the payment routine, the Friday forecast, the alerts by role and channel, and the member assistant.',
   alternates: { canonical: '/demo' },
@@ -177,6 +177,7 @@ export default function DemoPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-xs text-slate sm:flex-row sm:items-center sm:px-8">
           <span>© {new Date().getFullYear()} GymIQ AI Ltd · demo club data is fictional</span>
           <nav className="flex gap-5">
+            <Link href="/ai-gym-management-software" className="hover:text-ink">AI for gym owners</Link>
             <Link href="/impact" className="hover:text-ink">What it made</Link>
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
