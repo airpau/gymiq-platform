@@ -9,7 +9,7 @@ import SalesPulseDemo from '@/components/demo/SalesPulseDemo'
 import RetryDemo from '@/components/demo/RetryDemo'
 import CashDemo from '@/components/demo/CashDemo'
 import AlertsDemo from '@/components/demo/AlertsDemo'
-import { WALKTHROUGH_HREF, PRICE_PER_CLUB } from '@/lib/site'
+import { WALKTHROUGH_HREF, FOUNDING_PRICE, FOUNDING_SLOTS } from '@/lib/site'
 
 export const metadata = {
   title: 'Try every gymIQ tool',
@@ -148,7 +148,7 @@ export default function DemoPage() {
       <section className="mt-16 bg-moss text-paper">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">All of it, on your club&apos;s real numbers, within a week.</h2>
-          <p className="mt-5 max-w-xl text-lg text-paper/80">£{PRICE_PER_CLUB} a month per club including a monthly business review. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
+          <p className="mt-5 max-w-xl text-lg text-paper/80">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs, monthly business review included. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a href={WALKTHROUGH_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper">
               Book a walkthrough

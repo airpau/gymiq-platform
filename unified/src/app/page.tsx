@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
-import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { PRICE_PER_CLUB, FOUNDING_PRICE, FOUNDING_SLOTS, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
@@ -111,7 +111,7 @@ function Hero() {
             <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Bullet>Works with {SYSTEMS}. Nothing to migrate.</Bullet>
               <Bullet>Each club connects its own login. Read only.</Bullet>
-              <Bullet>£{PRICE_PER_CLUB} a month per club, monthly business review included.</Bullet>
+              <Bullet>£{FOUNDING_PRICE} a month for the first {FOUNDING_SLOTS} clubs, review included. £{PRICE_PER_CLUB} after.</Bullet>
               <Bullet>Six figures made and saved at one club in its first year. Every line shown.</Bullet>
             </ul>
           </div>
@@ -498,13 +498,14 @@ function Pricing() {
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="rounded-3xl border border-ink-3 bg-ink-2 p-8 lg:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">gymIQ intelligence + monthly review</p>
-            <p className="mt-4 flex items-baseline gap-2">
-              <span className="font-display text-6xl font-extrabold tracking-tight text-paper">£{PRICE_PER_CLUB}</span>
-              <span className="text-base text-paper/60">a month, per club</span>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">Founding clubs · {FOUNDING_SLOTS} places</p>
+            <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-display text-6xl font-extrabold tracking-tight text-paper">£{FOUNDING_PRICE}</span>
+              <span className="text-base text-paper/60">a month, per club, locked for twelve months</span>
             </p>
+            <p className="mt-2 text-sm text-paper/50">List price £{PRICE_PER_CLUB}. The first {FOUNDING_SLOTS} clubs keep the founding rate for a year and shape what gets built next.</p>
             <p className="mt-3 text-[15px] text-paper/70">
-              On a 1,000 member club that is about 50p per member per month. Sixteen recovered payments, or two members kept for a year, covers it. The Hertfordshire club&apos;s first year came to six figures on a conservative count.
+              On a 1,000 member club that is about 30p per member per month. Ten recovered payments, or one member kept for a year, covers it. The Hertfordshire club&apos;s first year came to six figures on a conservative count.
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {included.map((f) => (
@@ -519,7 +520,7 @@ function Pricing() {
                 href={START_HREF}
                 className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper"
               >
-                Start at £{PRICE_PER_CLUB} a month
+                Start at £{FOUNDING_PRICE} a month
                 <ArrowRight className="h-4 w-4" />
               </a>
               <a

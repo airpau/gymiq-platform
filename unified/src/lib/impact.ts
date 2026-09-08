@@ -10,7 +10,7 @@
  *   club_monthly_metrics (attrition, overdue, MRR, ARPU by month)
  *   club_financials (July settled 48,633 on 50,427 submitted; August close)
  *   decision_log (price rises, student age leak, renewals list, card vs DD,
- *                 price trial revert, Primal vs Precor, HP vs lease, lease review)
+ *                 price trial revert, refit supplier comparison, HP vs lease, lease review)
  */
 
 export type Basis = 'measured' | 'estimated'
@@ -120,8 +120,8 @@ export const IMPACT: ImpactLine[] = [
     key: 'capex',
     area: 'Capital and property',
     title: 'Refit supplier switched on a like for like comparison',
-    what: 'A 32 line equipment design priced at Precor list £334,965 ex VAT against Primal Strength at £152,074 for identical specification. The approved programme fell from £295,000 to £253,432 and the monthly finance from £6,883 to £5,913.',
-    how: 'Conservative counts the programme saving. Central counts the identical specification gap after a 25% Precor discount, £99,149. Finance saving of £970 a month sits on top and is not counted.',
+    what: 'A 32 line equipment design priced line by line at two suppliers for identical specification. The approved programme came down by about £42,000 and the monthly finance by about £970.',
+    how: 'Conservative counts the programme saving. Central counts the identical specification gap after the incumbent supplier’s list discount. The finance saving sits on top and is not counted.',
     basis: 'measured',
     kind: 'one-off',
     conservative: 41568,
@@ -155,9 +155,9 @@ export const IMPACT: ImpactLine[] = [
   {
     key: 'lease',
     area: 'Capital and property',
-    title: 'Lease and planning read before money moved',
-    what: 'Confirmed the lease is protected under the 1954 Act, that the live rent review is upward only and cannot be affected by the refit, that the changing rooms need landlord consent, and that a roof planning consent worth £622,080 in a purchase model had lapsed nine months earlier.',
-    how: 'Risk found, not cash counted. The rent review alone is a £23,000 a year question.',
+    title: 'Lease read before money moved',
+    what: 'Confirmed the lease protections, that the live rent review cannot be affected by the refit, and which works need landlord consent, before the order was placed.',
+    how: 'Risk found, not cash counted. The rent review alone is a five figure a year question.',
     basis: 'measured',
     kind: 'one-off',
     conservative: 0,
@@ -208,7 +208,7 @@ export const STORIES = [
   {
     date: '10 August 2026',
     title: 'The refit that cost £42,000 less',
-    body: 'The club was about to order a floor of equipment from the brand it had always used. gymIQ priced the identical 32 line specification against a second supplier, line by line, found the treadmill warranty contradiction on the supplier’s own website, confirmed the second supplier was rebadged commercial kit from an established manufacturer, and modelled six phasing routes against the club’s profit floor. The approved programme fell from £295,000 to £253,432 and the two stage relaunch route came out £106,213 better over three years.',
+    body: 'The club was about to order a floor of equipment from the brand it had always used. gymIQ priced the identical 32 line specification against a second supplier, line by line, checked the warranty terms on both suppliers’ own documents, and modelled six phasing routes against the club’s profit floor. The approved programme came down by about £42,000 and the two stage relaunch route came out six figures better over three years.',
     figure: '£41,568 off the programme',
   },
   {
@@ -236,9 +236,9 @@ export const STORIES = [
     figure: 'about £530 a month, no capital',
   },
   {
-    date: '11 August 2026',
-    title: 'The planning consent that had already lapsed',
-    body: 'A purchase model for the club’s building attributed £622,080 of value to a planning consent for three flats on the roof. gymIQ searched the council portal, found the application, its resubmission, and the decision date, and worked out it had expired nine months earlier on the standard three year limit. The refinance case changed before any offer was made.',
-    figure: '£622,080 of value that was not there',
+    date: '3 September 2026',
+    title: 'The Friday payout, forecast before it landed',
+    body: 'The club is paid most of what settled by Wednesday on Friday. gymIQ forecasts each credit with a range, and on Wednesday afternoon lists the arrears that can still be cleared onto this week’s payout rather than next month’s. The banked model was checked against six months of statements and came out within 0.4%.',
+    figure: 'no surprises on Friday',
   },
 ]

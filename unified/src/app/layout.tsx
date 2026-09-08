@@ -72,7 +72,7 @@ const jsonLd = {
       url: 'https://www.gymiq.ai',
       description:
         'The intelligence layer for gyms: reads the club’s management system and delivers a written morning brief, a staff task board, payment retries, price and age audits, a cash forecast and a monthly business review. Works with Glofox, ClubRight, Mindbody, PerfectGym and others.',
-      offers: { '@type': 'Offer', price: '495', priceCurrency: 'GBP', description: 'Per club, per month, monthly business review included. No setup fee.' },
+      offers: { '@type': 'Offer', price: '295', priceCurrency: 'GBP', description: 'Per club, per month, monthly business review included. No setup fee.' },
       provider: { '@id': 'https://www.gymiq.ai/#org' },
     },
     {

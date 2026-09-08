@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import { ArrowRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
-import { CONTACT, PRICE_PER_CLUB, SYSTEMS } from '@/lib/site'
+import { CONTACT, FOUNDING_PRICE, SYSTEMS } from '@/lib/site'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -91,7 +91,7 @@ export default function BookForm({ intent = 'walkthrough' }: { intent?: 'walkthr
       )}
       <button type="submit" disabled={state === 'sending'} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-ink-2 disabled:opacity-60 sm:w-auto">
         {state === 'sending' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        {intent === 'start' ? `Start gymIQ at £${PRICE_PER_CLUB} a month` : 'Book my walkthrough'}
+        {intent === 'start' ? `Start gymIQ at £${FOUNDING_PRICE} a month` : 'Book my walkthrough'}
         <ArrowRight className="h-4 w-4" />
       </button>
       <p className="text-xs text-slate">Works with {SYSTEMS}. Prefer email? <a href={`mailto:${CONTACT}`} className="text-moss underline-offset-2 hover:underline">{CONTACT}</a>. No mailing list, no sales team, you get me.</p>

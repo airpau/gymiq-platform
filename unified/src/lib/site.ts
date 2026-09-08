@@ -1,5 +1,8 @@
 /** Commercial constants used across the marketing pages. Change here, not in pages. */
 export const PRICE_PER_CLUB = 495
+/** Founding rate for the first ten clubs, locked for twelve months. */
+export const FOUNDING_PRICE = 295
+export const FOUNDING_SLOTS = 10
 export const CONTACT = 'paul@gymiq.ai'
 export const SYSTEMS = 'Glofox, ClubRight, Mindbody, PerfectGym, GymMaster and others'
 /** Every 'book a walkthrough' button on the site. A form that reaches Paul on Telegram and email. */
