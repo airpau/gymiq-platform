@@ -617,7 +617,7 @@ function Audit() {
 
 function FinalCta() {
   return (
-    <section className="bg-moss text-paper">
+    <section className="bg-ink text-paper">
       <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
         <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight text-paper sm:text-5xl">
           See your own club&apos;s first brief.

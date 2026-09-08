@@ -9,12 +9,14 @@ import SalesPulseDemo from '@/components/demo/SalesPulseDemo'
 import RetryDemo from '@/components/demo/RetryDemo'
 import CashDemo from '@/components/demo/CashDemo'
 import AlertsDemo from '@/components/demo/AlertsDemo'
+import MemberChatDemo from '@/components/demo/MemberChatDemo'
+import { DemoStoreProvider } from '@/components/demo/DemoStore'
 import { WALKTHROUGH_HREF, FOUNDING_PRICE, FOUNDING_SLOTS } from '@/lib/site'
 
 export const metadata = {
   title: 'Try every gymIQ tool',
   description:
-    'Click through every tool in gymIQ: the lead assistant, the morning brief you can talk to, the staff board, the retention radar, the sales pulse, the payment routine, the Friday forecast, and the alerts by role and channel.',
+    'Click through every tool in gymIQ: the lead assistant, the morning brief you can talk to, the staff board, the retention radar, the sales pulse, the payment routine, the Friday forecast, the alerts by role and channel, and the member assistant.',
   alternates: { canonical: '/demo' },
 }
 
@@ -27,6 +29,7 @@ const TOOLS = [
   { id: 'retries', label: 'Payment routine' },
   { id: 'cash', label: 'Friday forecast' },
   { id: 'alerts', label: 'Alerts by role' },
+  { id: 'members', label: 'Member assistant' },
 ]
 
 export default function DemoPage() {
@@ -64,6 +67,7 @@ export default function DemoPage() {
       </section>
 
       <main className="mx-auto max-w-6xl px-5 sm:px-8">
+       <DemoStoreProvider>
         <DemoFrame
           id="leads"
           eyebrow="Lead assistant"
@@ -88,8 +92,8 @@ export default function DemoPage() {
           id="board"
           eyebrow="Staff board"
           title="A task list that rewrites itself every morning."
-          blurb="Generated from the live roster before the club opens: the top 12 overdue members to call, the top 6 billing faults, every membership ending this week, the drifting members, the tours to confirm, and the standing jobs. Capped so a small desk can finish it. Each person signs in with a PIN, every tick is recorded to them, a tick sticks for three days, and the owner gets the count by name at 22:00. Works alongside any CRM, or on its own."
-          tries={['Switch who you are and tick a few money hour tasks', 'Watch the queue counter and the 22:00 report change', 'Untick one in Done today']}
+          blurb="Generated from the live roster before the club opens: the top 12 overdue members to call, the top 6 billing faults, every membership ending this week, the drifting members, the tours to confirm, and the standing jobs. Capped so a small desk can finish it. Assign any task to a named person or leave it for whoever is on shift. Each person signs in with a PIN, every tick is recorded to them, a tick sticks for three days, and the owner gets the count by name at 22:00. The retention radar and the payment routine below write straight onto it. Works alongside any CRM, or on its own."
+          tries={['Switch who you are and tick a few money hour tasks', 'Assign a task to Rachel, then switch to "Mine"', 'Watch the queue counter and the 22:00 report change', 'Mark someone called on the retention radar below and see it tick here']}
         >
           <BoardDemo />
         </DemoFrame>
@@ -98,8 +102,8 @@ export default function DemoPage() {
           id="retention"
           eyebrow="Retention radar"
           title="Who is drifting, measured against their own habit."
-          blurb="A flat 30 day rule calls a twice a year member dormant and misses a daily member who has been away three weeks. gymIQ measures each member against their own pattern: how far they have drifted from their usual gap. The drifting window gets a check in, the long tenured low users are left in peace, and the calls land on the board."
-          tries={['Switch between the habit rule and the flat 30 day rule', 'Find Dev and Harry, then Ben, Emma and Jack', 'Mark someone as called']}
+          blurb="A flat 30 day rule calls a twice a year member dormant and misses a daily member who has been away three weeks. gymIQ measures each member against their own pattern: how far they have drifted from their usual gap. The drifting window gets a check in, the long tenured low users are left in peace, and the calls land on the staff board above, so marking a call here ticks it there."
+          tries={['Switch between the habit rule and the flat 30 day rule', 'Find Dev and Harry, then Ben, Emma and Jack', 'Press "Called, noted" and scroll up to the board']}
         >
           <RetentionDemo />
         </DemoFrame>
@@ -118,8 +122,8 @@ export default function DemoPage() {
           id="retries"
           eyebrow="Payment routine"
           title="Failed payments, decided the way a careful person would."
-          blurb="Three times a week, every failed payment is read: temporary shortfall or dead card, how many attempts, how long since the last, how many months, whether the member still trains. Temporary failures get one retry, never within two days of the last, never a sixth attempt. Everything else becomes a named action on the board: new card, mandate to re set, cancellation for a human to decide. Cash payers are never chased by message."
-          tries={['Run the routine', 'Tick "It is Friday" and run again', 'Find Sam, whose card was replaced']}
+          blurb="Three times a week, every failed payment is read: temporary shortfall or dead card, how many attempts, how long since the last, how many months, whether the member still trains. Temporary failures get one retry, never within two days of the last, never a sixth attempt. Everything else becomes a named action on the staff board: new card, mandate to re set, cancellation for a human to decide. Cash payers are never chased by message. Press Run and watch each step, then the bank's answer for every retry."
+          tries={['Run the routine and watch the log', 'Tick "It is Friday" and run again: Mercedes is retried', 'Find Sam, whose card was replaced', 'Scroll up: the routed ones are on the board']}
         >
           <RetryDemo />
         </DemoFrame>
@@ -127,8 +131,8 @@ export default function DemoPage() {
         <DemoFrame
           id="cash"
           eyebrow="Friday forecast"
-          title="What lands on Friday, to the pound, before it lands."
-          blurb="The club is paid 80% of what settled by Wednesday, on Friday, and the balance next month. gymIQ forecasts each credit with a range and on Wednesday afternoon warns what has not been retried yet. The banked model was verified within 0.4% against six months of statements. Automatic reconciliation against a live bank feed is coming soon."
+          title="What lands on Friday, before it lands. In testing."
+          blurb="Whatever your processor's schedule, gymIQ learns it from your statements and forecasts each credit with a range, then on Wednesday afternoon warns what has not been retried in time to make it. At the Hertfordshire club the model has matched the bank within 0.4% over six months. This feature is in testing: it is switched on for your club once it has matched your first month of credits. Automatic reconciliation against a live bank feed is coming soon."
           tries={['Move the arrears slider and watch Friday move', 'Drop the pending clearance to 85%']}
         >
           <CashDemo />
@@ -138,20 +142,31 @@ export default function DemoPage() {
           id="alerts"
           eyebrow="Alerts by role"
           title="Reaches you where you are. Shows each person only their part."
-          blurb="The owner gets money. The manager gets performance and the board. The desk gets today's names. Same read of the club, cut three ways, delivered on WhatsApp, Telegram, email or SMS, and you can reply to it. Nobody logs in anywhere to find out what happened."
-          tries={['Switch role and channel', 'Compare the 06:00 brief for the owner and the desk']}
+          blurb="The owner gets money. The manager gets performance and the board. The desk gets today's names. Every message has the same shape: a one line verdict, the numbers behind it with a label each, then what to do. Delivered on WhatsApp, Telegram, email or SMS, and you can reply to it. Nobody logs in anywhere to find out what happened."
+          tries={['Switch role and channel', 'Compare the 06:00 brief for the owner and the desk', 'Reply "who are the 47?" or, as the desk, "done"']}
         >
           <AlertsDemo />
         </DemoFrame>
+
+        <DemoFrame
+          id="members"
+          eyebrow="Member assistant"
+          title="Members ask the club anything. It answers from your facts, and knows when to hand over."
+          blurb="On the website, in WhatsApp and in the app: hours, classes, prices, freezes, parking, PT, cancellations. It answers from a fact sheet you control, takes the actions you allow (a freeze, a class booking, a trial), logs every question so you can see what members keep asking, and passes anything it is unsure about, and every cancellation or complaint, to a person with the thread attached."
+          tries={['Ask "what time do you open on Sunday?"', 'Ask to freeze for a month', 'Say "I want to cancel" and watch it reach a person', 'Ask something it cannot know']}
+        >
+          <MemberChatDemo />
+        </DemoFrame>
+       </DemoStoreProvider>
       </main>
 
-      <section className="mt-16 bg-moss text-paper">
+      <section className="mt-16 bg-ink text-paper">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">All of it, on your club&apos;s real numbers, within a week.</h2>
           <p className="mt-5 max-w-xl text-lg text-paper/80">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs, monthly business review included. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a href={WALKTHROUGH_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper">
-              Book a walkthrough
+              Book a 30 minute walkthrough
               <ArrowRight className="h-4 w-4" />
             </a>
             <Link href="/#audit" className="text-base font-semibold text-paper underline-offset-4 hover:underline">Or start with the free audit</Link>
