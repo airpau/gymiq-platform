@@ -157,37 +157,37 @@ export default function AlertsDemo() {
       </div>
       <div className="mx-auto w-full max-w-[380px]">
         <div className={`rounded-[30px] p-3 ${channel === 'whatsapp' ? 'bg-[#0b141a]' : channel === 'telegram' ? 'bg-[#17212b]' : channel === 'email' ? 'bg-ink' : 'bg-[#1c1c1e]'}`}>
-          <div className="px-2 pb-2 pt-1 font-mono text-[11px] text-paper/50">{c.label} · {r.label} · {time}</div>
+          <div className="px-2 pb-2 pt-1 font-mono text-[11px] text-paper/75">{c.label} · {r.label} · {time}</div>
           <div className="max-h-[520px] space-y-2 overflow-y-auto">
             <div className={`rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${bubble}`}>
               {channel === 'email' && <p className="mb-2 border-b border-mist pb-2 font-semibold">gymIQ: Riverside, {which === 'morning' ? 'morning brief' : which === 'alert' ? 'alert' : 'evening close'}</p>}
-              <p className={`font-mono text-[10px] uppercase tracking-wider ${dark ? 'text-paper/50' : 'text-slate'}`}>Riverside · {time}</p>
+              <p className={`font-mono text-[11px] uppercase tracking-wider ${dark ? 'text-paper/75' : 'text-slate'}`}>Riverside · {time}</p>
               <p className="mt-1 font-semibold leading-snug">{m.verdict}</p>
               <dl className={`mt-3 space-y-1.5 border-t pt-2 ${dark ? 'border-white/10' : 'border-mist'}`}>
                 {m.lines.map(([k, v]) => (
-                  <div key={k + v} className="flex gap-3 text-[12.5px]">
-                    <dt className={`w-[38%] shrink-0 ${dark ? 'text-paper/55' : 'text-slate'}`}>{k}</dt>
+                  <div key={k + v} className="flex gap-3 text-[13.5px]">
+                    <dt className={`w-[38%] shrink-0 ${dark ? 'text-paper/80' : 'text-slate'}`}>{k}</dt>
                     <dd className="font-mono">{v}</dd>
                   </div>
                 ))}
               </dl>
-              {m.action && <p className={`mt-3 rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold ${dark ? 'bg-lime/15 text-lime' : 'bg-moss-soft text-moss'}`}>{m.action}</p>}
+              {m.action && <p className={`mt-3 rounded-lg px-2.5 py-1.5 text-[13.5px] font-semibold ${dark ? 'bg-lime/15 text-lime' : 'bg-moss-soft text-moss'}`}>{m.action}</p>}
             </div>
             {thread.map((t, i) => (
               <div key={i} className={`flex ${t.me ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-[13px] leading-snug ${t.me ? 'bg-moss text-paper' : bubble}`}>{t.text}</div>
               </div>
             ))}
-            {typing && <p className="px-3 font-mono text-[11px] text-paper/40">gymIQ is typing</p>}
+            {typing && <p className="px-3 font-mono text-[11px] text-paper/75">gymIQ is typing</p>}
             <div ref={bottom} />
           </div>
           {canReply ? (
             <form onSubmit={(e) => { e.preventDefault(); send() }} className="mt-2 flex items-center gap-2 rounded-full bg-black/30 py-1 pl-4 pr-1">
-              <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={role === 'desk' ? 'Reply, e.g. "done"' : 'Ask, e.g. "who are the 47?"'} className="min-w-0 flex-1 bg-transparent font-mono text-[12px] text-paper placeholder-paper/40 focus:outline-none" aria-label="Reply" />
+              <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={role === 'desk' ? 'Reply, e.g. "done"' : 'Ask, e.g. "who are the 47?"'} className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-paper placeholder-paper/70 focus:outline-none" aria-label="Reply" />
               <button type="submit" className="rounded-full bg-lime px-3 py-1.5 text-xs font-semibold text-ink disabled:opacity-50" disabled={!draft.trim() || typing}>Send</button>
             </form>
           ) : (
-            <p className="mt-2 px-3 font-mono text-[11px] text-paper/40">{channel === 'email' ? 'Reply by email and it answers within a minute.' : 'SMS is one way. Replies come on WhatsApp or Telegram.'}</p>
+            <p className="mt-2 px-3 font-mono text-[11px] text-paper/75">{channel === 'email' ? 'Reply by email and it answers within a minute.' : 'SMS is one way. Replies come on WhatsApp or Telegram.'}</p>
           )}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 import { IMPACT, STORIES, MONTHLY, CLUB, impactTotals } from '@/lib/impact'
 import RoiCalculator from '@/components/marketing/RoiCalculator'
@@ -20,10 +21,7 @@ export default function ImpactPage() {
     <div className="min-h-screen bg-paper text-ink antialiased">
       <header className="sticky top-0 z-30 border-b border-mist/80 bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">IQ</span>
-            gymIQ
-          </Link>
+          <LogoLink />
           <a href={WALKTHROUGH_HREF} className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-paper transition hover:bg-ink-2">
             Book a walkthrough
             <ArrowRight className="h-3.5 w-3.5" />
@@ -38,7 +36,7 @@ export default function ImpactPage() {
           <h1 className="mt-4 max-w-4xl font-display text-5xl font-extrabold leading-[0.98] tracking-tight sm:text-7xl">
             Six figures in the first year. From one club, on a conservative count.
           </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-paper/75">
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-paper/88">
             That is what the intelligence layer has made and saved at a 1,617 member franchise gym, measured against the club&apos;s own records, with the assumption written next to every line. The fee for the year was {gbpExact(PRICE_PER_CLUB * 12)}. The workings are below, so the number can be argued line by line rather than taken on trust.
           </p>
           <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -80,7 +78,7 @@ export default function ImpactPage() {
                     <p className="mt-1 text-xs text-slate">{l.how}</p>
                   </td>
                   <td className="whitespace-nowrap px-5 py-4 align-top">
-                    <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${l.basis === 'measured' ? 'bg-moss-soft text-moss' : 'bg-amber-soft text-amber'}`}>{l.basis}</span>
+                    <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${l.basis === 'measured' ? 'bg-moss-soft text-moss' : 'bg-amber-soft text-amber-ink'}`}>{l.basis}</span>
                     <span className="ml-1 font-mono text-[11px] text-slate">{l.kind}</span>
                   </td>
                   <td className="whitespace-nowrap px-5 py-4 text-right align-top font-mono tabular-nums text-ink">{l.counted ? gbpExact(l.conservative) : 'not counted'}</td>
@@ -125,7 +123,7 @@ export default function ImpactPage() {
               <p className="font-mono text-xs uppercase tracking-wider text-slate">{s.date}</p>
               <h3 className="mt-2 font-display text-2xl font-bold leading-tight text-ink">{s.title}</h3>
               <p className="mt-3 text-[15px] leading-relaxed text-slate">{s.body}</p>
-              <p className="mt-auto pt-5 font-mono text-sm font-medium text-amber">{s.figure}</p>
+              <p className="mt-auto pt-5 font-mono text-sm font-medium text-amber-ink">{s.figure}</p>
             </article>
           ))}
         </div>
@@ -149,7 +147,7 @@ export default function ImpactPage() {
       <section className="bg-moss text-paper">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">The first month is a free audit of your membership file. The fee starts when the brief does.</h2>
-          <p className="mt-5 max-w-xl text-lg text-paper/80">
+          <p className="mt-5 max-w-xl text-lg text-paper/90">
             And every month after that, a 45 minute review of what it found, what was acted on, and what it was worth. If a month&apos;s review cannot show at least the fee in found money, that month is free.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -181,7 +179,7 @@ function Big({ v, l, s }: { v: string; l: string; s: string }) {
     <div>
       <p className="font-display text-3xl font-extrabold tracking-tight text-lime sm:text-4xl">{v}</p>
       <p className="mt-1 text-sm font-semibold text-paper">{l}</p>
-      <p className="text-xs text-paper/50">{s}</p>
+      <p className="text-xs text-paper/75">{s}</p>
     </div>
   )
 }

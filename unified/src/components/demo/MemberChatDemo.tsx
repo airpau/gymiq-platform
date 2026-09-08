@@ -73,13 +73,13 @@ export default function MemberChatDemo() {
         sub="website chat · also WhatsApp and the app"
         footer={
           <form onSubmit={(e) => { e.preventDefault(); send(draft) }} className="flex items-center gap-2">
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask the club anything" className="min-w-0 flex-1 rounded-full bg-ink px-4 py-2 font-mono text-[12px] text-paper placeholder-paper/40 focus:outline-none" aria-label="Message" />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask the club anything" className="min-w-0 flex-1 rounded-full bg-ink px-4 py-2 font-mono text-[13px] text-paper placeholder-paper/70 focus:outline-none" aria-label="Message" />
             <button type="submit" disabled={!draft.trim() || typing} className="rounded-full bg-lime px-3 py-2 text-xs font-semibold text-ink disabled:opacity-50">Send</button>
           </form>
         }
       >
         {thread.map((m, i) => <Bubble key={i} from={m.from} time={m.time}>{m.text}</Bubble>)}
-        {typing && <p className="px-2 font-mono text-[11px] text-paper/40">typing</p>}
+        {typing && <p className="px-2 font-mono text-[11px] text-paper/75">typing</p>}
         <div ref={bottom} />
       </Phone>
       <div className="space-y-4">
@@ -89,10 +89,10 @@ export default function MemberChatDemo() {
             {SUGGESTED.map((s) => <button key={s} onClick={() => send(s)} className="rounded-full border border-mist px-3 py-1 text-left text-xs text-ink hover:bg-paper-2">{s}</button>)}
           </div>
         </div>
-        <div className="rounded-2xl bg-ink p-4 text-paper">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-paper/50">What it did behind the chat</p>
-          {log.length === 0 ? <p className="mt-2 font-mono text-[12px] text-paper/50">Nothing yet.</p> : (
-            <ul className="mt-2 space-y-1 font-mono text-[12px] text-paper/85">{log.map((l, i) => <li key={i}>{l}</li>)}</ul>
+        <div className="rounded-2xl border border-mist bg-white p-4">
+          <p className="font-mono text-xs uppercase tracking-wider text-moss">What it did behind the chat</p>
+          {log.length === 0 ? <p className="mt-2 text-sm text-slate">Nothing yet.</p> : (
+            <ul className="mt-2 space-y-1.5 text-sm text-ink">{log.map((l, i) => <li key={i} className="flex gap-2"><span className="text-moss">·</span>{l}</li>)}</ul>
           )}
         </div>
         <div className="rounded-2xl border border-mist bg-white p-4 text-sm text-slate">

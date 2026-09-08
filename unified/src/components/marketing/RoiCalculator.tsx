@@ -48,9 +48,9 @@ export default function RoiCalculator({ pricePerMonth }: Props) {
       </div>
       <div className="lg:col-span-3">
         <div className="rounded-2xl bg-ink p-6 text-paper">
-          <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/50">A year of gymIQ at your club, conservative</p>
+          <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/75">A year of gymIQ at your club, conservative</p>
           <p className="mt-2 font-display text-5xl font-extrabold tracking-tight text-lime">{gbp(r.total)}</p>
-          <p className="mt-1 text-sm text-paper/60">against {gbp(r.fee)} of fees. {r.multiple >= 1 ? `${r.multiple.toFixed(1)} times the cost.` : ''}</p>
+          <p className="mt-1 text-sm text-paper/85">against {gbp(r.fee)} of fees. {r.multiple >= 1 ? `${r.multiple.toFixed(1)} times the cost.` : ''}</p>
           <dl className="mt-6 divide-y divide-ink-3 border-t border-ink-3 text-sm">
             <Row k={`Failed payments brought to 4%`} v={gbp(r.collection)} sub={`on ${gbp(r.billed)} billed a month`} />
             <Row k="One point of attrition, members kept" v={gbp(r.retention)} sub={`${Math.round(r.retentionMembers)} members a month, 7.55 months each`} />
@@ -94,7 +94,7 @@ function Row({ k, v, sub }: { k: string; v: string; sub: string }) {
     <div className="grid grid-cols-[1fr_auto] gap-3 py-3">
       <div>
         <dt className="text-paper/90">{k}</dt>
-        <dd className="text-xs text-paper/50">{sub}</dd>
+        <dd className="text-xs text-paper/75">{sub}</dd>
       </div>
       <dd className="font-mono tabular-nums text-lime">{v}</dd>
     </div>

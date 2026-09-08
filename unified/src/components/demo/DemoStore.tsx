@@ -9,7 +9,7 @@
  */
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
 
-export type Section = 'money-hour' | 'sales' | 'retention' | 'club'
+export type Section = 'money-hour' | 'contact' | 'sales' | 'retention' | 'club'
 export interface Task {
   id: string
   section: Section
@@ -52,7 +52,7 @@ export function verdict(m: Member) {
   const ratio = m.daysSince / gap
   if (m.tenureMonths >= 12 && m.visitsPerMonth < 1 && m.daysSince >= 30) return { key: 'leave' as const, label: 'Leave alone', why: 'Long tenured, low use, happy paying. A call only reminds them.', tone: 'bg-paper-2 text-slate' }
   if (ratio >= 2 && m.daysSince >= 14) return { key: 'call' as const, label: 'Call today', why: `Away ${m.daysSince} days against a usual gap of ${gap.toFixed(0)}. Habit broken.`, tone: 'bg-signal/10 text-signal' }
-  if (ratio >= 1.3 && m.daysSince >= 10) return { key: 'watch' as const, label: 'Drifting', why: `Slipping from ${m.visitsPerMonth} visits a month. Book them into a class.`, tone: 'bg-amber-soft text-amber' }
+  if (ratio >= 1.3 && m.daysSince >= 10) return { key: 'watch' as const, label: 'Drifting', why: `Slipping from ${m.visitsPerMonth} visits a month. Book them into a class.`, tone: 'bg-amber-soft text-amber-ink' }
   return { key: 'ok' as const, label: 'Healthy', why: 'On their own pattern.', tone: 'bg-moss-soft text-moss' }
 }
 

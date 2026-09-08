@@ -50,7 +50,7 @@ export function Phone({ header, sub, children, footer }: { header: string; sub?:
       <div className="flex h-[640px] flex-col overflow-hidden rounded-[24px] bg-ink-2">
         <div className="border-b border-ink-3 px-4 py-3">
           <p className="font-display text-sm font-bold text-paper">{header}</p>
-          {sub && <p className="font-mono text-[11px] text-paper/50">{sub}</p>}
+          {sub && <p className="font-mono text-[11px] text-paper/75">{sub}</p>}
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-3">{children}</div>
         {footer && <div className="border-t border-ink-3 px-3 py-3">{footer}</div>}
@@ -61,14 +61,14 @@ export function Phone({ header, sub, children, footer }: { header: string; sub?:
 
 export function Bubble({ from, children, time }: { from: 'club' | 'lead' | 'system'; children: React.ReactNode; time?: string }) {
   if (from === 'system') {
-    return <p className="my-2 text-center font-mono text-[10px] uppercase tracking-wider text-paper/40">{children}</p>
+    return <p className="my-2 text-center font-mono text-[11px] uppercase tracking-wider text-paper/75">{children}</p>
   }
   const mine = from === 'lead'
   return (
     <div className={`my-1.5 flex ${mine ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-[13px] leading-snug ${mine ? 'rounded-br-sm bg-moss text-paper' : 'rounded-bl-sm bg-ink text-paper/90'}`}>
         <div className="whitespace-pre-wrap">{children}</div>
-        {time && <div className={`mt-1 text-[10px] ${mine ? 'text-paper/70' : 'text-paper/40'}`}>{time}</div>}
+        {time && <div className={`mt-1 text-[11px] ${mine ? 'text-paper/85' : 'text-paper/75'}`}>{time}</div>}
       </div>
     </div>
   )

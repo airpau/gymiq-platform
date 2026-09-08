@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata = {
@@ -26,7 +27,7 @@ export default function CaseStudyPage() {
     <div className="min-h-screen bg-white text-ink antialiased">
       <header className="border-b border-mist bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <Link href="/" className="text-sm font-semibold tracking-tight text-ink">gymIQ</Link>
+          <LogoLink size="sm" />
           <Link href="/#pricing" className="text-sm font-medium text-moss hover:text-moss">Pricing</Link>
         </div>
       </header>
@@ -102,7 +103,7 @@ export default function CaseStudyPage() {
 
         <H2>What the owner actually sees</H2>
         <P>The Sunday evening close, as it landed on the owner&apos;s phone on 6 September 2026.</P>
-        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink p-5 font-mono text-[13px] leading-relaxed text-paper/85">{`Evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
+        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-xl bg-ink p-5 font-mono text-[13px] leading-relaxed text-paper/92">{`Evening close, Sun 6 Sep: £26,413.94 collected MTD, 1,472 active paying
 
 TOP 3
 1. Retention is good. 7 leavers this month against 19 over the same six days of August, and the roster has GROWN six days running, 1,611 to 1,617.
@@ -197,7 +198,7 @@ function Ledger({ rows }: { rows: Row[] }) {
           </div>
           <div
             className={`font-mono text-sm font-medium tabular-nums sm:text-right ${
-              tone === 'good' ? 'text-moss' : tone === 'warn' ? 'text-amber' : 'text-ink'
+              tone === 'good' ? 'text-moss' : tone === 'warn' ? 'text-amber-ink' : 'text-ink'
             }`}
           >
             {value}

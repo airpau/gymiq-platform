@@ -14,11 +14,11 @@ interface F { name: string; amount: number; method: 'card' | 'dd' | 'flexible' |
 const FAILED: F[] = [
   { name: 'Mercedes W', amount: 36.99, method: 'dd', reason: 'Insufficient funds', attempts: 1, lastAttemptDaysAgo: 1, monthsFailed: 1, lastVisitDays: 6, bankSays: 'paid' },
   { name: 'Callum B', amount: 31.99, method: 'card', reason: 'Card declined', attempts: 2, lastAttemptDaysAgo: 4, monthsFailed: 1, lastVisitDays: 5, bankSays: 'failed' },
-  { name: 'Tanya B', amount: 36.99, method: 'dd', reason: 'Insufficient funds', attempts: 2, lastAttemptDaysAgo: 3, monthsFailed: 1, lastVisitDays: 8, bankSays: 'failed' },
+  { name: 'Tanya B', amount: 36.99, method: 'dd', reason: 'Insufficient funds', attempts: 2, lastAttemptDaysAgo: 3, monthsFailed: 1, lastVisitDays: 8, bankSays: 'paid' },
   { name: 'Yomi W', amount: 36.99, method: 'dd', reason: 'Mandate cancelled at bank', attempts: 3, lastAttemptDaysAgo: 9, monthsFailed: 4, lastVisitDays: 120, bankSays: 'failed' },
   { name: 'Geetha G', amount: 36.99, method: 'flexible', reason: 'No payment method', attempts: 0, lastAttemptDaysAgo: 30, monthsFailed: 2, lastVisitDays: 40, bankSays: 'failed' },
   { name: 'Sam A', amount: 31.99, method: 'card', reason: 'Card replaced 2 days ago, last failure was on the old card', attempts: 5, lastAttemptDaysAgo: 6, monthsFailed: 2, lastVisitDays: 3, bankSays: 'paid' },
-  { name: 'Ade O', amount: 31.99, method: 'dd', reason: 'Insufficient funds', attempts: 6, lastAttemptDaysAgo: 3, monthsFailed: 3, lastVisitDays: 2, bankSays: 'failed' },
+  { name: 'Ade O', amount: 31.99, method: 'dd', reason: 'Insufficient funds', attempts: 3, lastAttemptDaysAgo: 4, monthsFailed: 2, lastVisitDays: 2, bankSays: 'failed' },
   { name: 'Lou M', amount: 22.99, method: 'cash', reason: 'Not paid at desk', attempts: 0, lastAttemptDaysAgo: 0, monthsFailed: 1, lastVisitDays: 4, bankSays: 'failed' },
 ]
 
@@ -28,12 +28,12 @@ function decide(f: F, friday: boolean): { action: Action; tone: string; why: str
   if (f.method === 'cash') return { action: 'Desk collects', tone: 'bg-paper-2 text-slate', why: 'Cash payers are never messaged. Flagged for the front desk at next visit.', task: `Desk: collect £${f.amount} from ${f.name} at next visit` }
   if (/replaced/.test(f.reason)) return { action: 'Retry once', tone: 'bg-moss-soft text-moss', why: 'New card on file since the last failure; the old reason no longer applies.' }
   if (/mandate/i.test(f.reason) && f.monthsFailed >= 3) return { action: 'Cancel for review', tone: 'bg-signal/10 text-signal', why: `${f.monthsFailed} months failed, mandate dead, last visit ${f.lastVisitDays} days ago. Listed for a human decision, never auto cancelled.`, task: `Decide: cancel ${f.name}? ${f.monthsFailed} months unpaid, mandate cancelled` }
-  if (/declined|incorrect/i.test(f.reason)) return { action: 'Contact: new card', tone: 'bg-amber-soft text-amber', why: 'A declined card never fixes itself. SMS with a payment link and an ask to update the card in the app.', task: `Send card update link: ${f.name} (£${f.amount})` }
-  if (/no payment method/i.test(f.reason)) return { action: 'Contact: set up DD', tone: 'bg-amber-soft text-amber', why: 'Payment link for the arrears plus how to set up a Direct Debit at the club.', task: `Set up Direct Debit: ${f.name}, £${f.amount} arrears` }
-  if (f.attempts >= 5) return { action: 'Stop retrying, chase', tone: 'bg-amber-soft text-amber', why: `${f.attempts} attempts already. Hammering a card gets it blocked. Chase with a link instead.`, task: `Chase by message: ${f.name}, ${f.attempts} failed attempts` }
+  if (/declined|incorrect/i.test(f.reason)) return { action: 'Contact: new card', tone: 'bg-amber-soft text-amber-ink', why: 'A declined card never fixes itself. SMS with a payment link and an ask to update the card in the app.', task: `Send card update link: ${f.name} (£${f.amount})` }
+  if (/no payment method/i.test(f.reason)) return { action: 'Contact: set up DD', tone: 'bg-amber-soft text-amber-ink', why: 'Payment link for the arrears plus how to set up a Direct Debit at the club.', task: `Set up Direct Debit: ${f.name}, £${f.amount} arrears` }
+  if (f.attempts >= 5) return { action: 'Stop retrying, chase', tone: 'bg-amber-soft text-amber-ink', why: `${f.attempts} attempts already. Hammering a card gets it blocked. Chase with a link instead.`, task: `Chase by message: ${f.name}, ${f.attempts} failed attempts` }
   if (f.lastAttemptDaysAgo === 0 || (f.lastAttemptDaysAgo === 1 && !friday)) return { action: 'Leave today', tone: 'bg-paper-2 text-slate', why: 'Attempted in the last two days. Next run.' }
   if (/insufficient/i.test(f.reason)) return { action: 'Retry once', tone: 'bg-moss-soft text-moss', why: `Temporary shortfall, ${f.lastAttemptDaysAgo} days since the last attempt${friday && f.lastAttemptDaysAgo === 1 ? ', and Friday is payday' : ''}.` }
-  return { action: 'Contact', tone: 'bg-amber-soft text-amber', why: 'Routed to a named action.', task: `Contact ${f.name} about £${f.amount}` }
+  return { action: 'Contact', tone: 'bg-amber-soft text-amber-ink', why: 'Routed to a named action.', task: `Contact ${f.name} about £${f.amount}` }
 }
 
 type Stage = 'waiting' | 'reading' | 'decided' | 'submitting' | 'paid' | 'failed' | 'board' | 'skipped'
@@ -72,13 +72,13 @@ export default function RetryDemo() {
         set(f.name, 'submitting'); say(`   Submitting one retry of £${f.amount} for ${f.name} to the bank.`)
         await sleep(900); if (!alive()) return
         if (f.bankSays === 'paid') { paid++; paidValue += f.amount; set(f.name, 'paid'); say(`   Bank: PAID £${f.amount}. ${f.name} is clear, noted on the profile.`) }
-        else { failed++; set(f.name, 'failed'); say(`   Bank: FAILED again. No second attempt today; chase task added to the board.`); addTask({ id: `p-${f.name}`, section: 'money-hour', title: `Chase by message: ${f.name}`, detail: `Retry of £${f.amount} failed again in the routine. Send a payment link, do not retry the card.`, via: 'routine' }) }
+        else { failed++; set(f.name, 'failed'); say(`   Bank: FAILED again. No second attempt today; chase task added to the board under Contact members.`); addTask({ id: `p-${f.name}`, section: 'contact', title: `Chase by message: ${f.name}`, detail: `Retry of £${f.amount} failed again in the routine. Send a payment link, do not retry the card.`, via: 'routine' }) }
       } else if (d.action === 'Leave today') {
         set(f.name, 'skipped'); say(`   Left alone: tried in the last two days. Picked up at the next run.`)
       } else {
         board++
-        set(f.name, 'board'); say(`   On the staff board: ${d.task}.`)
-        addTask({ id: `p-${f.name}`, section: 'money-hour', title: d.task!, detail: d.why, via: 'routine' })
+        set(f.name, 'board'); say(`   On the staff board, Contact members: ${d.task}.`)
+        addTask({ id: `p-${f.name}`, section: 'contact', title: d.task!, detail: d.why, via: 'routine' })
       }
       await sleep(250); if (!alive()) return
     }
@@ -100,7 +100,7 @@ export default function RetryDemo() {
     if (s === 'paid') return <span className="inline-flex items-center gap-1 rounded-full bg-moss px-2 py-0.5 font-semibold text-paper">PAID £{f.amount}</span>
     if (s === 'failed') return <span className="inline-flex items-center gap-1 rounded-full bg-signal px-2 py-0.5 font-semibold text-paper">FAILED, not retried</span>
     if (s === 'skipped') return <span className="text-slate">left for the next run</span>
-    return <span className="text-amber">on the staff board</span>
+    return <span className="text-amber-ink">on the staff board</span>
   }
 
   return (
@@ -112,11 +112,11 @@ export default function RetryDemo() {
       </div>
 
       {log.length > 0 && (
-        <div ref={logRef} className="max-h-56 overflow-y-auto rounded-2xl bg-ink p-4 font-mono text-[12px] leading-relaxed text-paper/85">
+        <div ref={logRef} className="max-h-56 overflow-y-auto rounded-2xl bg-ink p-4 font-mono text-[13px] leading-relaxed text-paper/92">
           {log.map((l, i) => (
-            <p key={i} className={l.startsWith('Step') || l.startsWith('Done') ? 'text-lime' : l.includes('PAID') ? 'text-lime' : l.includes('FAILED') ? 'text-[#f0a89f]' : l.startsWith('   ') ? 'pl-4 text-paper/70' : ''}>{l}</p>
+            <p key={i} className={l.startsWith('Step') || l.startsWith('Done') ? 'text-lime' : l.includes('PAID') ? 'text-lime' : l.includes('FAILED') ? 'text-[#f0a89f]' : l.startsWith('   ') ? 'pl-4 text-paper/85' : ''}>{l}</p>
           ))}
-          {phase === 'running' && <p className="animate-pulse text-paper/50">working</p>}
+          {phase === 'running' && <p className="animate-pulse text-paper/75">working</p>}
         </div>
       )}
 

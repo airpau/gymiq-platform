@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, CalendarCheck } from 'lucide-react'
 import BookForm from '@/components/marketing/BookForm'
 import { CONTACT, PRICE_PER_CLUB, FOUNDING_PRICE, FOUNDING_SLOTS, STRIPE_CHECKOUT_URL, CALENDLY_URL } from '@/lib/site'
@@ -19,10 +20,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
     <div className="min-h-screen bg-paper text-ink antialiased">
       <header className="border-b border-mist/80 bg-paper/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">IQ</span>
-            gymIQ
-          </Link>
+          <LogoLink />
           <nav className="flex items-center gap-5 text-sm text-slate">
             <Link href="/demo" className="hover:text-ink">Try the tools</Link>
             <Link href="/#pricing" className="hover:text-ink">Pricing</Link>

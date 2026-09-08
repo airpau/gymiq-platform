@@ -302,7 +302,7 @@ export default function LeadEngineDemo() {
                 onKeyDown={(e) => e.key === 'Enter' && send()}
                 placeholder="Reply as the lead..."
                 aria-label="Reply as the lead"
-                className="flex-1 rounded-full bg-ink px-4 py-2 text-sm text-paper placeholder-paper/40 focus:outline-none focus:ring-2 focus:ring-moss/40"
+                className="flex-1 rounded-full bg-ink px-4 py-2 text-sm text-paper placeholder-paper/70 focus:outline-none focus:ring-2 focus:ring-moss/40"
               />
               <button onClick={send} className="rounded-full bg-moss px-4 py-2 text-sm font-semibold text-paper hover:bg-moss-deep">Send</button>
             </div>
@@ -322,13 +322,13 @@ export default function LeadEngineDemo() {
         }
       >
         {msgs.length === 0 && (
-          <p className="px-2 pt-10 text-center text-sm text-paper/40">This phone is the lead&apos;s view. Create a lead and the assistant sends the first message within seconds. Then reply as the customer.</p>
+          <p className="px-2 pt-10 text-center text-sm text-paper/75">This phone is the lead&apos;s view. Create a lead and the assistant sends the first message within seconds. Then reply as the customer.</p>
         )}
         {msgs.map((m, i) => (
           <Bubble key={i} from={m.from} time={m.time}>{m.text}</Bubble>
         ))}
         {typing && (
-          <div className="my-1.5 flex justify-start"><div className="rounded-2xl rounded-bl-sm bg-ink px-3 py-2 text-[13px] text-paper/50">typing</div></div>
+          <div className="my-1.5 flex justify-start"><div className="rounded-2xl rounded-bl-sm bg-ink px-3 py-2 text-[13px] text-paper/75">typing</div></div>
         )}
         <div ref={bottom} />
       </Phone>
@@ -340,21 +340,21 @@ export default function LeadEngineDemo() {
             <p className="mt-2 text-sm text-slate">Nothing yet. Every reply is read against this record before the assistant answers, so it never books twice, never forgets a time it offered, and never contradicts what was agreed.</p>
           ) : (
             <div className="mt-3 space-y-3">
-              <dl className="space-y-1.5 font-mono text-[12px] leading-relaxed">
+              <dl className="space-y-1.5 font-mono text-[13px] leading-relaxed">
                 <div><dt className="inline text-slate">Booking: </dt><dd className={`inline ${mem.booking ? 'text-moss font-semibold' : 'text-ink'}`}>{mem.booking ? fmtShort(mem.booking.at) : 'none'}</dd></div>
-                <div><dt className="inline text-slate">Waiting for: </dt><dd className="inline text-amber">{mem.pending ? (mem.pending.kind === 'cancel' ? 'a yes to cancel the booking' : `a yes to ${mem.pending.kind === 'reschedule' ? 'move to ' : ''}${fmtShort(mem.pending.at!)}`) : 'nothing'}</dd></div>
+                <div><dt className="inline text-slate">Waiting for: </dt><dd className="inline text-amber-ink">{mem.pending ? (mem.pending.kind === 'cancel' ? 'a yes to cancel the booking' : `a yes to ${mem.pending.kind === 'reschedule' ? 'move to ' : ''}${fmtShort(mem.pending.at!)}`) : 'nothing'}</dd></div>
                 <div><dt className="inline text-slate">Asked about: </dt><dd className="inline text-ink">{mem.asked.length ? Array.from(new Set(mem.asked)).join(', ') : 'nothing yet'}</dd></div>
                 <div><dt className="inline text-slate">Told us: </dt><dd className="inline text-ink">{mem.facts.length ? Array.from(new Set(mem.facts)).join('; ') : 'nothing yet'}</dd></div>
                 <div><dt className="inline text-slate">Visits: </dt><dd className="inline text-ink">{mem.outcomes.length ? mem.outcomes.join('; ') : 'none yet'}</dd></div>
               </dl>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-slate">Bookings table</p>
-                {ledger.length === 0 ? <p className="mt-1 text-[12px] text-slate">No rows yet. Nothing is written until the lead says yes to a specific time.</p> : (
+                <p className="font-mono text-[11px] uppercase tracking-wider text-slate">Bookings table</p>
+                {ledger.length === 0 ? <p className="mt-1 text-[13px] text-slate">No rows yet. Nothing is written until the lead says yes to a specific time.</p> : (
                   <ul className="mt-1 space-y-1">
                     {ledger.map((b) => (
                       <li key={b.id} className="flex items-center justify-between gap-2 rounded-lg bg-paper-2 px-2 py-1 font-mono text-[11px]">
                         <span className="text-ink">#{b.id} · {fmtShort(b.at)}</span>
-                        <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${b.status === 'booked' ? 'bg-moss text-paper' : b.status === 'attended' || b.status === 'joined' ? 'bg-lime text-ink' : 'bg-mist text-slate'}`}>{b.status}{b.from ? ` · from #${b.from}` : ''}</span>
+                        <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] uppercase tracking-wider ${b.status === 'booked' ? 'bg-moss text-paper' : b.status === 'attended' || b.status === 'joined' ? 'bg-lime text-ink' : 'bg-mist text-slate'}`}>{b.status}{b.from ? ` · from #${b.from}` : ''}</span>
                       </li>
                     ))}
                   </ul>
@@ -371,11 +371,11 @@ export default function LeadEngineDemo() {
               const items = all.filter((l) => l.stage === key)
               return (
                 <div key={key} className="min-h-[88px] rounded-xl bg-paper-2 p-2">
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-slate">{label} <span className="text-amber">{items.length}</span></p>
+                  <p className="font-mono text-[11px] uppercase tracking-wider text-slate">{label} <span className="text-amber-ink">{items.length}</span></p>
                   {items.map((l) => (
                     <div key={l.name} className={`mt-1.5 rounded-lg border bg-white px-2 py-1 text-[11px] ${lead && l.name === lead.name ? 'border-moss' : 'border-mist'}`}>
                       <p className="font-semibold text-ink">{l.name}</p>
-                      {l.slot && <p className="text-[10px] text-moss">{l.slot}</p>}
+                      {l.slot && <p className="text-[11px] text-moss">{l.slot}</p>}
                     </div>
                   ))}
                 </div>
@@ -393,11 +393,11 @@ export default function LeadEngineDemo() {
         </div>
 
         <div className="rounded-2xl bg-ink p-4 text-paper">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-paper/50">What the team sees, Telegram or WhatsApp</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-paper/75">What the team sees, Telegram or WhatsApp</p>
           <div className="mt-3 space-y-2">
-            {alerts.length === 0 && <p className="text-sm text-paper/40">Alerts appear here as the lead moves.</p>}
+            {alerts.length === 0 && <p className="text-sm text-paper/75">Alerts appear here as the lead moves.</p>}
             {alerts.map((a, i) => (
-              <div key={i} className="rounded-xl bg-ink-2 px-3 py-2 font-mono text-[12px] leading-relaxed text-paper/85">{a}</div>
+              <div key={i} className="rounded-xl bg-ink-2 px-3 py-2 font-mono text-[13px] leading-relaxed text-paper/92">{a}</div>
             ))}
           </div>
         </div>

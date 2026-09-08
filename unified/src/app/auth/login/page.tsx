@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -34,10 +35,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-paper text-ink antialiased">
       <header className="border-b border-mist/80">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">IQ</span>
-            gymIQ
-          </Link>
+          <LogoLink />
           <Link href="/" className="text-sm text-slate hover:text-ink">Back to the site</Link>
         </div>
       </header>

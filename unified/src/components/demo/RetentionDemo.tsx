@@ -60,11 +60,11 @@ export default function RetentionDemo() {
                       </div>
                     ) : task ? (
                       <div>
-                        <button onClick={() => markCalled(m.name)} className="rounded-full bg-moss px-3 py-1 text-xs font-semibold text-paper">Called, noted</button>
+                        <button onClick={() => markCalled(m.name)} className="whitespace-nowrap rounded-full bg-moss px-3 py-1 text-xs font-semibold text-paper">Called, noted</button>
                         <span className="mt-1 block text-[11px] text-slate">on the board{task.assignee ? `, ${task.assignee}` : ''}</span>
                       </div>
                     ) : (v.key === 'call' || v.key === 'watch') ? (
-                      <button onClick={() => markCalled(m.name)} className="rounded-full bg-moss px-3 py-1 text-xs font-semibold text-paper">Called, noted</button>
+                      <button onClick={() => markCalled(m.name)} className="whitespace-nowrap rounded-full bg-moss px-3 py-1 text-xs font-semibold text-paper">Called, noted</button>
                     ) : (
                       <span className="text-[11px] text-slate">not on the board</span>
                     )}

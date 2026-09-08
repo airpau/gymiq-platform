@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 import { DemoFrame } from '@/components/demo/DemoFrame'
 import LeadEngineDemo from '@/components/demo/LeadEngineDemo'
@@ -37,10 +38,7 @@ export default function DemoPage() {
     <div className="min-h-screen bg-paper text-ink antialiased">
       <header className="sticky top-0 z-30 border-b border-mist/80 bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">IQ</span>
-            gymIQ
-          </Link>
+          <LogoLink />
           <nav className="hidden gap-4 overflow-x-auto text-xs text-slate lg:flex">
             {TOOLS.map((t) => (
               <a key={t.id} href={`#${t.id}`} className="whitespace-nowrap hover:text-ink">{t.label}</a>
@@ -163,7 +161,7 @@ export default function DemoPage() {
       <section className="mt-16 bg-ink text-paper">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">All of it, on your club&apos;s real numbers, within a week.</h2>
-          <p className="mt-5 max-w-xl text-lg text-paper/80">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs, monthly business review included. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
+          <p className="mt-5 max-w-xl text-lg text-paper/90">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs, monthly business review included. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a href={WALKTHROUGH_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper">
               Book a 30 minute walkthrough

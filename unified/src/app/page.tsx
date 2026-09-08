@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
@@ -41,10 +42,7 @@ function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-mist/80 bg-paper/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-          <Logo />
-          <span>gymIQ</span>
-        </Link>
+        <LogoLink />
         <nav className="hidden items-center gap-7 text-sm text-slate md:flex">
           <Link href="/demo" className="transition hover:text-ink">Try the tools</Link>
           <Link href="/impact" className="transition hover:text-ink">What it made</Link>
@@ -65,14 +63,6 @@ function Nav() {
         </div>
       </div>
     </header>
-  )
-}
-
-function Logo() {
-  return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">
-      IQ
-    </span>
   )
 }
 
@@ -131,15 +121,15 @@ function BriefPhone() {
     <div className="relative mx-auto w-full max-w-[380px]">
       <div className="rounded-[36px] border border-ink-3 bg-ink p-3 shadow-[0_40px_80px_-30px_rgba(15,22,20,0.55)]">
         <div className="rounded-[26px] bg-ink-2 px-5 pb-5 pt-4 text-paper">
-          <div className="flex items-center justify-between font-mono text-[11px] text-paper/50">
+          <div className="flex items-center justify-between font-mono text-[11px] text-paper/75">
             <span>gymIQ</span>
             <span>06:00</span>
           </div>
           <p className="mt-4 font-display text-[15px] font-bold leading-snug text-paper">
             Morning brief, Mon 7 Sep
           </p>
-          <p className="mt-1 font-mono text-[12px] text-lime">£26,414 collected MTD · 1,472 active paying</p>
-          <pre className="mt-4 whitespace-pre-wrap font-mono text-[12px] leading-[1.6] text-paper/85">{`TOP 3
+          <p className="mt-1 font-mono text-[13px] text-lime">£26,414 collected MTD · 1,472 active paying</p>
+          <pre className="mt-4 whitespace-pre-wrap font-mono text-[13px] leading-[1.6] text-paper/92">{`TOP 3
 1. Retention is good. 7 leavers this month against 19 over the same six days of August. Roster up six days running.
 2. Selling is the problem. Joins project 77 against a 100 target.
 3. £1,884 of arrears across 47 members clears onto Friday's credit if worked before Wednesday.
@@ -147,7 +137,7 @@ function BriefPhone() {
 FAILURE RATE 6.77%, best of the month.
 FRIDAY CREDIT forecast £20,471.
 BOARD 12 overdue calls, 6 billing fixes, 46 queued.`}</pre>
-          <div className="mt-4 rounded-xl bg-ink px-3 py-2.5 font-mono text-[11px] text-paper/60">
+          <div className="mt-4 rounded-xl bg-ink px-3 py-2.5 font-mono text-[11px] text-paper/85">
             Reply: <span className="text-paper">who are the 47?</span>
           </div>
         </div>
@@ -187,17 +177,17 @@ function Proof() {
   return (
     <section className="bg-ink text-paper">
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/50">An énergie Fitness club in Hertfordshire, 1,617 members, July to September 2026</p>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/75">An énergie Fitness club in Hertfordshire, 1,617 members, July to September 2026</p>
         <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label}>
               <p className="whitespace-nowrap font-display text-[34px] font-extrabold tracking-tight text-lime sm:text-[44px]">{s.value}</p>
               <p className="mt-2 text-base font-semibold text-paper">{s.label}</p>
-              <p className="mt-1 text-sm text-paper/55">{s.note}</p>
+              <p className="mt-1 text-sm text-paper/80">{s.note}</p>
             </div>
           ))}
         </div>
-        <p className="mt-10 max-w-3xl text-sm leading-relaxed text-paper/60">
+        <p className="mt-10 max-w-3xl text-sm leading-relaxed text-paper/85">
           Every figure is from the club&apos;s own data and explained, bad months included, on the{' '}
           <Link href="/case-study" className="text-lime underline-offset-4 hover:underline">case study page</Link>. The club now clears its non payers from the roster every month on purpose, which is why the numbers are real.
         </p>
@@ -266,7 +256,7 @@ function Reaches() {
           <div className="lg:col-span-5">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">Where it reaches you</p>
             <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">WhatsApp, Telegram, email or SMS. Nobody logs in to find out.</h2>
-            <p className="mt-5 text-lg leading-relaxed text-paper/75">
+            <p className="mt-5 text-lg leading-relaxed text-paper/88">
               Every update about the club comes to the person who needs it, on the app they already use, and they can reply to it. Three levels of staff see three cuts of the same read. The task list works alongside your existing CRM, or stands on its own, and it is rewritten every morning for each member of staff as the club changes.
             </p>
             <Link href="/demo#alerts" className="mt-7 inline-flex items-center gap-2 text-base font-semibold text-lime">
@@ -274,11 +264,11 @@ function Reaches() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-ink-3 bg-ink-3 lg:col-span-7">
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl bg-mist lg:col-span-7">
             {roles.map((r) => (
-              <div key={r.who} className="bg-ink-2 p-6">
-                <h3 className="font-display text-xl font-bold text-paper">{r.who}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-paper/70">{r.sees}</p>
+              <div key={r.who} className="bg-paper p-6">
+                <h3 className="font-display text-xl font-bold text-ink">{r.who}</h3>
+                <p className="mt-2 text-base leading-relaxed text-slate">{r.sees}</p>
               </div>
             ))}
           </div>
@@ -316,7 +306,7 @@ function Impact() {
             <article key={st.title} className="rounded-3xl border border-mist bg-white p-6">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-display text-xl font-bold leading-tight text-ink">{st.title}</h3>
-                <span className="font-mono text-sm font-medium text-amber">{st.figure}</span>
+                <span className="font-mono text-sm font-medium text-amber-ink">{st.figure}</span>
               </div>
               <p className="mt-2 text-[15px] leading-relaxed text-slate">{st.body.split('. ').slice(0, 2).join('. ')}.</p>
             </article>
@@ -355,7 +345,7 @@ function Replaces() {
         {rows.map((r, idx) => (
           <div key={r.what} className={`grid grid-cols-1 gap-2 px-6 py-5 md:grid-cols-[minmax(0,1fr)_200px_minmax(0,1.6fr)] md:gap-8 ${idx > 0 ? 'border-t border-mist' : ''}`}>
             <h3 className="font-display text-lg font-bold text-ink">{r.what}</h3>
-            <p className="font-mono text-sm text-amber">{r.cost}</p>
+            <p className="font-mono text-sm text-amber-ink">{r.cost}</p>
             <p className="text-[15px] leading-relaxed text-slate">{r.does}</p>
           </div>
         ))}
@@ -430,7 +420,7 @@ function WhatItFinds() {
             <div key={r.what} className={`grid grid-cols-1 gap-3 px-6 py-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_150px] md:items-baseline md:gap-8 ${idx > 0 ? 'border-t border-mist' : ''}`}>
               <h3 className="font-display text-lg font-bold leading-snug text-ink">{r.what}</h3>
               <p className="text-[15px] leading-relaxed text-slate">{r.found}</p>
-              <p className="font-mono text-sm font-medium text-amber md:text-right">{r.worth}</p>
+              <p className="font-mono text-sm font-medium text-amber-ink md:text-right">{r.worth}</p>
             </div>
           ))}
         </div>
@@ -494,24 +484,24 @@ function Pricing() {
           <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-paper sm:text-5xl">
             One set fee per club, and it has to pay for itself.
           </h2>
-          <p className="mt-4 text-base text-paper/60">Monthly. No setup fee. No usage charges. Cancel with a month&apos;s notice. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
+          <p className="mt-4 text-base text-paper/85">Monthly. No setup fee. No usage charges. Cancel with a month&apos;s notice. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
-          <div className="rounded-3xl border border-ink-3 bg-ink-2 p-8 lg:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-lime">Founding clubs · {FOUNDING_SLOTS} places</p>
+          <div className="rounded-3xl bg-paper p-8 text-ink lg:col-span-3">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Founding clubs · {FOUNDING_SLOTS} places</p>
             <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="font-display text-6xl font-extrabold tracking-tight text-paper">£{FOUNDING_PRICE}</span>
-              <span className="text-base text-paper/60">a month, per club, locked for twelve months</span>
+              <span className="font-display text-6xl font-extrabold tracking-tight text-ink">£{FOUNDING_PRICE}</span>
+              <span className="text-base text-slate">a month, per club, locked for twelve months</span>
             </p>
-            <p className="mt-2 text-sm text-paper/50">List price £{PRICE_PER_CLUB}. The first {FOUNDING_SLOTS} clubs keep the founding rate for a year and shape what gets built next.</p>
-            <p className="mt-3 text-[15px] text-paper/70">
+            <p className="mt-2 text-sm text-slate">List price £{PRICE_PER_CLUB}. The first {FOUNDING_SLOTS} clubs keep the founding rate for a year and shape what gets built next.</p>
+            <p className="mt-3 text-[15px] text-ink">
               On a 1,000 member club that is about 30p per member per month. Ten recovered payments, or one member kept for a year, covers it. The Hertfordshire club&apos;s first year came to six figures on a conservative count.
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {included.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-[15px] text-paper/85">
-                  <Check className="mt-1 h-4 w-4 flex-shrink-0 text-lime" strokeWidth={2.5} />
+                <li key={f} className="flex items-start gap-2.5 text-[15px] text-ink">
+                  <Check className="mt-1 h-4 w-4 flex-shrink-0 text-moss" strokeWidth={2.5} />
                   {f}
                 </li>
               ))}
@@ -519,27 +509,27 @@ function Pricing() {
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <a
                 href={START_HREF}
-                className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-paper"
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-moss"
               >
                 Start at £{FOUNDING_PRICE} a month
                 <ArrowRight className="h-4 w-4" />
               </a>
               <a
                 href={WALKTHROUGH_HREF}
-                className="inline-flex items-center gap-2 rounded-full border border-paper/30 px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-paper/10"
+                className="inline-flex items-center gap-2 rounded-full border border-ink/25 px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-ink hover:text-paper"
               >
                 Book a walkthrough first
               </a>
             </div>
           </div>
 
-          <div className="flex flex-col rounded-3xl border border-ink-3 p-8 lg:col-span-2">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/50">Groups and franchises</p>
+          <div className="flex flex-col rounded-3xl bg-ink-2 p-8 lg:col-span-2">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-paper/75">Groups and franchises</p>
             <p className="mt-4 font-display text-2xl font-bold text-paper">Per club, priced on numbers</p>
-            <p className="mt-3 text-[15px] leading-relaxed text-paper/70">
+            <p className="mt-3 text-[15px] leading-relaxed text-paper/85">
               Each club keeps its own login and its own board. The owner or area manager gets one brief across all of them. Talk to us about three clubs or more.
             </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-paper/70">
+            <p className="mt-4 text-[15px] leading-relaxed text-paper/85">
               énergie clubs: the Friday credit, the monthly reconciliation and the franchise fee are already modelled, so the cash forecast works from day one.
             </p>
             <a
@@ -615,7 +605,7 @@ function FinalCta() {
         <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight text-paper sm:text-5xl">
           See your own club&apos;s first brief.
         </h2>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-paper/80">
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-paper/90">
           A 20 minute call, a login, and your first morning brief lands within a week. If it finds nothing, you will have lost twenty minutes.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -623,7 +613,7 @@ function FinalCta() {
             Book a walkthrough
             <ArrowRight className="h-4 w-4" />
           </a>
-          <span className="text-sm text-paper/70">Or email {CONTACT}</span>
+          <span className="text-sm text-paper/85">Or email {CONTACT}</span>
         </div>
       </div>
     </section>
@@ -638,10 +628,7 @@ function Footer() {
   return (
     <footer className="border-t border-mist bg-paper">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-10 sm:flex-row sm:items-center sm:px-8">
-        <Link href="/" className="flex items-center gap-2 font-display text-base font-bold text-ink">
-          <Logo />
-          gymIQ
-        </Link>
+        <LogoLink size="sm" />
         <p className="text-xs text-slate">© {new Date().getFullYear()} GymIQ AI Ltd · Made in Hertfordshire · {CONTACT}</p>
         <nav className="flex items-center gap-5 text-xs text-slate">
           <a href="#day" className="hover:text-ink">What it does</a>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 import { CONTACT, FOUNDING_PRICE, FOUNDING_SLOTS, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
@@ -34,10 +35,7 @@ export default function AiGymManagementSoftwarePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <header className="border-b border-mist/80 bg-paper/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-ink">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-moss font-mono text-[11px] font-semibold text-lime">IQ</span>
-            gymIQ
-          </Link>
+          <LogoLink />
           <nav className="flex items-center gap-5 text-sm text-slate">
             <Link href="/demo" className="hover:text-ink">Try the tools</Link>
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
@@ -99,14 +97,14 @@ export default function AiGymManagementSoftwarePage() {
               {who.map(([h, p]) => (
                 <div key={h} className="rounded-2xl border border-ink-3 p-6">
                   <h3 className="font-display text-lg font-bold text-lime">{h}</h3>
-                  <p className="mt-2 text-[15px] leading-relaxed text-paper/80">{p}</p>
+                  <p className="mt-2 text-[15px] leading-relaxed text-paper/90">{p}</p>
                 </div>
               ))}
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-4 rounded-2xl bg-ink-2 p-6">
               <div className="flex-1">
                 <p className="font-display text-2xl font-bold">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs.</p>
-                <p className="mt-1 text-paper/70">Fixed for twelve months, list £{PRICE_PER_CLUB}. No setup fee, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.</p>
+                <p className="mt-1 text-paper/85">Fixed for twelve months, list £{PRICE_PER_CLUB}. No setup fee, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.</p>
               </div>
               <a href={START_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink hover:bg-paper">Start at £{FOUNDING_PRICE} a month <ArrowRight className="h-4 w-4" /></a>
             </div>

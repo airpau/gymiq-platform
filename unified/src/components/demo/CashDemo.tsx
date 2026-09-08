@@ -31,7 +31,7 @@ export default function CashDemo() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
       <div className="space-y-5 rounded-2xl border border-mist bg-white p-5">
         <div className="flex items-center gap-2 rounded-xl bg-amber-soft px-3 py-2 text-xs text-ink">
-          <span className="rounded-full bg-amber px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-paper">In testing</span>
+          <span className="rounded-full bg-amber px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-paper">In testing</span>
           <span>Live at one club. Your payout schedule and fee rate are set on the setup call, then the forecast is checked against your first month of credits before it goes in your brief.</span>
         </div>
         <div>
@@ -49,18 +49,18 @@ export default function CashDemo() {
         </div>
       </div>
       <div className="rounded-2xl bg-ink p-5 text-paper">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-paper/50">This Friday, 11 September</p>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-paper/75">This Friday, 11 September</p>
         <p className="mt-1 font-display text-5xl font-extrabold tracking-tight text-lime">{gbp(friday)}</p>
-        <p className="text-xs text-paper/50">range {gbp(friday * 0.9)} to {gbp(friday * 1.05)}</p>
+        <p className="text-xs text-paper/75">range {gbp(friday * 0.9)} to {gbp(friday * 1.05)}</p>
         <dl className="mt-6 divide-y divide-ink-3 border-t border-ink-3 text-sm">
-          <div className="flex justify-between py-2.5"><dt className="text-paper/80">Settled by Wednesday</dt><dd className="font-mono">{gbp(settledByWed)}</dd></div>
-          <div className="flex justify-between py-2.5"><dt className="text-paper/80">Pending that clears</dt><dd className="font-mono">{gbp(pendingIn)}</dd></div>
-          <div className="flex justify-between py-2.5"><dt className="text-paper/80">Arrears recovered in time</dt><dd className="font-mono text-lime">{gbp(worked)}</dd></div>
-          <div className="flex justify-between py-2.5"><dt className="text-paper/80">Processor fees</dt><dd className="font-mono">−{gbp(fees)}</dd></div>
+          <div className="flex justify-between py-2.5"><dt className="text-paper/90">Settled by Wednesday</dt><dd className="font-mono">{gbp(settledByWed)}</dd></div>
+          <div className="flex justify-between py-2.5"><dt className="text-paper/90">Pending that clears</dt><dd className="font-mono">{gbp(pendingIn)}</dd></div>
+          <div className="flex justify-between py-2.5"><dt className="text-paper/90">Arrears recovered in time</dt><dd className="font-mono text-lime">{gbp(worked)}</dd></div>
+          <div className="flex justify-between py-2.5"><dt className="text-paper/90">Processor fees</dt><dd className="font-mono">−{gbp(fees)}</dd></div>
           <div className="flex justify-between py-2.5"><dt className="font-semibold text-paper">Paid Friday</dt><dd className="font-mono font-semibold">{gbp(friday)}</dd></div>
-          <div className="flex justify-between py-2.5"><dt className="text-paper/80">Next Friday, forecast</dt><dd className="font-mono">{gbp(nextFriday)}</dd></div>
+          <div className="flex justify-between py-2.5"><dt className="text-paper/90">Next Friday, forecast</dt><dd className="font-mono">{gbp(nextFriday)}</dd></div>
         </dl>
-        <p className="mt-4 font-mono text-[11px] leading-relaxed text-paper/60">Wed 9 Sep 16:00 alert: £{Math.round(leftUnworked).toLocaleString('en-GB')} of arrears not yet retried. Anything after tonight lands on 18 September, not the 11th.</p>
+        <p className="mt-4 font-mono text-[11px] leading-relaxed text-paper/85">Wed 9 Sep 16:00 alert: £{Math.round(leftUnworked).toLocaleString('en-GB')} of arrears not yet retried. Anything after tonight lands on 18 September, not the 11th.</p>
       </div>
     </div>
   )

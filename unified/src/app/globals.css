@@ -24,8 +24,15 @@
   --color-moss-soft: #DDEDE9;
   --color-lime: #C9F27A;
   --color-amber: #E0A94A;
+  /* Amber for text on light surfaces; the badge amber fails contrast as type. */
+  --color-amber-ink: #8F5E0A;
   --color-amber-soft: #F7EBD3;
   --color-signal: #B03A2E;
+}
+
+html {
+  /* 17px base: the site reads on phones at arm's length and on desks across a room. */
+  font-size: 17px;
 }
 
 html, body {

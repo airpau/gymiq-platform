@@ -78,13 +78,13 @@ export default function BriefDemo() {
         sub={`${run} · ${RUNS[run].label}`}
         footer={
           <div className="flex gap-2">
-            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ask()} placeholder="Ask the brief..." aria-label="Ask the brief" className="flex-1 rounded-full bg-ink px-4 py-2 text-sm text-paper placeholder-paper/40 focus:outline-none focus:ring-2 focus:ring-moss/40" />
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ask()} placeholder="Ask the brief..." aria-label="Ask the brief" className="flex-1 rounded-full bg-ink px-4 py-2 text-sm text-paper placeholder-paper/70 focus:outline-none focus:ring-2 focus:ring-moss/40" />
             <button onClick={() => ask()} className="rounded-full bg-moss px-4 py-2 text-sm font-semibold text-paper hover:bg-moss-deep">Ask</button>
           </div>
         }
       >
         <div className="rounded-2xl bg-ink px-3 py-3">
-          <pre className="whitespace-pre-wrap font-mono text-[11.5px] leading-[1.6] text-paper/85">{RUNS[run].text}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-[11.5px] leading-[1.6] text-paper/92">{RUNS[run].text}</pre>
         </div>
         {thread.map((m, i) => (
           <Bubble key={i} from={m.from} time={m.time}>{m.text}</Bubble>
