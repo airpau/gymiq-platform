@@ -3,7 +3,7 @@ import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
-import { PRICE_PER_CLUB, FOUNDING_PRICE, FOUNDING_SLOTS, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
 
 export const metadata = {
@@ -102,7 +102,7 @@ function Hero() {
             <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Bullet>Works with {SYSTEMS}. Nothing to migrate.</Bullet>
               <Bullet>Each club connects its own login. Read only.</Bullet>
-              <Bullet>£{FOUNDING_PRICE} a month for the first {FOUNDING_SLOTS} clubs, review included. £{PRICE_PER_CLUB} after.</Bullet>
+              <Bullet>£{PRICE_PER_CLUB} a month per club, monthly business review included.</Bullet>
               <Bullet>Six figures made and saved at one club in its first year. Every line shown.</Bullet>
             </ul>
           </div>
@@ -294,7 +294,7 @@ function Impact() {
             Six figures in year one, at one club.
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-slate">
-            Collection, pricing, retention, a refit bought for tens of thousands less, and the analyst the club no longer needs to hire. Counted line by line against the club&apos;s own records, with the assumption written next to every number, and a calculator for what it would find in yours. The fee for the year was under £6,000; the conservative count came to more than {Math.floor(t.conservative / (PRICE_PER_CLUB * 12) / 5) * 5} times that.
+            Collection, pricing, retention, a refit bought for tens of thousands less, and the analyst the club no longer needs to hire. Counted line by line against the club&apos;s own records, with the assumption written next to every number, and a calculator for what it would find in yours. The fee for the year was under £4,000; the conservative count came to more than {Math.floor(t.conservative / (PRICE_PER_CLUB * 12) / 5) * 5} times that.
           </p>
           <Link href="/impact" className="mt-7 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-ink-2">
             See the whole ledger
@@ -489,13 +489,12 @@ function Pricing() {
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="rounded-3xl bg-paper p-8 text-ink lg:col-span-3">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Founding clubs · {FOUNDING_SLOTS} places</p>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Per club</p>
             <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="font-display text-6xl font-extrabold tracking-tight text-ink">£{FOUNDING_PRICE}</span>
-              <span className="text-base text-slate">a month, per club, locked for twelve months</span>
+              <span className="font-display text-6xl font-extrabold tracking-tight text-ink">£{PRICE_PER_CLUB}</span>
+              <span className="text-base text-slate">a month, per club, excluding VAT</span>
             </p>
-            <p className="mt-2 text-sm text-slate">List price £{PRICE_PER_CLUB}. The first {FOUNDING_SLOTS} clubs keep the founding rate for a year and shape what gets built next.</p>
-            <p className="mt-3 text-[15px] text-ink">
+                        <p className="mt-3 text-[15px] text-ink">
               On a 1,000 member club that is about 30p per member per month. Ten recovered payments, or one member kept for a year, covers it. The Hertfordshire club&apos;s first year came to six figures on a conservative count.
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -511,7 +510,7 @@ function Pricing() {
                 href={START_HREF}
                 className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-paper transition hover:bg-moss"
               >
-                Start at £{FOUNDING_PRICE} a month
+                Start at £{PRICE_PER_CLUB} a month
                 <ArrowRight className="h-4 w-4" />
               </a>
               <a

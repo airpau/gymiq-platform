@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
-import { CONTACT, FOUNDING_PRICE, FOUNDING_SLOTS, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { CONTACT, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
 
 export const metadata = {
   title: 'AI gym management software for gym owners',
   description:
-    'What AI gym management software should actually do for a gym owner: read the software you already have, tell your staff who to call, retry failed payments properly, catch drifting members before they cancel, answer leads in seconds, and put the numbers on your phone by 06:00. gymIQ does this, live at a UK club, from £' + FOUNDING_PRICE + ' a month.',
+    'What AI gym management software should actually do for a gym owner: read the software you already have, tell your staff who to call, retry failed payments properly, catch drifting members before they cancel, answer leads in seconds, and put the numbers on your phone by 06:00. gymIQ does this, live at a UK club, £' + PRICE_PER_CLUB + ' a month per club.',
   alternates: { canonical: '/ai-gym-management-software' },
 }
 
@@ -103,10 +103,10 @@ export default function AiGymManagementSoftwarePage() {
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-4 rounded-2xl bg-ink-2 p-6">
               <div className="flex-1">
-                <p className="font-display text-2xl font-bold">£{FOUNDING_PRICE} a month per club for the first {FOUNDING_SLOTS} clubs.</p>
-                <p className="mt-1 text-paper/85">Fixed for twelve months, list £{PRICE_PER_CLUB}. No setup fee, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.</p>
+                <p className="font-display text-2xl font-bold">£{PRICE_PER_CLUB} a month per club.</p>
+                <p className="mt-1 text-paper/85">No setup fee, cancel with a month’s notice, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.</p>
               </div>
-              <a href={START_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink hover:bg-paper">Start at £{FOUNDING_PRICE} a month <ArrowRight className="h-4 w-4" /></a>
+              <a href={START_HREF} className="inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink hover:bg-paper">Start at £{PRICE_PER_CLUB} a month <ArrowRight className="h-4 w-4" /></a>
             </div>
           </div>
         </section>

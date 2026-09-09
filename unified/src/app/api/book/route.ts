@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { z } from 'zod'
-import { CONTACT, FOUNDING_PRICE } from '@/lib/site'
+import { CONTACT, PRICE_PER_CLUB } from '@/lib/site'
 
 export const runtime = 'nodejs'
 
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   if (apiKey) {
     const resend = new Resend(apiKey)
     const from = process.env.RESEND_FROM_EMAIL ?? 'gymIQ <audit@gymiq.ai>'
-    const what = p.intent === 'start' ? `wants to start gymIQ (£${FOUNDING_PRICE} a month founding rate)` : 'wants a walkthrough call'
+    const what = p.intent === 'start' ? `wants to start gymIQ (£${PRICE_PER_CLUB} a month)` : 'wants a walkthrough call'
     const lines = [
       `${p.firstName} at ${p.gymName} ${what}.`,
       `Email: ${p.email}`,

@@ -1,4 +1,4 @@
-import { SYSTEMS, FOUNDING_PRICE, FOUNDING_SLOTS, PRICE_PER_CLUB } from './site'
+import { SYSTEMS, PRICE_PER_CLUB } from './site'
 
 /** The homepage FAQ. Also emitted as FAQPage structured data so search engines and AI assistants can quote it. */
 export const FAQ: Array<{ q: string; a: string }> = [
@@ -7,7 +7,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   { q: 'Which systems does it work with?', a: `${SYSTEMS}. If your software can produce a memberships report and a sales report, gymIQ can read it. The Hertfordshire club runs on Glofox, so that connection is the most worn in.` },
   { q: 'Who is it for?', a: 'Independent gym owners, franchise club operators, boutique studios, health clubs and personal training businesses with a membership book, in the UK first. If you have between 200 and 5,000 members and nobody whose job is to read the numbers every day, it is built for you.' },
   { q: 'Does it contact my members?', a: 'Not by default. The board tells your staff who to call and why. Automated retries of failed payments run inside your system’s own rules. Any messaging to members is switched on per club, by you, in writing.' },
-  { q: 'What does it cost?', a: `£${FOUNDING_PRICE} a month per club for the first ${FOUNDING_SLOTS} founding clubs, fixed for twelve months (list price £${PRICE_PER_CLUB}). No setup fee, cancel with a month’s notice, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.` },
+  { q: 'What does it cost?', a: `£${PRICE_PER_CLUB} a month per club, excluding VAT. No setup fee, cancel with a month’s notice, monthly business review included. If a month’s review cannot show at least the fee in found money, that month is free.` },
   { q: 'What does it need from me?', a: 'A login for the club, ideally a read only staff account created for gymIQ. And an hour on a call so the brief is written the way you think.' },
   { q: 'What happens on the monthly review?', a: 'Forty five minutes with us, on the phone or a call. What the system found, what your team acted on, what it was worth, and the one or two decisions for next month: a price, a plan, a supplier, a hire. You leave with a number for the month and a plan. As the product matures the review will become optional, but early clubs keep it at no extra cost.' },
   { q: 'Will it work if my front desk is part time?', a: 'That is who it is built for. The board is capped at a list a small desk can clear in an hour, and the evening report tells you who cleared what. If nothing gets ticked, you will know by 22:00, not at month end.' },

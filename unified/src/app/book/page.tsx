@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, CalendarCheck } from 'lucide-react'
 import BookForm from '@/components/marketing/BookForm'
-import { CONTACT, PRICE_PER_CLUB, FOUNDING_PRICE, FOUNDING_SLOTS, STRIPE_CHECKOUT_URL, CALENDLY_URL } from '@/lib/site'
+import { CONTACT, PRICE_PER_CLUB, STRIPE_CHECKOUT_URL, CALENDLY_URL } from '@/lib/site'
 
 export const metadata = {
   title: 'Book a walkthrough',
@@ -45,7 +45,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-slate">
             {intent === 'start'
-              ? `£${FOUNDING_PRICE} a month per club as one of the first ${FOUNDING_SLOTS} founding clubs (list price £${PRICE_PER_CLUB}, your rate fixed for twelve months), no setup fee, cancel with a month's notice, and the monthly business review is included. Pay by card now or tell me about the club and I will call to set up the connection and book your first review. If a month's review cannot show at least the fee in found money, that month is free.`
+              ? `£${PRICE_PER_CLUB} a month per club, no setup fee, cancel with a month's notice, and the monthly business review is included. Pay by card now or tell me about the club and I will call to set up the connection and book your first review. If a month's review cannot show at least the fee in found money, that month is free.`
               : 'Pick a slot that suits you. No slides. You tell me about the club, I show you what gymIQ finds in a membership export like yours, and you leave with your own numbers whether or not you go ahead. I am a gym owner, not a salesperson.'}
           </p>
           <ul className="mt-8 space-y-3 text-[15px] text-ink">
@@ -58,7 +58,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           </ul>
           {intent === 'start' && STRIPE_CHECKOUT_URL && !paid && (
             <a href={STRIPE_CHECKOUT_URL} className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3.5 text-base font-semibold text-ink transition hover:bg-moss hover:text-paper">
-              Pay by card now, £{FOUNDING_PRICE} a month
+              Pay by card now, £{PRICE_PER_CLUB} a month
               <ArrowRight className="h-4 w-4" />
             </a>
           )}
