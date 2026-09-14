@@ -5,8 +5,9 @@
  * ask it questions. Answers are scripted from a fixed club day so the demo
  * never needs a server.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Phone, Bubble, now } from './DemoFrame'
+import { useStickToBottom } from './useStickToBottom'
 
 const RUNS: Record<string, { label: string; text: string }> = {
   '06:00': {
@@ -60,7 +61,7 @@ export default function BriefDemo() {
   const [thread, setThread] = useState<Array<{ from: 'club' | 'lead'; text: string; time?: string }>>([])
   const [input, setInput] = useState('')
   const bottom = useRef<HTMLDivElement>(null)
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }) }, [thread])
+  useStickToBottom(bottom, [thread], thread.length ? 'bottom' : 'top')
 
   function ask(q?: string) {
     const text = (q ?? input).trim()

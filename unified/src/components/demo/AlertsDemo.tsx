@@ -7,6 +7,7 @@
  * to it and get an answer (scripted from the same fixed club day).
  */
 import { useEffect, useRef, useState } from 'react'
+import { useStickToBottom } from './useStickToBottom'
 
 type Role = 'owner' | 'manager' | 'desk'
 type Channel = 'whatsapp' | 'telegram' | 'email' | 'sms'
@@ -111,7 +112,7 @@ export default function AlertsDemo() {
   const canReply = channel !== 'email' && channel !== 'sms'
 
   useEffect(() => { setThread([]); setDraft('') }, [role, channel, which])
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [thread, typing])
+  useStickToBottom(bottom, [thread, typing], thread.length ? 'bottom' : 'top')
 
   function send() {
     const q = draft.trim()

@@ -9,6 +9,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { Phone, Bubble, now } from './DemoFrame'
+import { useStickToBottom } from './useStickToBottom'
 
 const FACTS = {
   hours: 'Open 05:30 to 22:00 weekdays, 07:00 to 20:00 weekends. Staffed 08:00 to 20:00; 24 hour access with your fob outside those times.',
@@ -50,7 +51,7 @@ export default function MemberChatDemo() {
   const [typing, setTyping] = useState(false)
   const [log, setLog] = useState<string[]>([])
   const bottom = useRef<HTMLDivElement>(null)
-  useEffect(() => { bottom.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }, [thread, typing])
+  useStickToBottom(bottom, [thread, typing])
   // Stamp the greeting on the client only, so the server and client markup match.
   useEffect(() => { setThread((t) => (t[0]?.time ? t : [{ ...t[0], time: now() }, ...t.slice(1)])) }, [])
 

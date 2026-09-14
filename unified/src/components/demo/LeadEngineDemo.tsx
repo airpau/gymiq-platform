@@ -11,8 +11,9 @@
  * Nothing here calls a server. The production engine uses a language model
  * for understanding and wording; the rules and the memory are the same.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Phone, Bubble, now } from './DemoFrame'
+import { useStickToBottom } from './useStickToBottom'
 
 type Stage = 'new' | 'contacted' | 'replied' | 'booked' | 'showed' | 'no_show' | 'handover' | 'cold' | 'opted_out'
 type BookingStatus = 'booked' | 'rescheduled' | 'cancelled' | 'attended' | 'no_show' | 'joined'
@@ -120,7 +121,7 @@ export default function LeadEngineDemo() {
   const bottom = useRef<HTMLDivElement>(null)
   const nextId = useRef(1)
 
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, typing])
+  useStickToBottom(bottom, [msgs, typing])
 
   function push(m: Msg) { setMsgs((s) => [...s, m]) }
   function alert(a: string) { setAlerts((s) => [a, ...s]) }
