@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Meta Pixel and Google tag, loaded only when their IDs are set in the
- * environment, so a preview build never fires real conversions.
+ * Meta Pixel and Google tag. Loaded only when the visitor has accepted
+ * advertising cookies (see lib/analytics/consent) and the IDs are set.
  *
  *   NEXT_PUBLIC_META_PIXEL_ID         e.g. 1234567890 (falls back to the gymIQ pixel in lib/site)
  *   NEXT_PUBLIC_GOOGLE_ADS_ID         e.g. AW-123456789
@@ -23,8 +23,11 @@
  * and identifyLead() ties the PostHog visitor to the lead row by lead id
  * only, so no name, email or phone goes to PostHog.
  */
+import { useEffect } from 'react'
 import Script from 'next/script'
 import posthog from 'posthog-js'
+import { hasAnalyticsConsent, onConsentChange } from '@/lib/analytics/consent'
+import { useConsent } from '@/components/analytics/useConsent'
 import { META_PIXEL_ID } from '@/lib/site'
 
 const PIXEL = META_PIXEL_ID
@@ -39,6 +42,26 @@ declare global {
 }
 
 export default function AdTracking() {
+  const { consent } = useConsent()
+  const ads = consent?.ads === true
+
+  // Withdrawn after the pixel loaded on this page: stop it sending anything more.
+  useEffect(
+    () =>
+      onConsentChange((c, prev) => {
+        try {
+          // The pixel script only runs once per page, so a change of mind on
+          // the same page is passed to the already loaded pixel.
+          if (prev?.ads && !c.ads) window.fbq?.('consent', 'revoke')
+          if (prev && !prev.ads && c.ads) window.fbq?.('consent', 'grant')
+        } catch {
+          // ignore
+        }
+      }),
+    [],
+  )
+
+  if (!ads) return null
   return (
     <>
       {PIXEL && (
@@ -85,6 +108,8 @@ function ph(event: string, props: Record<string, unknown> = {}) {
 export function identifyLead(leadId: string, props: { form: string; gym_name?: string; software?: string | null; members?: string | null }) {
   try {
     if (typeof window === 'undefined' || !leadId) return
+    // Linking a visitor to a lead is individual tracking: only with analytics consent.
+    if (!hasAnalyticsConsent()) return
     posthog.identify(`lead:${leadId}`, { lead_id: leadId, ...props })
   } catch {
     // ignore

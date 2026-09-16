@@ -28,6 +28,8 @@ export interface Attribution {
   landing_page?: string
   referrer?: string
   first_seen?: string
+  /** 'page_url' when taken from the form's page address rather than the cookie. */
+  source?: string
   /** Most recent tagged visit, when it differs from the first. */
   last?: Omit<Attribution, 'last'>
 }
@@ -144,6 +146,36 @@ export function captureAttribution(): Attribution | null {
   } catch {
     return null
   }
+}
+
+/**
+ * Server: attribution from the page address a form was sent from. Used when
+ * there is no gymiq_attr cookie (no advertising consent): the utm tags in the
+ * link the visitor is on are part of what they sent us, nothing is read from
+ * their device. Ad click ids are left out without consent.
+ */
+export function attributionFromUrl(url: string | null | undefined): Attribution | null {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    const tags = pick(u.searchParams)
+    delete tags.fbclid
+    delete tags.gclid
+    if (!tags.utm_source) return null
+    const params = new URLSearchParams(u.search)
+    params.delete('fbclid')
+    params.delete('gclid')
+    params.delete('l')
+    const qs = params.toString()
+    return { ...tags, landing_page: u.pathname + (qs ? `?${qs}` : ''), first_seen: new Date().toISOString(), source: 'page_url' } as Attribution
+  } catch {
+    return null
+  }
+}
+
+/** Server: cookie attribution when there is one, else what the page address carries. */
+export function requestAttribution(cookieHeader: string | null | undefined, pageUrl: string | null | undefined): Attribution | null {
+  return attributionFromCookieHeader(cookieHeader) ?? attributionFromUrl(pageUrl)
 }
 
 /** Server: pull attribution from a Next request's cookie jar. */

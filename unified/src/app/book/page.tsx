@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, CalendarCheck } from 'lucide-react'
 import BookForm from '@/components/marketing/BookForm'
+import CalendlyEmbed from '@/components/marketing/CalendlyEmbed'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 import { CONTACT, PRICE_PER_CLUB, STRIPE_CHECKOUT_URL, CALENDLY_URL } from '@/lib/site'
 
 export const metadata = {
@@ -9,8 +11,6 @@ export const metadata = {
   description: 'Pick a 30 minute slot with the gym owner who built gymIQ. Bring your membership export and leave with your own numbers.',
   alternates: { canonical: '/book' },
 }
-
-const calendlyEmbed = `${CALENDLY_URL}?hide_gdpr_banner=1&hide_landing_page_details=1&background_color=ffffff&text_color=0f1614&primary_color=0f6e63`
 
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ intent?: string; paid?: string }> }) {
   const sp = await searchParams
@@ -75,12 +75,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
         <div className="space-y-6">
           {intent === 'walkthrough' && (
             <div className="overflow-hidden rounded-3xl border border-mist bg-white shadow-sm">
-              <iframe
-                src={calendlyEmbed}
-                title="Pick a time for your gymIQ walkthrough"
-                className="h-[720px] w-full"
-                loading="lazy"
-              />
+              <CalendlyEmbed url={CALENDLY_URL} title="Pick a time for your gymIQ walkthrough" />
             </div>
           )}
           <div className="rounded-3xl border border-mist bg-white p-6 shadow-sm sm:p-8">
@@ -89,6 +84,16 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           </div>
         </div>
       </main>
+      <footer className="border-t border-mist">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-slate sm:px-8">
+          <span>gymIQ · GymIQ AI Ltd · {CONTACT}</span>
+          <span className="flex gap-4">
+            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink">Terms</Link>
+            <CookieSettingsLink />
+          </span>
+        </div>
+      </footer>
     </div>
   )
 }

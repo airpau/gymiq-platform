@@ -22,7 +22,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { z } from 'zod'
 import { CONTACT } from '@/lib/site'
-import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
+import { requestAttribution } from '@/lib/analytics/attribution'
 import { sendMetaLead } from '@/lib/analytics/meta-capi'
 
 export const runtime = 'nodejs'
@@ -39,6 +39,8 @@ const Schema = z.object({
   sourceUrl: z.string().trim().max(500).optional().nullable(),
   fbp: z.string().trim().max(120).optional().nullable(),
   fbc: z.string().trim().max(200).optional().nullable(),
+  /** The visitor accepted advertising cookies. Without it nothing is sent to Meta. */
+  adConsent: z.boolean().optional().default(false),
   company_url_hp: z.string().optional(), // honeypot
 })
 
@@ -57,11 +59,11 @@ export async function POST(req: NextRequest) {
   if (!supabase) return NextResponse.json({ error: 'Storage not configured' }, { status: 500 })
 
   const email = p.email.toLowerCase()
-  const attribution = attributionFromCookieHeader(req.headers.get('cookie'))
   const userAgent = req.headers.get('user-agent') ?? null
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
   const eventId = p.eventId || `lead-${Date.now()}`
   const sourceUrl = p.sourceUrl || req.headers.get('referer') || req.nextUrl.origin
+  const attribution = requestAttribution(req.headers.get('cookie'), sourceUrl)
 
   // Keep anything the row already holds (an earlier partial fill, or a
   // completed audit) and never downgrade a completed audit to requested.
@@ -80,6 +82,7 @@ export async function POST(req: NextRequest) {
     attribution: (prior.attribution as Record<string, unknown> | undefined) ?? attribution ?? null,
     requested_at: (prior.requested_at as string | undefined) ?? new Date().toISOString(),
     request_page: sourceUrl,
+    ad_consent: p.adConsent,
   }
 
   const { data, error } = await supabase
@@ -110,8 +113,10 @@ export async function POST(req: NextRequest) {
   const uploadUrl = `${appUrl}/audit?l=${leadId}`
 
   after(async () => {
-    const meta = await sendMetaLead({ email, phone: p.phone, firstName: p.firstName, eventId, sourceUrl, userAgent, ip, fbp: p.fbp, fbc: p.fbc })
-    if (!meta.sent && meta.error !== 'not configured') console.warn('[leads/request] Meta CAPI:', meta.error)
+    if (p.adConsent) {
+      const meta = await sendMetaLead({ email, phone: p.phone, firstName: p.firstName, eventId, sourceUrl, userAgent, ip, fbp: p.fbp, fbc: p.fbc })
+      if (!meta.sent && meta.error !== 'not configured') console.warn('[leads/request] Meta CAPI:', meta.error)
+    }
 
     const apiKey = process.env.RESEND_API_KEY
     if (!apiKey) return

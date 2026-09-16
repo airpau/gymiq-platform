@@ -17,7 +17,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { z } from 'zod'
 import { CONTACT, PRICE_PER_CLUB } from '@/lib/site'
-import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
+import { requestAttribution } from '@/lib/analytics/attribution'
 import { sendMetaEvent } from '@/lib/analytics/meta-capi'
 
 export const runtime = 'nodejs'
@@ -37,6 +37,8 @@ const Schema = z.object({
   sourceUrl: z.string().trim().max(500).optional().nullable(),
   fbp: z.string().trim().max(120).optional().nullable(),
   fbc: z.string().trim().max(200).optional().nullable(),
+  /** The visitor accepted advertising cookies. Without it nothing is sent to Meta. */
+  adConsent: z.boolean().optional().default(false),
   company_url_hp: z.string().optional(), // honeypot
 })
 
@@ -57,10 +59,10 @@ export async function POST(req: NextRequest) {
   const stage = p.intent === 'start' ? 'start_requested' : 'walkthrough_requested'
   const source = p.intent === 'start' ? 'start_form' : 'book_call'
   const email = p.email.toLowerCase()
-  const attribution = attributionFromCookieHeader(req.headers.get('cookie'))
   const userAgent = req.headers.get('user-agent') ?? null
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
   const sourceUrl = p.sourceUrl || req.headers.get('referer') || req.nextUrl.origin
+  const attribution = requestAttribution(req.headers.get('cookie'), sourceUrl)
 
   // Keep what the row already holds, above all the first touch attribution.
   const { data: existing } = await supabase.from('leads').select('metadata').eq('email', email).eq('source', source).maybeSingle()
@@ -74,6 +76,7 @@ export async function POST(req: NextRequest) {
     message: p.message ?? null,
     page: req.headers.get('referer') ?? null,
     submitted_at: new Date().toISOString(),
+    ad_consent: p.adConsent,
   }
   const { data, error } = await supabase
     .from('leads')
@@ -101,6 +104,7 @@ export async function POST(req: NextRequest) {
 
   // Ad attribution, server side, deduplicated against the browser pixel by event id.
   after(async () => {
+    if (!p.adConsent) return
     const user = { email, phone: p.phone, firstName: p.firstName, sourceUrl, userAgent, ip, fbp: p.fbp, fbc: p.fbc }
     const results = await Promise.all([
       sendMetaEvent({ ...user, eventName: 'Lead', eventId: p.leadEventId || `book-lead-${data.id}`, contentName: source }),

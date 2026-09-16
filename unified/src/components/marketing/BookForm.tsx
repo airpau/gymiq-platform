@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
 import { CONTACT, PRICE_PER_CLUB, SYSTEMS } from '@/lib/site'
 import { identifyLead, newEventId, trackBooking } from '@/components/analytics/AdTracking'
 import { readCookie } from '@/lib/analytics/attribution'
+import { hasAdConsent } from '@/lib/analytics/consent'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -37,6 +38,7 @@ export default function BookForm({ intent = 'walkthrough' }: { intent?: 'walkthr
           sourceUrl: window.location.href,
           fbp: readCookie('_fbp'),
           fbc: readCookie('_fbc'),
+          adConsent: hasAdConsent(),
         }),
       })
       const j = await res.json().catch(() => ({}))

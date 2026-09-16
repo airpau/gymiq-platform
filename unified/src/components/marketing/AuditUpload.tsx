@@ -16,6 +16,7 @@ import { useState, useRef, useEffect, FormEvent, DragEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileSpreadsheet, ArrowRight, Loader2, AlertCircle, CheckCircle2, Mail } from 'lucide-react'
 import { trackLead, trackFormStart, trackAuditCompleted, newEventId, identifyLead } from '@/components/analytics/AdTracking'
+import { hasAdConsent } from '@/lib/analytics/consent'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -109,6 +110,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
           metadata: { software: software || null, members: members || null },
           source,
           referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+          sourceUrl: typeof window !== 'undefined' ? window.location.href : null,
         }),
       }).catch(() => {
         // Best effort.
@@ -151,6 +153,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
           sourceUrl: window.location.href,
           fbp: readCookie('_fbp'),
           fbc: readCookie('_fbc'),
+          adConsent: hasAdConsent(),
         }),
       })
       if (!res.ok) {
@@ -229,6 +232,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
       fd.append('fbp', readCookie('_fbp') ?? '')
       fd.append('fbc', readCookie('_fbc') ?? '')
       fd.append('sourceUrl', window.location.href)
+      fd.append('adConsent', hasAdConsent() ? 'true' : 'false')
 
       const res = await fetch('/api/audit', { method: 'POST', body: fd })
       if (!res.ok) {

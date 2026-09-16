@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
-import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
+import { requestAttribution } from '@/lib/analytics/attribution'
 
 export const runtime = 'nodejs'
 
@@ -23,6 +23,7 @@ const Schema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional().nullable(),
   source: z.string().trim().optional().default('audit_form'),
   referrer: z.string().optional().nullable(),
+  sourceUrl: z.string().max(500).optional().nullable(),
   userAgent: z.string().optional().nullable(),
 })
 
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const email = parsed.email.toLowerCase()
   const userAgent = parsed.userAgent ?? req.headers.get('user-agent') ?? null
   const referrer = parsed.referrer ?? req.headers.get('referer') ?? null
-  const attribution = attributionFromCookieHeader(req.headers.get('cookie'))
+  const attribution = requestAttribution(req.headers.get('cookie'), parsed.sourceUrl ?? null)
 
   // Keep what the row already holds (attribution from an earlier visit, or a
   // completed audit's numbers); a partial fill must never wipe it.

@@ -4,6 +4,7 @@ import './globals.css'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import AdTracking from '@/components/analytics/AdTracking'
 import AttributionCapture from '@/components/analytics/AttributionCapture'
+import ConsentBanner from '@/components/analytics/ConsentBanner'
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AdTracking />
         <AttributionCapture />
         <PostHogProvider>{children}</PostHogProvider>
+        <ConsentBanner />
       </body>
     </html>
   )

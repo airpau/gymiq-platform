@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { IMPACT, STORIES, MONTHLY, CLUB, impactTotals } from '@/lib/impact'
 import RoiCalculator from '@/components/marketing/RoiCalculator'
 import { PRICE_PER_CLUB, WALKTHROUGH_HREF } from '@/lib/site'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata = {
   title: 'What AI has made at one gym, month by month',
@@ -167,6 +168,7 @@ export default function ImpactPage() {
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
+            <CookieSettingsLink />
           </nav>
         </div>
       </footer>

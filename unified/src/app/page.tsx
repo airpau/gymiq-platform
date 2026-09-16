@@ -5,6 +5,7 @@ import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
 import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata = {
   title: 'gymIQ. The intelligence layer for your gym.',
@@ -637,6 +638,7 @@ function Footer() {
           <a href="#pricing" className="hover:text-ink">Pricing</a>
           <Link href="/privacy" className="hover:text-ink">Privacy</Link>
           <Link href="/terms" className="hover:text-ink">Terms</Link>
+          <CookieSettingsLink />
           <Link href="/auth/login" className="hover:text-ink">Sign in</Link>
         </nav>
       </div>

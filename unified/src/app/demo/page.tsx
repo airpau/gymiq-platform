@@ -14,6 +14,7 @@ import MemberChatDemo from '@/components/demo/MemberChatDemo'
 import { DemoStoreProvider } from '@/components/demo/DemoStore'
 import { WALKTHROUGH_HREF, PRICE_PER_CLUB } from '@/lib/site'
 import AuditUpload from '@/components/marketing/AuditUpload'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata = {
   title: 'Try every tool: live AI gym management demo',
@@ -195,6 +196,7 @@ export default function DemoPage() {
             <Link href="/impact" className="hover:text-ink">What it made</Link>
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <CookieSettingsLink />
           </nav>
         </div>
       </footer>

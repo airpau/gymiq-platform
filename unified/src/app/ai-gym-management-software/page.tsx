@@ -3,6 +3,7 @@ import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 import { CONTACT, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata = {
   title: 'AI gym management software for gym owners',
@@ -133,6 +134,7 @@ export default function AiGymManagementSoftwarePage() {
             <Link href="/impact" className="hover:text-ink">What it made</Link>
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
+            <CookieSettingsLink />
           </nav>
         </div>
       </footer>

@@ -14,7 +14,7 @@ import { parseMemberFile } from '@/lib/csv/parse-members'
 import { analyseAudit } from '@/lib/services/audit-analysis'
 import { sendAuditEmail } from '@/lib/email/send-audit'
 import { sendMetaAuditCompleted, sendMetaLead } from '@/lib/analytics/meta-capi'
-import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
+import { requestAttribution } from '@/lib/analytics/attribution'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
     // now uploading, possibly from a different device via the emailed link.
     const leadId = (formData.get('leadId') as string | null)?.trim() || null
     const leadSource = (formData.get('leadSource') as string | null)?.trim() === 'demo_form' ? 'demo_form' : 'audit_form'
-    const cookieAttribution = attributionFromCookieHeader(req.headers.get('cookie'))
+    const cookieAttribution = requestAttribution(req.headers.get('cookie'), sourceUrl)
+    const adConsent = (formData.get('adConsent') as string | null) === 'true'
 
     if (!(file instanceof File)) {
       return badRequest('Missing file in upload.')
@@ -161,13 +162,16 @@ export async function POST(req: NextRequest) {
       // Ad attribution, server side, deduplicated against the browser pixel by eventId.
       // Step one already sent Lead for this person; here we send the higher intent
       // AuditCompleted. If they somehow skipped step one, send Lead too.
+      // Only with advertising consent.
       const user = { email, phone, firstName, sourceUrl, userAgent, ip, fbp, fbc }
-      if (!leadId && priorStage !== 'audit_requested' && priorStage !== 'audit_completed') {
+      if (adConsent && !leadId && priorStage !== 'audit_requested' && priorStage !== 'audit_completed') {
         const lead = await sendMetaLead({ ...user, eventId: `${eventId}-lead` })
         if (!lead.sent && lead.error !== 'not configured') console.warn('[audit] Meta CAPI Lead:', lead.error)
       }
-      const meta = await sendMetaAuditCompleted({ ...user, eventId })
-      if (!meta.sent && meta.error !== 'not configured') console.warn('[audit] Meta CAPI AuditCompleted:', meta.error)
+      if (adConsent) {
+        const meta = await sendMetaAuditCompleted({ ...user, eventId })
+        if (!meta.sent && meta.error !== 'not configured') console.warn('[audit] Meta CAPI AuditCompleted:', meta.error)
+      }
 
       // The report email.
       try {

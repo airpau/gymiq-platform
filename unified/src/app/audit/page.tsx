@@ -12,6 +12,7 @@ import { LogoLink } from '@/components/brand/Logo'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import ViewContentPing from '@/components/analytics/ViewContentPing'
 import { CONTACT, SYSTEMS } from '@/lib/site'
+import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata: Metadata = {
   title: 'Free membership file audit for gym owners',
@@ -151,6 +152,7 @@ export default async function AuditLandingPage({ searchParams }: { searchParams:
           <span className="flex gap-4">
             <a href="/privacy" className="hover:text-ink">Privacy</a>
             <a href="/terms" className="hover:text-ink">Terms</a>
+            <CookieSettingsLink />
             <a href="/" className="hover:text-ink">gymiq.ai</a>
           </span>
         </div>
