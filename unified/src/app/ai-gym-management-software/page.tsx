@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
-import { CONTACT, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { CONTACT, PRICE_PER_CLUB, SYSTEMS, WALKTHROUGH_HREF, START_HREF, COMPANY_LINE } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
 import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
@@ -128,8 +128,8 @@ export default function AiGymManagementSoftwarePage() {
 
       <footer className="border-t border-mist bg-paper">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-xs text-slate sm:flex-row sm:items-center sm:px-8">
-          <span>© {new Date().getFullYear()} GymIQ AI Ltd</span>
-          <nav className="flex gap-5">
+          <span>© {new Date().getFullYear()} {COMPANY_LINE}</span>
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 whitespace-nowrap">
             <Link href="/demo" className="hover:text-ink">Try the tools</Link>
             <Link href="/impact" className="hover:text-ink">What it made</Link>
             <Link href="/case-study" className="hover:text-ink">Case study</Link>

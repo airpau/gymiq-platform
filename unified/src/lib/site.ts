@@ -4,6 +4,12 @@ export const PRICE_PER_CLUB = 295
 export const FOUNDING_PRICE = PRICE_PER_CLUB
 export const FOUNDING_SLOTS = 0
 export const CONTACT = 'paul@gymiq.ai'
+/** The registered company behind gymIQ (Companies House). Shown wherever the site names the business. */
+export const LEGAL_NAME = 'Gym IQ Ltd'
+export const COMPANY_NUMBER = '17093442'
+export const REGISTERED_OFFICE = '71-75 Shelton Street, Covent Garden, London WC2H 9JQ'
+/** One line trading disclosure for footers and legal pages. */
+export const COMPANY_LINE = `${LEGAL_NAME}, registered in England and Wales, company number ${COMPANY_NUMBER}, registered office ${REGISTERED_OFFICE}`
 export const SYSTEMS = 'Glofox, ClubRight, Mindbody, PerfectGym, GymMaster and others'
 /** Every 'book a walkthrough' button on the site. A form that reaches Paul on Telegram and email. */
 export const WALKTHROUGH_HREF = '/book'

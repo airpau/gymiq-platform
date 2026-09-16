@@ -57,6 +57,17 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
   // Arriving from the emailed link: load the details and go straight to the upload.
   useEffect(() => {
     if (!leadIdProp) return
+    // The link works like a password for the prefill: take it out of the
+    // address bar so it is not bookmarked, shared or reported by analytics.
+    try {
+      const u = new URL(window.location.href)
+      if (u.searchParams.has('l')) {
+        u.searchParams.delete('l')
+        window.history.replaceState(window.history.state, '', u.pathname + (u.search || '') + u.hash)
+      }
+    } catch {
+      // ignore
+    }
     let cancelled = false
     fetch(`/api/leads/request?l=${encodeURIComponent(leadIdProp)}`)
       .then((r) => (r.ok ? r.json() : null))

@@ -4,7 +4,7 @@ import { ArrowRight, CalendarCheck } from 'lucide-react'
 import BookForm from '@/components/marketing/BookForm'
 import CalendlyEmbed from '@/components/marketing/CalendlyEmbed'
 import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
-import { CONTACT, PRICE_PER_CLUB, STRIPE_CHECKOUT_URL, CALENDLY_URL } from '@/lib/site'
+import { CONTACT, PRICE_PER_CLUB, STRIPE_CHECKOUT_URL, CALENDLY_URL, COMPANY_LINE } from '@/lib/site'
 
 export const metadata = {
   title: 'Book a walkthrough',
@@ -86,7 +86,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
       </main>
       <footer className="border-t border-mist">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-slate sm:px-8">
-          <span>gymIQ · GymIQ AI Ltd · {CONTACT}</span>
+          <span>gymIQ · {COMPANY_LINE} · {CONTACT}</span>
           <span className="flex gap-4">
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>

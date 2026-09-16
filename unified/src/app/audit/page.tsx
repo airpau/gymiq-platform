@@ -11,7 +11,7 @@ import { Check } from 'lucide-react'
 import { LogoLink } from '@/components/brand/Logo'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import ViewContentPing from '@/components/analytics/ViewContentPing'
-import { CONTACT, SYSTEMS } from '@/lib/site'
+import { CONTACT, SYSTEMS, COMPANY_LINE } from '@/lib/site'
 import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata: Metadata = {
@@ -148,7 +148,7 @@ export default async function AuditLandingPage({ searchParams }: { searchParams:
 
       <footer className="border-t border-mist">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-slate sm:px-8">
-          <span>gymIQ · GymIQ AI Ltd · {CONTACT}</span>
+          <span>gymIQ · {COMPANY_LINE} · {CONTACT}</span>
           <span className="flex gap-4">
             <a href="/privacy" className="hover:text-ink">Privacy</a>
             <a href="/terms" className="hover:text-ink">Terms</a>

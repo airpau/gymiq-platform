@@ -24,6 +24,18 @@ import { onConsentChange, readConsent, type Consent } from '@/lib/analytics/cons
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.i.posthog.com'
 
+/** Drop the private upload link token (?l=) from any URL PostHog records. */
+function scrubUrl(v: unknown): unknown {
+  if (typeof v !== 'string' || !/[?&]l=/.test(v)) return v
+  try {
+    const u = new URL(v, 'https://www.gymiq.ai')
+    u.searchParams.delete('l')
+    return /^https?:/.test(v) ? u.toString() : u.pathname + u.search + u.hash
+  } catch {
+    return v.replace(/([?&])l=[^&#]*&?/, '$1').replace(/[?&]$/, '')
+  }
+}
+
 function applyConsent(c: Consent | null) {
   if (c?.analytics === true) {
     posthog.set_config({ persistence: 'localStorage+cookie', disable_session_recording: false })
@@ -50,6 +62,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       persistence: consent?.analytics ? 'localStorage+cookie' : 'memory',
       disable_session_recording: !consent?.analytics,
       opt_out_capturing_by_default: consent?.analytics === false,
+      before_send: (event) => {
+        if (!event?.properties) return event
+        for (const k of ['$current_url', '$pathname', '$referrer', '$initial_current_url', '$session_entry_url']) {
+          if (k in event.properties) event.properties[k] = scrubUrl(event.properties[k])
+        }
+        return event
+      },
       loaded: (ph) => {
         if (process.env.NODE_ENV === 'development') ph.opt_out_capturing()
       },

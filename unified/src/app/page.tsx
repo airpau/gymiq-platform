@@ -3,7 +3,7 @@ import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight, Check } from 'lucide-react'
 import AuditUpload from '@/components/marketing/AuditUpload'
 import { STORIES, impactTotals } from '@/lib/impact'
-import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF } from '@/lib/site'
+import { PRICE_PER_CLUB, CONTACT, SYSTEMS, WALKTHROUGH_HREF, START_HREF, COMPANY_LINE } from '@/lib/site'
 import { FAQ, faqJsonLd } from '@/lib/faq'
 import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
@@ -627,10 +627,10 @@ function FinalCta() {
 function Footer() {
   return (
     <footer className="border-t border-mist bg-paper">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-10 sm:flex-row sm:items-center sm:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-10 sm:px-8 lg:flex-row lg:items-center">
         <LogoLink size="sm" />
-        <p className="text-xs text-slate">© {new Date().getFullYear()} GymIQ AI Ltd · Made in Hertfordshire · {CONTACT}</p>
-        <nav className="flex items-center gap-5 text-xs text-slate">
+        <p className="max-w-md text-xs text-slate">© {new Date().getFullYear()} {COMPANY_LINE} · Made in Hertfordshire · {CONTACT}</p>
+        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 whitespace-nowrap text-xs text-slate">
           <a href="#day" className="hover:text-ink">What it does</a>
           <Link href="/ai-gym-management-software" className="hover:text-ink">AI for gym owners</Link>
           <Link href="/case-study" className="hover:text-ink">Case study</Link>

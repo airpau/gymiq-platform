@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { COMPANY_LINE } from '@/lib/site'
 
 export const metadata = {
   title: 'Terms',
@@ -6,7 +7,7 @@ export const metadata = {
   alternates: { canonical: '/terms' },
 }
 
-const UPDATED = '7 September 2026'
+const UPDATED = '16 September 2026'
 
 export default function TermsPage() {
   return (
@@ -20,7 +21,7 @@ export default function TermsPage() {
       <main className="mx-auto max-w-3xl px-5 pb-24 pt-12 text-[15px] leading-relaxed text-ink-3">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-moss">Terms</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Terms of service</h1>
-        <p className="mt-2 text-sm text-slate">Last updated {UPDATED}. GymIQ AI Ltd, United Kingdom.</p>
+        <p className="mt-2 text-sm text-slate">Last updated {UPDATED}. These terms are between you and {COMPANY_LINE} (&quot;gymIQ&quot;, &quot;we&quot;).</p>
 
         <H>The free audit</H>
         <P>The free membership file audit is provided as is, for the gym operator who uploads the file, to help them understand their own membership data. Figures are computed from the file you provide and depend on which columns it contains; estimated recoveries apply rates observed at a live club and are not a guarantee. You confirm you are entitled to process the data in the file. We may contact you about the report and about gymIQ; you can opt out at any time.</P>

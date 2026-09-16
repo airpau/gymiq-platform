@@ -23,7 +23,8 @@
  * and identifyLead() ties the PostHog visitor to the lead row by lead id
  * only, so no name, email or phone goes to PostHog.
  */
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import Script from 'next/script'
 import posthog from 'posthog-js'
 import { hasAnalyticsConsent, onConsentChange } from '@/lib/analytics/consent'
@@ -41,9 +42,44 @@ declare global {
   }
 }
 
+/**
+ * Pages advertising tags must never see: audit reports (and their preview),
+ * the emailed private upload link (?l=), sign in, onboarding and the
+ * dashboard. The pixel is not loaded when a visit starts on one of these, and
+ * no PageView is sent when the visitor moves to one.
+ */
+export function isPrivatePage(pathname: string, search: string): boolean {
+  if (/^\/audit\/./.test(pathname)) return true
+  if (pathname === '/audit' && /(?:^|[?&])l=/.test(search)) return true
+  return ['/auth', '/onboard', '/overview', '/members', '/retention', '/conversations', '/leads', '/settings', '/cancel-save'].some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  )
+}
+
 export default function AdTracking() {
   const { consent } = useConsent()
   const ads = consent?.ads === true
+  const pathname = usePathname()
+  const lastPath = useRef<string | null>(null)
+  const startedPrivate = useRef<boolean | null>(null)
+  if (startedPrivate.current === null && typeof window !== 'undefined') {
+    startedPrivate.current = isPrivatePage(window.location.pathname, window.location.search)
+  }
+
+  // Page views after the first: the pixel's own history tracking is switched
+  // off (disablePushState) so private pages are never reported.
+  useEffect(() => {
+    const previous = lastPath.current
+    lastPath.current = pathname
+    // First render, or consent changed on the same page: the pixel's own init sends that PageView.
+    if (previous === null || previous === pathname) return
+    if (!ads || isPrivatePage(pathname, window.location.search)) return
+    try {
+      window.fbq?.('track', 'PageView')
+    } catch {
+      // ignore
+    }
+  }, [pathname, ads])
 
   // Withdrawn after the pixel loaded on this page: stop it sending anything more.
   useEffect(
@@ -61,12 +97,12 @@ export default function AdTracking() {
     [],
   )
 
-  if (!ads) return null
+  if (!ads || startedPrivate.current) return null
   return (
     <>
       {PIXEL && (
         <Script id="meta-pixel" strategy="afterInteractive">
-          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL}');fbq('track','PageView');`}
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];n.disablePushState=!0;t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${PIXEL}');fbq('track','PageView');`}
         </Script>
       )}
       {ADS && (

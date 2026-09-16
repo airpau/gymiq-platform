@@ -3,7 +3,7 @@ import { LogoLink } from '@/components/brand/Logo'
 import { ArrowRight } from 'lucide-react'
 import { IMPACT, STORIES, MONTHLY, CLUB, impactTotals } from '@/lib/impact'
 import RoiCalculator from '@/components/marketing/RoiCalculator'
-import { PRICE_PER_CLUB, WALKTHROUGH_HREF } from '@/lib/site'
+import { PRICE_PER_CLUB, WALKTHROUGH_HREF, COMPANY_LINE } from '@/lib/site'
 import CookieSettingsLink from '@/components/analytics/CookieSettingsLink'
 
 export const metadata = {
@@ -163,8 +163,8 @@ export default function ImpactPage() {
 
       <footer className="border-t border-mist bg-paper">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-xs text-slate sm:flex-row sm:items-center sm:px-8">
-          <span>© {new Date().getFullYear()} GymIQ AI Ltd · figures from the club&apos;s own records, September 2026</span>
-          <nav className="flex gap-5">
+          <span>© {new Date().getFullYear()} {COMPANY_LINE} · figures from the club&apos;s own records, September 2026</span>
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 whitespace-nowrap">
             <Link href="/case-study" className="hover:text-ink">Case study</Link>
             <Link href="/privacy" className="hover:text-ink">Privacy</Link>
             <Link href="/terms" className="hover:text-ink">Terms</Link>
