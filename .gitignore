@@ -41,3 +41,6 @@ packages/database/prisma/migrations/**/migration_lock.toml
 .vercel
 .github/workflows/deploy.yml
 apps/api/node_modules/
+
+# Lead PII exported from GymGlitch - never commit
+gymglitch-exit/
