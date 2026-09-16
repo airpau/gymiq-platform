@@ -1,0 +1,37 @@
+# fly.io app definition for the gymIQ worker.
+# Deploy from the REPO ROOT so the Docker build can see unified/:
+#   fly deploy --config worker/fly.toml --dockerfile worker/Dockerfile .
+app = "gymiq-worker"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "worker/Dockerfile"
+
+[env]
+  PORT = "8080"
+  PLAYBOOK_MODEL = "claude-haiku-4-5"
+  MAX_BUDGET_USD = "0.50"
+  ARTIFACT_BUCKET = "iq-artifacts"
+  RESEND_FROM = "gymIQ <brief@gymiq.ai>"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 4
+    soft_limit = 2
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

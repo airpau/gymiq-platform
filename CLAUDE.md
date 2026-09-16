@@ -14,6 +14,7 @@ Operating rules:
 3. **All Supabase schema changes go through a migration file in `unified/supabase/migrations/`** and are applied via the Supabase MCP. Don't edit tables directly from Studio in production.
 4. **Multi-tenant from day one.** Every query is scoped to `gym_id`. RLS policies restrict gym owners to their own data.
 5. **AI routing through `unified/src/lib/ai/gateway.ts`.** Never use GPT-4 when GPT-4o-mini works. Cancel-save and other empathy-required calls use Claude Sonnet.
+6. **Nothing a customer pays for may depend on Cowork, openclaw or Paul's Mac mini.** Scheduled agent work runs in `worker/` (hosted agent runtime, see below). Cowork skills and scheduled tasks are Paul's operator console only; a feature exists for customers once it is a playbook in `worker/playbooks/` fired from `iq.playbooks`.
 
 ---
 
@@ -183,6 +184,18 @@ Critical: `SUPABASE_SERVICE_ROLE_KEY` is the bypass-RLS key. Never import it int
 - Preview branches get their own auto-built URL.
 - Deploy hooks exist (`Settings → Git → Deploy Hooks`) for manual triggering without a commit.
 - The `legacy-monorepo` branch on GitHub holds the dormant code as our rollback point for 30 days after the May 16 salvage.
+
+---
+
+## HOSTED AGENT RUNTIME (`worker/`, added 2026-09-16)
+
+`worker/` is a separate deployable (Fly.io, app `gymiq-worker`, region lhr) that runs playbooks per tenant through the Claude Agent SDK with tenant-scoped tools only. Full runbook: [worker/README.md](./worker/README.md).
+
+- Schedule lives in `iq.playbooks` (site, playbook, run_at, timezone, channels). `iq.dispatch_playbooks()` runs from pg_cron every 5 minutes and POSTs due rows to the worker's `/run`. Vault secrets `gymiq_worker_url` + `gymiq_worker_secret` must exist for it to fire.
+- CRM exports reach the worker by HTTP (`POST /artifacts/:siteId/:filename`, `worker/scripts/push-artifact.sh`) into the private `iq-artifacts` bucket. The ingest (`unified/scripts/iq/daily-ingest.mts`, now an exported `runDailyIngest`) reads from there, never from a laptop folder.
+- Every run logs to `iq.agent_runs` (tokens, cost, status, output, error). Per-run caps: `max_turns` and `max_budget_usd` in the playbook frontmatter, never above `MAX_BUDGET_USD`.
+- Playbooks are markdown with frontmatter, the same shape as a Cowork skill. Adding a customer capability = adding a playbook file + rows in `iq.playbooks`. Adding a customer = config rows + Vault secrets, no code.
+- Deploy from the repo root: `fly deploy --config worker/fly.toml --dockerfile worker/Dockerfile .` (the image copies `unified/src/lib/iq`).
 
 ---
 

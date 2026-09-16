@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.gymiq.token-keeper</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "$HOME/.openclaw/workspace/gymiq-platform/unified/scripts/token-keeper" &amp;&amp; npm run --silent refresh</string>
+  </array>
+
+  <!-- Glofox session tokens live about 3 hours, so refresh every 2. -->
+  <key>StartInterval</key>
+  <integer>7200</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- Optional: fill these in to get a Telegram nudge when a manual Glofox
+         login is genuinely required. Leave blank for silent operation. -->
+    <key>TELEGRAM_BOT_TOKEN</key>
+    <string></string>
+    <key>TELEGRAM_CHAT_ID</key>
+    <string></string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/gymiq-token-keeper.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/gymiq-token-keeper.err</string>
+</dict>
+</plist>

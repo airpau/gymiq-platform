@@ -1,0 +1,16 @@
+{
+  "name": "gymiq-iq-scripts",
+  "private": true,
+  "type": "module",
+  "description": "GymIQ AI Layer operational scripts (daily ingest, backfill). Standalone deps so the Next.js app bundle is untouched.",
+  "dependencies": {
+    "pg": "^8.12.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
