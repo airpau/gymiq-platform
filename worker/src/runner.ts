@@ -5,7 +5,7 @@
  */
 import * as fs from 'node:fs'
 import { query } from '@anthropic-ai/claude-agent-sdk'
-import { config } from './config.js'
+import { config, platformSecret } from './config.js'
 import { sql } from './db.js'
 import { loadSite } from './tenant.js'
 import { loadPlaybook } from './playbook.js'
@@ -43,6 +43,8 @@ export async function runPlaybook(req: RunRequest): Promise<RunResult> {
   const model = pb.model ?? config.defaultModel
   const budget = Math.min(pb.maxBudgetUsd ?? config.maxBudgetUsd, config.maxBudgetUsd)
   fs.mkdirSync(config.scratchDir, { recursive: true })
+  const anthropicKey = await platformSecret('anthropicApiKey')
+  if (!anthropicKey) throw new Error('no Anthropic API key: set Vault secret anthropic_api_key (or ANTHROPIC_API_KEY)')
 
   const today = new Intl.DateTimeFormat('en-GB', { timeZone: site.timezone, dateStyle: 'full' }).format(new Date())
   const systemPrompt = [
@@ -74,7 +76,7 @@ export async function runPlaybook(req: RunRequest): Promise<RunResult> {
         settingSources: [],
         persistSession: false,
         cwd: config.scratchDir,
-        env: { ...process.env, ANTHROPIC_API_KEY: config.anthropicApiKey },
+        env: { ...process.env, ANTHROPIC_API_KEY: anthropicKey },
       },
     })) {
       if (msg.type === 'result') {

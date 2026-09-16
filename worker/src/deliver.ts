@@ -5,7 +5,7 @@
  * member PII: these are owner/manager channels, not member messaging (that
  * stays behind the app's MESSAGING_LIVE + gyms.messaging_enabled gates).
  */
-import { config } from './config.js'
+import { config, platformSecret } from './config.js'
 
 export interface DeliveryResult { channel: 'telegram' | 'email' | 'whatsapp'; ok: boolean; detail: string }
 
@@ -29,10 +29,11 @@ export async function sendTelegram(botToken: string, chatId: string, text: strin
 }
 
 export async function sendEmail(to: string[], subject: string, text: string): Promise<DeliveryResult> {
-  if (!config.resendApiKey) return { channel: 'email', ok: false, detail: 'RESEND_API_KEY not set; email channel disabled' }
+  const key = await platformSecret('resendApiKey')
+  if (!key) return { channel: 'email', ok: false, detail: 'no Resend key (Vault resend_api_key); email channel disabled' }
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { authorization: `Bearer ${config.resendApiKey}`, 'content-type': 'application/json' },
+    headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
     body: JSON.stringify({ from: config.resendFrom, to, subject, text }),
   })
   if (!res.ok) return { channel: 'email', ok: false, detail: `resend ${res.status}: ${(await res.text()).slice(0, 300)}` }

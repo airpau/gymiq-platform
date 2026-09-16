@@ -11,7 +11,6 @@ primary_region = "lhr"
   PORT = "8080"
   PLAYBOOK_MODEL = "claude-haiku-4-5"
   MAX_BUDGET_USD = "0.50"
-  ARTIFACT_BUCKET = "iq-artifacts"
   RESEND_FROM = "gymIQ <brief@gymiq.ai>"
 
 [http_service]

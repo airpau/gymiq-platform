@@ -2,16 +2,16 @@
  * gymIQ worker: HTTP surface.
  *
  *   GET  /health                      liveness
- *   POST /run                         { playbook, site_id, dry_run? }   bearer WORKER_SECRET
- *   POST /artifacts/:siteId/:filename raw file body                     bearer WORKER_SECRET or the site's ingest_token
- *   GET  /playbooks                   list available playbooks          bearer WORKER_SECRET
+ *   POST /run                         { playbook, site_id, dry_run?, wait? }   bearer worker secret (Vault gymiq_worker_secret)
+ *   POST /artifacts/:siteId/:filename raw file body                     bearer worker secret or the site's ingest_token
+ *   GET  /playbooks                   list available playbooks          bearer worker secret
  *
  * The scheduler (pg_cron in Supabase) calls POST /run. The Mac mini openclaw
  * job, a customer's script, or the hosted collector calls POST /artifacts.
  */
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
-import { config } from './config.js'
+import { config, platformSecret } from './config.js'
 import { runPlaybook } from './runner.js'
 import { listPlaybooks } from './playbook.js'
 import { uploadArtifact } from './artifacts.js'
@@ -21,7 +21,7 @@ const app = new Hono()
 
 const bearer = (h: string | undefined) => (h ?? '').replace(/^Bearer\s+/i, '').trim()
 const timingSafeEqual = (a: string, b: string) => {
-  if (a.length !== b.length) return false
+  if (!a || !b || a.length !== b.length) return false
   let r = 0
   for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i)
   return r === 0
@@ -29,8 +29,10 @@ const timingSafeEqual = (a: string, b: string) => {
 
 app.get('/health', (c) => c.json({ ok: true, playbooks: listPlaybooks() }))
 
-app.get('/playbooks', (c) => {
-  if (!timingSafeEqual(bearer(c.req.header('authorization')), config.workerSecret)) return c.json({ error: 'unauthorised' }, 401)
+const isWorker = async (h: string | undefined) => timingSafeEqual(bearer(h), await platformSecret('workerSecret'))
+
+app.get('/playbooks', async (c) => {
+  if (!(await isWorker(c.req.header('authorization')))) return c.json({ error: 'unauthorised' }, 401)
   return c.json({ playbooks: listPlaybooks() })
 })
 
@@ -43,7 +45,7 @@ app.get('/playbooks', (c) => {
  *                (leading whitespace is valid JSON; curl and fetch().json() both accept it).
  */
 app.post('/run', async (c) => {
-  if (!timingSafeEqual(bearer(c.req.header('authorization')), config.workerSecret)) return c.json({ error: 'unauthorised' }, 401)
+  if (!(await isWorker(c.req.header('authorization')))) return c.json({ error: 'unauthorised' }, 401)
   const body = await c.req.json().catch(() => ({})) as { playbook?: string; site_id?: string; dry_run?: boolean; wait?: boolean }
   if (!body.playbook || !body.site_id) return c.json({ error: 'playbook and site_id are required' }, 400)
   const started = Date.now()
@@ -73,7 +75,7 @@ app.post('/artifacts/:siteId/:filename', async (c) => {
   const siteId = c.req.param('siteId')
   const filename = c.req.param('filename')
   const token = bearer(c.req.header('authorization'))
-  let ok = timingSafeEqual(token, config.workerSecret)
+  let ok = timingSafeEqual(token, await platformSecret('workerSecret'))
   if (!ok) {
     try {
       const site = await loadSite(siteId)
