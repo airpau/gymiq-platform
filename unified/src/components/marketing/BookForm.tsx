@@ -3,6 +3,8 @@
 import { useState, FormEvent } from 'react'
 import { ArrowRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react'
 import { CONTACT, PRICE_PER_CLUB, SYSTEMS } from '@/lib/site'
+import { identifyLead, newEventId, trackBooking } from '@/components/analytics/AdTracking'
+import { readCookie } from '@/lib/analytics/attribution'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -21,11 +23,27 @@ export default function BookForm({ intent = 'walkthrough' }: { intent?: 'walkthr
     }
     setState('sending'); setError(null)
     try {
-      const res = await fetch('/api/book', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...f, intent }) })
+      // Event ids shared with the server side mirror so Meta counts each once.
+      const leadEventId = newEventId('book-lead')
+      const scheduleEventId = newEventId('book-schedule')
+      const res = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...f,
+          intent,
+          leadEventId,
+          scheduleEventId,
+          sourceUrl: window.location.href,
+          fbp: readCookie('_fbp'),
+          fbc: readCookie('_fbc'),
+        }),
+      })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(j.error || 'Something went wrong')
       setState('done')
-      try { window.fbq?.('track', 'Schedule', { content_name: intent }) } catch { /* ignore */ }
+      trackBooking({ intent, leadEventId, scheduleEventId, gymName: f.gymName.trim() })
+      if (j.leadId) identifyLead(j.leadId, { form: intent === 'start' ? 'start_form' : 'book_call', gym_name: f.gymName.trim(), software: f.software || null, members: f.members || null })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setState('error')

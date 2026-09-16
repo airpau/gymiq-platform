@@ -16,8 +16,15 @@
  *   InitiateCheckout  a valid email typed into the audit form
  *   Lead              audit details submitted (step 1). This is what the ads optimise for.
  *   AuditCompleted    a membership file parsed and a report produced (custom event)
+ *   Lead + Schedule   walkthrough or start form sent (/book)
+ *
+ * Each helper also sends a named PostHog event (audit_form_started,
+ * lead_captured, audit_completed, walkthrough_requested, start_requested),
+ * and identifyLead() ties the PostHog visitor to the lead row by lead id
+ * only, so no name, email or phone goes to PostHog.
  */
 import Script from 'next/script'
+import posthog from 'posthog-js'
 import { META_PIXEL_ID } from '@/lib/site'
 
 const PIXEL = META_PIXEL_ID
@@ -65,14 +72,34 @@ function fb(method: 'track' | 'trackCustom', name: string, data: Record<string, 
   }
 }
 
+function ph(event: string, props: Record<string, unknown> = {}) {
+  try {
+    if (typeof window === 'undefined') return
+    posthog.capture(event, props)
+  } catch {
+    // Analytics must never break the page.
+  }
+}
+
+/** Link this browser's PostHog visitor to a lead row. Lead id only, no personal details. */
+export function identifyLead(leadId: string, props: { form: string; gym_name?: string; software?: string | null; members?: string | null }) {
+  try {
+    if (typeof window === 'undefined' || !leadId) return
+    posthog.identify(`lead:${leadId}`, { lead_id: leadId, ...props })
+  } catch {
+    // ignore
+  }
+}
+
 /** The audit landing page was shown. */
 export function trackViewContent(name = 'membership_file_audit', eventId?: string) {
   fb('track', 'ViewContent', { content_name: name, content_category: 'audit' }, eventId)
 }
 
 /** A valid email has been typed into the audit form. */
-export function trackFormStart(eventId?: string) {
+export function trackFormStart(eventId?: string, form = 'audit_form') {
   fb('track', 'InitiateCheckout', { content_name: 'membership_file_audit' }, eventId)
+  ph('audit_form_started', { form })
   try {
     window.gtag?.('event', 'begin_audit', { method: 'audit' })
   } catch {
@@ -80,15 +107,18 @@ export function trackFormStart(eventId?: string) {
   }
 }
 
-/** Audit details submitted. Fires the Lead on both networks. */
-export function trackLead(params: { eventId?: string; gymName?: string; value?: number }) {
-  fb('track', 'Lead', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' }, params.eventId)
+/** A lead was captured (audit details, or a walkthrough/start request). Fires the Lead on every network. */
+export function trackLead(params: { eventId?: string; gymName?: string; value?: number; form?: string }) {
+  const form = params.form ?? 'audit_form'
+  const contentName = form === 'audit_form' || form === 'demo_form' ? 'membership_file_audit' : form
+  fb('track', 'Lead', { content_name: contentName, value: params.value ?? 495, currency: 'GBP' }, params.eventId)
+  ph('lead_captured', { form })
   try {
     const label = process.env.NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL
     if (ADS && label) {
       window.gtag?.('event', 'conversion', { send_to: `${ADS}/${label}`, value: params.value ?? 495, currency: 'GBP' })
     }
-    window.gtag?.('event', 'generate_lead', { method: 'audit', gym: params.gymName ?? '' })
+    window.gtag?.('event', 'generate_lead', { method: form, gym: params.gymName ?? '' })
   } catch {
     // ignore
   }
@@ -97,9 +127,20 @@ export function trackLead(params: { eventId?: string; gymName?: string; value?: 
 /** A file was parsed and a report produced. Custom event, higher intent than Lead. */
 export function trackAuditCompleted(params: { eventId?: string; gymName?: string; value?: number }) {
   fb('trackCustom', 'AuditCompleted', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' }, params.eventId)
+  ph('audit_completed', {})
   try {
     window.gtag?.('event', 'audit_completed', { method: 'audit', gym: params.gymName ?? '' })
   } catch {
     // ignore
   }
+}
+
+/**
+ * Walkthrough or start form sent. Counts as a Lead (what the ads optimise
+ * for) and as a Schedule, each with its own event id mirrored by /api/book.
+ */
+export function trackBooking(params: { intent: 'walkthrough' | 'start'; leadEventId: string; scheduleEventId: string; gymName?: string }) {
+  trackLead({ eventId: params.leadEventId, gymName: params.gymName, form: params.intent === 'start' ? 'start_form' : 'book_call' })
+  fb('track', 'Schedule', { content_name: params.intent }, params.scheduleEventId)
+  ph(params.intent === 'start' ? 'start_requested' : 'walkthrough_requested', {})
 }

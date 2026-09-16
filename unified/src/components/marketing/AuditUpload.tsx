@@ -15,7 +15,7 @@
 import { useState, useRef, useEffect, FormEvent, DragEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, FileSpreadsheet, ArrowRight, Loader2, AlertCircle, CheckCircle2, Mail } from 'lucide-react'
-import { trackLead, trackFormStart, trackAuditCompleted, newEventId } from '@/components/analytics/AdTracking'
+import { trackLead, trackFormStart, trackAuditCompleted, newEventId, identifyLead } from '@/components/analytics/AdTracking'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -68,6 +68,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
         setSoftware(d.software ?? '')
         setMembers(d.members ?? '')
         setLeadId(d.leadId)
+        identifyLead(d.leadId, { form: source, gym_name: d.gymName ?? '', software: d.software || null, members: d.members || null })
         setStep(2)
       })
       .catch(() => {
@@ -76,7 +77,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
     return () => {
       cancelled = true
     }
-  }, [leadIdProp])
+  }, [leadIdProp, source])
 
   // Partial capture: as soon as there is a valid email, record it so an
   // abandoned form is still a name to call. Idempotent server side.
@@ -84,7 +85,7 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
     if (step !== 1 || !EMAIL_RE.test(email.trim())) return
     if (!formStartedRef.current) {
       formStartedRef.current = true
-      trackFormStart(newEventId('start'))
+      trackFormStart(newEventId('start'), source)
     }
     const snapshot = JSON.stringify({
       email: email.trim().toLowerCase(),
@@ -157,7 +158,8 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
         throw new Error(body?.error ?? `Could not save your details (${res.status}).`)
       }
       const data = (await res.json()) as { leadId: string }
-      trackLead({ eventId, gymName: gymName.trim() })
+      trackLead({ eventId, gymName: gymName.trim(), form: source })
+      identifyLead(data.leadId, { form: source, gym_name: gymName.trim(), software: software || null, members: members || null })
       setLeadId(data.leadId)
       setLinkSentTo(email.trim())
       setStep(2)

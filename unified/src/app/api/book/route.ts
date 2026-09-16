@@ -6,12 +6,19 @@
  * every such row to Paul's Telegram, so delivery does not depend on email.
  * We also email Paul and send the enquirer a short acknowledgement when
  * Resend is configured.
+ *
+ * Like the audit routes, it stores the first touch ad attribution from the
+ * gymiq_attr cookie in metadata.attribution (kept if the row already has
+ * one) and mirrors the browser's Lead and Schedule pixel events through the
+ * Conversions API with the same event ids.
  */
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { z } from 'zod'
 import { CONTACT, PRICE_PER_CLUB } from '@/lib/site'
+import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
+import { sendMetaEvent } from '@/lib/analytics/meta-capi'
 
 export const runtime = 'nodejs'
 
@@ -25,6 +32,11 @@ const Schema = z.object({
   preferredTime: z.string().trim().max(120).optional().nullable(),
   message: z.string().trim().max(2000).optional().nullable(),
   intent: z.enum(['walkthrough', 'start']).default('walkthrough'),
+  leadEventId: z.string().trim().max(80).optional().nullable(),
+  scheduleEventId: z.string().trim().max(80).optional().nullable(),
+  sourceUrl: z.string().trim().max(500).optional().nullable(),
+  fbp: z.string().trim().max(120).optional().nullable(),
+  fbc: z.string().trim().max(200).optional().nullable(),
   company_url_hp: z.string().optional(), // honeypot
 })
 
@@ -44,7 +56,18 @@ export async function POST(req: NextRequest) {
 
   const stage = p.intent === 'start' ? 'start_requested' : 'walkthrough_requested'
   const source = p.intent === 'start' ? 'start_form' : 'book_call'
+  const email = p.email.toLowerCase()
+  const attribution = attributionFromCookieHeader(req.headers.get('cookie'))
+  const userAgent = req.headers.get('user-agent') ?? null
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const sourceUrl = p.sourceUrl || req.headers.get('referer') || req.nextUrl.origin
+
+  // Keep what the row already holds, above all the first touch attribution.
+  const { data: existing } = await supabase.from('leads').select('metadata').eq('email', email).eq('source', source).maybeSingle()
+  const prior = (existing?.metadata ?? {}) as Record<string, unknown>
   const metadata = {
+    ...prior,
+    attribution: (prior.attribution as Record<string, unknown> | undefined) ?? attribution ?? null,
     software: p.software ?? null,
     members: p.members ?? null,
     preferred_time: p.preferredTime ?? null,
@@ -56,14 +79,14 @@ export async function POST(req: NextRequest) {
     .from('leads')
     .upsert(
       {
-        email: p.email.toLowerCase(),
+        email,
         first_name: p.firstName,
         gym_name: p.gymName,
         phone: p.phone,
         source,
         stage,
         metadata,
-        user_agent: req.headers.get('user-agent') ?? null,
+        user_agent: userAgent,
         referrer: req.headers.get('referer') ?? null,
         updated_at: new Date().toISOString(),
       },
@@ -75,6 +98,16 @@ export async function POST(req: NextRequest) {
     console.error('[book] upsert failed', error)
     return NextResponse.json({ error: 'Could not save your request. Email ' + CONTACT + ' instead.' }, { status: 500 })
   }
+
+  // Ad attribution, server side, deduplicated against the browser pixel by event id.
+  after(async () => {
+    const user = { email, phone: p.phone, firstName: p.firstName, sourceUrl, userAgent, ip, fbp: p.fbp, fbc: p.fbc }
+    const results = await Promise.all([
+      sendMetaEvent({ ...user, eventName: 'Lead', eventId: p.leadEventId || `book-lead-${data.id}`, contentName: source }),
+      sendMetaEvent({ ...user, eventName: 'Schedule', eventId: p.scheduleEventId || `book-schedule-${data.id}`, contentName: p.intent }),
+    ])
+    for (const r of results) if (!r.sent && r.error !== 'not configured') console.warn('[book] Meta CAPI:', r.error)
+  })
 
   // Email, best effort. The Telegram trigger has already fired from the database.
   const apiKey = process.env.RESEND_API_KEY

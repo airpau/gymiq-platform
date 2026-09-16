@@ -27,7 +27,7 @@ export interface MetaUser {
 }
 
 export interface MetaEventParams extends MetaUser {
-  eventName: 'Lead' | 'AuditCompleted' | 'InitiateCheckout' | 'ViewContent'
+  eventName: 'Lead' | 'AuditCompleted' | 'InitiateCheckout' | 'ViewContent' | 'Schedule'
   eventId: string
   sourceUrl: string
   value?: number

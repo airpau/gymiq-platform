@@ -59,7 +59,8 @@ export function parseAttributionCookie(raw: string | null | undefined): Attribut
   }
 }
 
-function readCookie(name: string): string | null {
+/** Browser: raw cookie value, or null. */
+export function readCookie(name: string): string | null {
   try {
     const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'))
     return m ? m[1] : null
