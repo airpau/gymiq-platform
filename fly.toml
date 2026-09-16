@@ -1,6 +1,6 @@
-# fly.io app definition for the gymIQ worker.
-# Deploy from the REPO ROOT so the Docker build can see unified/:
-#   fly deploy --config worker/fly.toml --dockerfile worker/Dockerfile .
+# fly.io app definition for the gymIQ worker (hosted agent runtime, see worker/README.md).
+# Lives at the repo root so the Docker build context can see unified/.
+#   fly deploy            (from the repo root)
 app = "gymiq-worker"
 primary_region = "lhr"
 
@@ -17,9 +17,11 @@ primary_region = "lhr"
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  # Always on: runs are accepted with 202 and finish in the background,
+  # so the machine must not be auto-stopped mid-run. One shared-cpu-1x is ~$5.70/mo.
+  auto_stop_machines = "off"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   [http_service.concurrency]
     type = "requests"
     hard_limit = 4

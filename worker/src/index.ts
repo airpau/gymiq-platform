@@ -34,17 +34,39 @@ app.get('/playbooks', (c) => {
   return c.json({ playbooks: listPlaybooks() })
 })
 
+/**
+ * POST /run
+ *   default:     202 immediately, the run finishes in the background (the scheduler never waits;
+ *                the outcome lands in iq.agent_runs and iq.playbooks.last_status).
+ *   wait: true:  200 with the result JSON once the run finishes. Fly's proxy drops connections idle
+ *                for 60s, so the response streams a space every 10s until the JSON is ready
+ *                (leading whitespace is valid JSON; curl and fetch().json() both accept it).
+ */
 app.post('/run', async (c) => {
   if (!timingSafeEqual(bearer(c.req.header('authorization')), config.workerSecret)) return c.json({ error: 'unauthorised' }, 401)
-  const body = await c.req.json().catch(() => ({})) as { playbook?: string; site_id?: string; dry_run?: boolean }
+  const body = await c.req.json().catch(() => ({})) as { playbook?: string; site_id?: string; dry_run?: boolean; wait?: boolean }
   if (!body.playbook || !body.site_id) return c.json({ error: 'playbook and site_id are required' }, 400)
   const started = Date.now()
-  try {
-    const result = await runPlaybook({ playbook: body.playbook, siteId: body.site_id, dryRun: !!body.dry_run })
-    return c.json({ ...result, duration_ms: Date.now() - started }, result.status === 'error' ? 500 : 200)
-  } catch (e: any) {
-    return c.json({ status: 'error', error: String(e?.message ?? e), duration_ms: Date.now() - started }, 500)
+  const run = runPlaybook({ playbook: body.playbook, siteId: body.site_id, dryRun: !!body.dry_run })
+    .then((r) => ({ ...r, duration_ms: Date.now() - started }))
+    .catch((e: any) => ({ status: 'error' as const, error: String(e?.message ?? e), duration_ms: Date.now() - started }))
+
+  if (!body.wait) {
+    void run.then((r) => console.log(`[run] ${body.playbook} ${body.site_id} ${r.status} ${r.duration_ms}ms${'error' in r && r.error ? ' ' + r.error : ''}`))
+    return c.json({ accepted: true, playbook: body.playbook, site_id: body.site_id, dry_run: !!body.dry_run }, 202)
   }
+
+  const enc = new TextEncoder()
+  const stream = new ReadableStream({
+    async start(controller) {
+      const tick = setInterval(() => controller.enqueue(enc.encode(' ')), 10_000)
+      const r = await run
+      clearInterval(tick)
+      controller.enqueue(enc.encode(JSON.stringify(r)))
+      controller.close()
+    },
+  })
+  return new Response(stream, { status: 200, headers: { 'content-type': 'application/json' } })
 })
 
 app.post('/artifacts/:siteId/:filename', async (c) => {

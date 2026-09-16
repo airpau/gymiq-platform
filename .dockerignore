@@ -1,0 +1,8 @@
+node_modules
+.env
+*.log
+**/node_modules
+.git
+unified/.next
+unified/public
+gymglitch-exit

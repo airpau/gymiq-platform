@@ -36,7 +36,8 @@ worker/
   src/cli.ts          local runner, dry run by default
   playbooks/*.md      the playbooks; daily-brief.md is playbook one
   scripts/push-artifact.sh   the one-liner for anything that produces an export
-  Dockerfile, fly.toml       deploy from the REPO ROOT (the image needs unified/src/lib/iq)
+  Dockerfile                 built from the REPO ROOT (the image needs unified/src/lib/iq)
+../fly.toml                  Fly app config, at the repo root for that reason
 ```
 
 `unified/scripts/iq/daily-ingest.mts` now exports `runDailyIngest(opts)`; the
@@ -102,9 +103,11 @@ prompt repeats it.
 
 ## Deploy (first time)
 
-1. Fly app, from the repo root:
+1. Fly app. Either the dashboard ("Launch an App" from GitHub, repo airpau/gymiq-platform,
+   app name gymiq-worker, region lhr, working directory and config path left blank so the root
+   fly.toml is used, secrets entered as environment variables), or the CLI from the repo root:
    ```
-   fly launch --config worker/fly.toml --no-deploy --copy-config --name gymiq-worker --region lhr
+   fly launch --no-deploy --copy-config --name gymiq-worker --region lhr
    fly secrets set -a gymiq-worker \
      WORKER_SECRET="$(openssl rand -hex 32)" \
      DATABASE_URL="postgresql://postgres.fugixpfgwhnmhtttdzym:<db password>@aws-1-eu-west-2.pooler.supabase.com:5432/postgres" \
@@ -112,7 +115,7 @@ prompt repeats it.
      SUPABASE_SERVICE_ROLE_KEY="<service role key>" \
      ANTHROPIC_API_KEY="<key>" \
      RESEND_API_KEY="<key, optional>"
-   fly deploy --config worker/fly.toml --dockerfile worker/Dockerfile .
+   fly deploy
    curl https://gymiq-worker.fly.dev/health
    ```
 2. Vault secrets the dispatcher reads (Supabase SQL editor or MCP):
@@ -136,10 +139,12 @@ prompt repeats it.
    ```
    curl -X POST https://gymiq-worker.fly.dev/run -H "authorization: Bearer $WORKER_SECRET" \
      -H 'content-type: application/json' \
-     -d '{"playbook":"daily-brief","site_id":"95f75b9f-2ff3-4c83-9fd0-168651ed7128","dry_run":true}'
+     -d '{"playbook":"daily-brief","site_id":"95f75b9f-2ff3-4c83-9fd0-168651ed7128","dry_run":true,"wait":true}'
    ```
-   The response carries `output` (the brief), cost and turns; the same lands
-   in `iq.agent_runs`. When it reads right:
+   With `wait: true` the response carries `output` (the brief), cost and turns
+   (it streams spaces while it works, so Fly's 60s idle timeout never bites).
+   Without `wait` the worker answers 202 and finishes in the background, which
+   is what the scheduler uses; either way the run lands in `iq.agent_runs`. When it reads right:
    ```sql
    update iq.playbooks set enabled = true where playbook = 'daily-brief';
    ```

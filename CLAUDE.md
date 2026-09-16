@@ -195,7 +195,7 @@ Critical: `SUPABASE_SERVICE_ROLE_KEY` is the bypass-RLS key. Never import it int
 - CRM exports reach the worker by HTTP (`POST /artifacts/:siteId/:filename`, `worker/scripts/push-artifact.sh`) into the private `iq-artifacts` bucket. The ingest (`unified/scripts/iq/daily-ingest.mts`, now an exported `runDailyIngest`) reads from there, never from a laptop folder.
 - Every run logs to `iq.agent_runs` (tokens, cost, status, output, error). Per-run caps: `max_turns` and `max_budget_usd` in the playbook frontmatter, never above `MAX_BUDGET_USD`.
 - Playbooks are markdown with frontmatter, the same shape as a Cowork skill. Adding a customer capability = adding a playbook file + rows in `iq.playbooks`. Adding a customer = config rows + Vault secrets, no code.
-- Deploy from the repo root: `fly deploy --config worker/fly.toml --dockerfile worker/Dockerfile .` (the image copies `unified/src/lib/iq`).
+- Deploy from the repo root: `fly deploy` (the image copies `unified/src/lib/iq`).
 
 ---
 

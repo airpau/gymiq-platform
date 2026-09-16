@@ -1,7 +1,8 @@
-# gymIQ worker. Build context is the REPO ROOT (fly.toml sets this) because the
+# gymIQ worker. Build context is the REPO ROOT (fly.toml lives there) because the
 # worker imports the ingest + iq library from unified/ so there is one source of truth.
 FROM node:22-bookworm-slim
 
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 WORKDIR /app
 
