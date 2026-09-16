@@ -13,6 +13,7 @@ import AlertsDemo from '@/components/demo/AlertsDemo'
 import MemberChatDemo from '@/components/demo/MemberChatDemo'
 import { DemoStoreProvider } from '@/components/demo/DemoStore'
 import { WALKTHROUGH_HREF, PRICE_PER_CLUB } from '@/lib/site'
+import AuditUpload from '@/components/marketing/AuditUpload'
 
 export const metadata = {
   title: 'Try every tool: live AI gym management demo',
@@ -158,7 +159,22 @@ export default function DemoPage() {
        </DemoStoreProvider>
       </main>
 
-      <section className="mt-16 bg-ink text-paper">
+      <section id="audit" className="mt-16 border-t border-mist bg-paper-2">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-5">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-moss">Now on your numbers</p>
+            <h2 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">See it on your own club, free.</h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate">
+              The demo club is fictional. Your membership file is not. Put your details in and we email a private link; upload the export from your gym software when you are at your desk and you get overdue by payment method, memberships ending unasked, members below current price and who is drifting.
+            </p>
+          </div>
+          <div className="lg:col-span-7">
+            <AuditUpload variant="section" source="demo_form" heading="Start with the free audit of your membership file." />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-ink text-paper">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">All of it, on your club&apos;s real numbers, within a week.</h2>
           <p className="mt-5 max-w-xl text-lg text-paper/90">£{PRICE_PER_CLUB} a month per club, monthly business review included. If a month&apos;s review cannot show at least the fee in found money, that month is free.</p>
@@ -167,7 +183,7 @@ export default function DemoPage() {
               Book a 30 minute walkthrough
               <ArrowRight className="h-4 w-4" />
             </a>
-            <Link href="/#audit" className="text-base font-semibold text-paper underline-offset-4 hover:underline">Or start with the free audit</Link>
+            <a href="#audit" className="text-base font-semibold text-paper underline-offset-4 hover:underline">Or start with the free audit</a>
           </div>
         </div>
       </section>

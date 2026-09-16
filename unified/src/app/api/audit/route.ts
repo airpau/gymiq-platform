@@ -13,7 +13,8 @@ import { createClient } from '@supabase/supabase-js'
 import { parseMemberFile } from '@/lib/csv/parse-members'
 import { analyseAudit } from '@/lib/services/audit-analysis'
 import { sendAuditEmail } from '@/lib/email/send-audit'
-import { sendMetaLead } from '@/lib/analytics/meta-capi'
+import { sendMetaAuditCompleted, sendMetaLead } from '@/lib/analytics/meta-capi'
+import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -34,6 +35,11 @@ export async function POST(req: NextRequest) {
     const fbp = (formData.get('fbp') as string | null)?.trim() || null
     const fbc = (formData.get('fbc') as string | null)?.trim() || null
     const sourceUrl = (formData.get('sourceUrl') as string | null)?.trim() || req.nextUrl.origin
+    // Set when the visitor already submitted their details (step one) and is
+    // now uploading, possibly from a different device via the emailed link.
+    const leadId = (formData.get('leadId') as string | null)?.trim() || null
+    const leadSource = (formData.get('leadSource') as string | null)?.trim() === 'demo_form' ? 'demo_form' : 'audit_form'
+    const cookieAttribution = attributionFromCookieHeader(req.headers.get('cookie'))
 
     if (!(file instanceof File)) {
       return badRequest('Missing file in upload.')
@@ -105,6 +111,22 @@ export async function POST(req: NextRequest) {
 
     after(async () => {
       // Lead row, with what the audit found attached so the follow up call has context.
+      // Metadata is merged, not replaced, so the ad attribution captured at step one
+      // survives an upload from a different device (the emailed link).
+      let priorStage: string | null = null
+      let priorMeta: Record<string, unknown> = {}
+      try {
+        const { data: prior } = await supabase
+          .from('leads')
+          .select('stage, metadata')
+          .eq('email', email)
+          .eq('source', leadSource)
+          .maybeSingle()
+        priorStage = (prior?.stage as string | null) ?? null
+        priorMeta = (prior?.metadata ?? {}) as Record<string, unknown>
+      } catch {
+        // fall through with empty prior
+      }
       try {
         const { error: leadErr } = await supabase.from('leads').upsert(
           {
@@ -113,14 +135,18 @@ export async function POST(req: NextRequest) {
             gym_name: gymName,
             phone: phone ?? undefined,
             metadata: {
+              ...priorMeta,
               software,
               members: memberBand,
               rows: report.totals.rowsParsed,
               mrr: report.insights?.membership.mrr ?? null,
               money_on_table_monthly: report.insights?.money.totalMonthly ?? null,
               overdue: report.insights?.membership.overdue ?? null,
+              attribution: (priorMeta.attribution as Record<string, unknown> | undefined) ?? cookieAttribution ?? null,
+              completed_at: new Date().toISOString(),
+              completed_page: sourceUrl,
             },
-            source: 'audit_form',
+            source: leadSource,
             stage: 'audit_completed',
             audit_id: reportId,
             updated_at: new Date().toISOString(),
@@ -133,8 +159,15 @@ export async function POST(req: NextRequest) {
       }
 
       // Ad attribution, server side, deduplicated against the browser pixel by eventId.
-      const meta = await sendMetaLead({ email, phone, firstName, eventId, sourceUrl, userAgent, ip, fbp, fbc })
-      if (!meta.sent && meta.error !== 'not configured') console.warn('[audit] Meta CAPI:', meta.error)
+      // Step one already sent Lead for this person; here we send the higher intent
+      // AuditCompleted. If they somehow skipped step one, send Lead too.
+      const user = { email, phone, firstName, sourceUrl, userAgent, ip, fbp, fbc }
+      if (!leadId && priorStage !== 'audit_requested' && priorStage !== 'audit_completed') {
+        const lead = await sendMetaLead({ ...user, eventId: `${eventId}-lead` })
+        if (!lead.sent && lead.error !== 'not configured') console.warn('[audit] Meta CAPI Lead:', lead.error)
+      }
+      const meta = await sendMetaAuditCompleted({ ...user, eventId })
+      if (!meta.sent && meta.error !== 'not configured') console.warn('[audit] Meta CAPI AuditCompleted:', meta.error)
 
       // The report email.
       try {

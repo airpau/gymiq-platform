@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { attributionFromCookieHeader } from '@/lib/analytics/attribution'
 
 export const runtime = 'nodejs'
 
@@ -43,6 +44,22 @@ export async function POST(req: NextRequest) {
   const email = parsed.email.toLowerCase()
   const userAgent = parsed.userAgent ?? req.headers.get('user-agent') ?? null
   const referrer = parsed.referrer ?? req.headers.get('referer') ?? null
+  const attribution = attributionFromCookieHeader(req.headers.get('cookie'))
+
+  // Keep what the row already holds (attribution from an earlier visit, or a
+  // completed audit's numbers); a partial fill must never wipe it.
+  const { data: existing } = await supabase
+    .from('leads')
+    .select('stage, metadata')
+    .eq('email', email)
+    .eq('source', parsed.source)
+    .maybeSingle()
+  const prior = (existing?.metadata ?? {}) as Record<string, unknown>
+  const metadata = {
+    ...prior,
+    ...(parsed.metadata ?? {}),
+    attribution: (prior.attribution as Record<string, unknown> | undefined) ?? attribution ?? null,
+  }
 
   // Upsert on (email, source) so the same visitor refining their form
   // updates the same row instead of accumulating dupes.
@@ -54,7 +71,7 @@ export async function POST(req: NextRequest) {
         first_name: parsed.firstName ?? undefined,
         gym_name: parsed.gymName ?? undefined,
         phone: parsed.phone ?? undefined,
-        metadata: parsed.metadata ?? undefined,
+        metadata,
         source: parsed.source,
         user_agent: userAgent,
         referrer,

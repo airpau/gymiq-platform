@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Source_Sans_3, IBM_Plex_Mono } from 'next/font/goo
 import './globals.css'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import AdTracking from '@/components/analytics/AdTracking'
+import AttributionCapture from '@/components/analytics/AttributionCapture'
 
 const display = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-paper text-ink antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <AdTracking />
+        <AttributionCapture />
         <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>

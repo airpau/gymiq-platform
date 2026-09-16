@@ -4,13 +4,18 @@
  * Meta Pixel and Google tag, loaded only when their IDs are set in the
  * environment, so a preview build never fires real conversions.
  *
- *   NEXT_PUBLIC_META_PIXEL_ID        e.g. 1234567890
- *   NEXT_PUBLIC_GOOGLE_ADS_ID        e.g. AW-123456789
- *   NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL e.g. AbCdEfGhIj (the conversion label for "audit completed")
+ *   NEXT_PUBLIC_META_PIXEL_ID         e.g. 1234567890 (falls back to the gymIQ pixel in lib/site)
+ *   NEXT_PUBLIC_GOOGLE_ADS_ID         e.g. AW-123456789
+ *   NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL e.g. AbCdEfGhIj (the conversion label for "audit requested")
  *
- * Conversions are fired from trackLead() below, called by the audit form on a
- * successful upload, and mirrored server side by /api/audit through the Meta
- * Conversions API when META_CAPI_TOKEN is set.
+ * The event ladder, browser side, each mirrored by the Conversions API from
+ * the matching route with the same eventID so Meta deduplicates:
+ *
+ *   PageView          every page (pixel init)
+ *   ViewContent       the /audit landing page rendered
+ *   InitiateCheckout  a valid email typed into the audit form
+ *   Lead              audit details submitted (step 1). This is what the ads optimise for.
+ *   AuditCompleted    a membership file parsed and a report produced (custom event)
  */
 import Script from 'next/script'
 import { META_PIXEL_ID } from '@/lib/site'
@@ -46,17 +51,55 @@ export default function AdTracking() {
   )
 }
 
-/** Fire the "audit completed" conversion on both networks. Safe to call when neither is configured. */
-export function trackLead(params: { email?: string; gymName?: string; value?: number }) {
+/** A fresh event id shared between the pixel call and the server side mirror. */
+export function newEventId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function fb(method: 'track' | 'trackCustom', name: string, data: Record<string, unknown>, eventId?: string) {
   try {
     if (typeof window === 'undefined') return
-    window.fbq?.('track', 'Lead', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' })
+    window.fbq?.(method, name, data, eventId ? { eventID: eventId } : undefined)
+  } catch {
+    // Tracking must never break the page.
+  }
+}
+
+/** The audit landing page was shown. */
+export function trackViewContent(name = 'membership_file_audit', eventId?: string) {
+  fb('track', 'ViewContent', { content_name: name, content_category: 'audit' }, eventId)
+}
+
+/** A valid email has been typed into the audit form. */
+export function trackFormStart(eventId?: string) {
+  fb('track', 'InitiateCheckout', { content_name: 'membership_file_audit' }, eventId)
+  try {
+    window.gtag?.('event', 'begin_audit', { method: 'audit' })
+  } catch {
+    // ignore
+  }
+}
+
+/** Audit details submitted. Fires the Lead on both networks. */
+export function trackLead(params: { eventId?: string; gymName?: string; value?: number }) {
+  fb('track', 'Lead', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' }, params.eventId)
+  try {
     const label = process.env.NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL
     if (ADS && label) {
       window.gtag?.('event', 'conversion', { send_to: `${ADS}/${label}`, value: params.value ?? 495, currency: 'GBP' })
     }
     window.gtag?.('event', 'generate_lead', { method: 'audit', gym: params.gymName ?? '' })
   } catch {
-    // Tracking must never break the form.
+    // ignore
+  }
+}
+
+/** A file was parsed and a report produced. Custom event, higher intent than Lead. */
+export function trackAuditCompleted(params: { eventId?: string; gymName?: string; value?: number }) {
+  fb('trackCustom', 'AuditCompleted', { content_name: 'membership_file_audit', value: params.value ?? 495, currency: 'GBP' }, params.eventId)
+  try {
+    window.gtag?.('event', 'audit_completed', { method: 'audit', gym: params.gymName ?? '' })
+  } catch {
+    // ignore
   }
 }
