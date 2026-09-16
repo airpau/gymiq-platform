@@ -26,6 +26,7 @@ import type {
   TenureBucket,
 } from '@/lib/services/audit-analysis'
 import ExpandableList from './ExpandableMemberList'
+import { normalizeAuditReport, type NormalizedAuditReport } from '@/lib/services/audit-report-compat'
 import AuditInsightsView from './AuditInsightsView'
 
 interface Props {
@@ -39,7 +40,9 @@ interface Props {
   auditId?: string
 }
 
-export default function AuditReportView({ report, gymName, firstName, createdAt, isPreview, auditId }: Props) {
+export default function AuditReportView({ report: stored, gymName, firstName, createdAt, isPreview, auditId }: Props) {
+  // Older stored reports lack sections the page reads; normalise first.
+  const report = normalizeAuditReport(stored)
   // Reports produced from September 2026 carry the deep read; render that.
   // Older stored reports fall through to the original layout.
   if (report.insights) {
@@ -60,7 +63,7 @@ export default function AuditReportView({ report, gymName, firstName, createdAt,
       {isPreview && <PreviewBanner />}
       <ReportHeader gymName={gymName} firstName={firstName} createdAt={createdAt} />
       <KeyMetrics report={report} />
-      <RevenueSnapshot report={report} />
+      {!report.legacyRevenue && <RevenueSnapshot report={report} />}
       <Benchmarks report={report} />
       <VisitDistribution report={report} />
       <SleeperBreakdown report={report} />
@@ -136,10 +139,31 @@ function ReportHeader({
 
 /* ------------------------------------------------------------------ */
 
-function KeyMetrics({ report }: { report: AuditReport }) {
+function KeyMetrics({ report }: { report: NormalizedAuditReport }) {
   const r = report
 
-  const metrics = [
+  // Reports from before the revenue block: show the member base and the
+  // average fee instead of revenue figures that were never computed.
+  const headline = r.legacyRevenue
+    ? [
+        {
+          label: 'Live members',
+          value: r.totals.liveMembers.toLocaleString('en-GB'),
+          hint: `${r.totals.activeMembers.toLocaleString('en-GB')} active · ${r.totals.frozenMembers.toLocaleString('en-GB')} frozen · ${r.totals.sleeperMembers.toLocaleString('en-GB')} sleeping`,
+          tone: 'neutral' as const,
+          icon: Coins,
+        },
+        {
+          label: 'Average monthly fee',
+          value: gbp(r.revenue.avgMonthlyFee),
+          hint: r.revenue.monthlyFeeAssumed ? 'Estimated, no price column in the export' : 'From your export',
+          tone: 'neutral' as const,
+          icon: TrendingUp,
+        },
+      ]
+    : []
+
+  const revenueTiles = [
     {
       label: 'Monthly revenue',
       value: gbp(r.revenue.totalMonthlyRevenue),
@@ -157,6 +181,9 @@ function KeyMetrics({ report }: { report: AuditReport }) {
       tone: 'neutral' as const,
       icon: TrendingUp,
     },
+  ]
+  const metrics = [
+    ...(r.legacyRevenue ? headline : revenueTiles),
     {
       label: 'Monthly revenue at risk',
       value: gbp(r.revenue.monthlyRevenueAtRisk),
