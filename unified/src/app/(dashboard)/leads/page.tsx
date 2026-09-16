@@ -35,11 +35,24 @@ export default async function LeadsPage() {
     )
   }
 
-  const { data: gym } = await svc
+  // A login reaches a gym two ways: it owns the gym outright, or it has a row in
+  // gym_users. Check both, otherwise a perfectly valid staff login sees nothing.
+  let { data: gym } = await svc
     .from('gyms')
     .select('id, name')
     .eq('owner_user_id', user.id)
     .maybeSingle()
+
+  if (!gym) {
+    const { data: membership } = await svc
+      .from('gym_users')
+      .select('gym_id, gyms(id, name)')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+    const linked = membership?.gyms as { id: string; name: string } | null | undefined
+    if (linked) gym = linked
+  }
 
   if (!gym) {
     return (
