@@ -18,7 +18,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, AlertCircle, Sparkles } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react'
 
 interface AuditPrefill {
   firstName: string
@@ -50,6 +50,7 @@ function SignUpForm() {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   // Load audit prefill data if we have an audit param.
   useEffect(() => {
@@ -73,6 +74,7 @@ function SignUpForm() {
     e.preventDefault()
     setSubmitting(true)
     setError(null)
+    setNotice(null)
 
     const supabase = createClient()
     const { data, error: authError } = await supabase.auth.signUp({
@@ -101,7 +103,7 @@ function SignUpForm() {
         password,
       })
       if (signInErr) {
-        setError('Account created. Please check your email to confirm and then sign in.')
+        setNotice('Account created. Check your inbox for the confirmation link, then sign in.')
         setSubmitting(false)
         return
       }
@@ -149,6 +151,13 @@ function SignUpForm() {
               <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50/60 px-3 py-2.5 text-xs text-signal">
                 <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {notice && (
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 text-xs text-emerald-800">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                <span>{notice}</span>
               </div>
             )}
 
