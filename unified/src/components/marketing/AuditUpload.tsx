@@ -351,6 +351,50 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
           </p>
         </details>
 
+        {/* Moved here from step 1 on 28 Sep 2026. Asking a cold visitor for a
+            mobile number before an email is captured is the single biggest
+            drop off on a paid landing page, and these three are only useful
+            once someone has actually committed. All optional. */}
+        <div className="mt-5 border-t border-mist pt-4">
+          <p className="text-xs font-medium text-ink-3">Optional, so the walkthrough is useful</p>
+          <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Field id="audit-phone" label="Mobile" type="tel" value={phone} onChange={setPhone} autoComplete="tel" error={errors.phone} inputMode="tel" />
+            <div>
+              <label htmlFor="audit-software" className="block text-xs font-medium text-ink-3">Gym software</label>
+              <select
+                id="audit-software"
+                value={software}
+                onChange={(e) => setSoftware(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
+              >
+                <option value="">Choose</option>
+                <option value="glofox">Glofox</option>
+                <option value="clubright">ClubRight</option>
+                <option value="mindbody">Mindbody</option>
+                <option value="perfectgym">PerfectGym</option>
+                <option value="gymmaster">GymMaster</option>
+                <option value="other">Other or spreadsheet</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="audit-members" className="block text-xs font-medium text-ink-3">Members</label>
+              <select
+                id="audit-members"
+                value={members}
+                onChange={(e) => setMembers(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
+              >
+                <option value="">Choose</option>
+                <option value="under-300">Under 300</option>
+                <option value="300-800">300 to 800</option>
+                <option value="800-1500">800 to 1,500</option>
+                <option value="1500-3000">1,500 to 3,000</option>
+                <option value="3000+">Over 3,000</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <button
           type="submit"
           disabled={submitting || !file}
@@ -403,42 +447,6 @@ export default function AuditUpload({ variant = 'hero', leadId: leadIdProp = nul
         <Field id="audit-gymName" label="Gym name" value={gymName} onChange={setGymName} autoComplete="organization" error={errors.gymName} />
       </div>
       <Field id="audit-email" label="Work email" type="email" value={email} onChange={setEmail} autoComplete="email" error={errors.email} className="mt-3" inputMode="email" />
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Field id="audit-phone" label="Mobile (for the walkthrough)" type="tel" value={phone} onChange={setPhone} autoComplete="tel" error={errors.phone} inputMode="tel" />
-        <div>
-          <label htmlFor="audit-software" className="block text-xs font-medium text-ink-3">Gym software</label>
-          <select
-            id="audit-software"
-            value={software}
-            onChange={(e) => setSoftware(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
-          >
-            <option value="">Choose</option>
-            <option value="glofox">Glofox</option>
-            <option value="clubright">ClubRight</option>
-            <option value="mindbody">Mindbody</option>
-            <option value="perfectgym">PerfectGym</option>
-            <option value="gymmaster">GymMaster</option>
-            <option value="other">Other or spreadsheet</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="audit-members" className="block text-xs font-medium text-ink-3">Members</label>
-          <select
-            id="audit-members"
-            value={members}
-            onChange={(e) => setMembers(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-mist bg-white px-3 py-2 text-sm text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 focus:ring-offset-1"
-          >
-            <option value="">Choose</option>
-            <option value="under-300">Under 300</option>
-            <option value="300-800">300 to 800</option>
-            <option value="800-1500">800 to 1,500</option>
-            <option value="1500-3000">1,500 to 3,000</option>
-            <option value="3000+">Over 3,000</option>
-          </select>
-        </div>
-      </div>
 
       <button
         type="submit"

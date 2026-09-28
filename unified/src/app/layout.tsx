@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Source_Sans_3, IBM_Plex_Mono } from 'next/font/goo
 import './globals.css'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import AdTracking from '@/components/analytics/AdTracking'
+import VisitLogger from '@/components/analytics/VisitLogger'
 import AttributionCapture from '@/components/analytics/AttributionCapture'
 import ConsentBanner from '@/components/analytics/ConsentBanner'
 
@@ -97,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-GB" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="min-h-screen bg-paper text-ink antialiased">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <VisitLogger />
         <AdTracking />
         <AttributionCapture />
         <PostHogProvider>{children}</PostHogProvider>
