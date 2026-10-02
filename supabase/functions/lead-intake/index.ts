@@ -1,4 +1,21 @@
-// lead-intake, v1 (23 Sep 2026)
+// lead-intake, v2.1 (2 Oct 2026)
+//
+// v2.1: reading a received email back needs a FULL ACCESS Resend key (a
+// sending-only key gets 401). The key is RESEND_RECEIVING_KEY, else
+// RESEND_API_KEY. If the fetch fails the email is still stored from the
+// webhook (subject, sender) as parse_status 'fetch_failed', Paul is told on
+// Telegram (@energie_hoddesdon_bot), and ?route=refetch (cron, every 5 min)
+// retries until the key works. Nothing is lost while the key is wrong.
+//
+// v2: the real feed. hoddesdon@energiefitness.com has an inbox rule that
+// redirects the TwoTaps "Free Trial Form Submission" emails to
+// hoddesdon-leads@iaecheenex.resend.app (the gymIQ Resend team's receiving
+// address); Resend posts email.received here. Until the webhook's signing
+// secret is stored as RESEND_INBOUND_SECRET the webhook body is not trusted
+// at all: the email is fetched back from Resend's API by id with our own key,
+// so only mail that really reached our receiving address is processed, and a
+// replayed id is a duplicate. Parser tuned to the TwoTaps format (Name,
+// Gender, Date of birth, Email, Phone, Postcode, How did you hear about us?).
 //
 // THE TRIGGER. A free-trial request or an abandoned cart on the website
 // produces a notification email into the club mailbox, hoddesdon@energiefitness.com.
@@ -22,6 +39,7 @@
 //                              the same pipeline for a replayed or manually forwarded email
 //   POST ?route=parse-test     {subject, text?, html?, from?}  parse only, writes nothing   (x-desk-key)
 //   POST ?route=reparse        {id}  re-run a stored email after a rule change              (x-desk-key)
+//   POST ?route=refetch        retry emails stored as fetch_failed                          (x-desk-key)
 //   GET  ?route=health
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -29,7 +47,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const DESK_KEY = Deno.env.get("DESK_KEY") ?? "";
-const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const RESEND_KEY = Deno.env.get("RESEND_RECEIVING_KEY") || Deno.env.get("RESEND_API_KEY") || "";   // must be full access
 const INBOUND_SECRET = Deno.env.get("RESEND_INBOUND_SECRET") ?? "";   // whsec_… from the Resend webhook
 const FN = Deno.env.get("PUBLIC_FN_URL") ?? `${SB_URL}/functions/v1`;
 const GYM_ID = Deno.env.get("INTAKE_GYM_ID") ?? "d3a32b32-6930-4660-8c5b-9df3a90aeb11";
@@ -64,6 +82,15 @@ async function sibling(name: string, route: string, payload: Row): Promise<Row> 
     const r = await fetch(`${FN}/${name}?route=${route}`, { method: "POST", headers: { "Content-Type": "application/json", "x-desk-key": await internalKey() }, body: JSON.stringify(payload) });
     return { http: r.status, ...(await r.json().catch(() => ({}))) };
   } catch (e) { return { http: 0, error: String(e).slice(0, 200) }; }
+}
+async function telegram(text: string) {
+  // Gym alerts only ever go through the Energie Gym Monitor bot.
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/rpc/gym_alert_telegram`, { method: "POST", headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" }, body: "{}" });
+    const t = await r.json();
+    if (!t?.token || !t?.chat_id) return;
+    await fetch(`https://api.telegram.org/bot${t.token}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: t.chat_id, text: text.slice(0, 3500), disable_web_page_preview: true }) });
+  } catch { /* alerts are best effort */ }
 }
 function background(p: Promise<unknown>) {
   const rt = (globalThis as any).EdgeRuntime;
@@ -135,9 +162,9 @@ function parse(subject: string, rawText: string, from: string, rules: Row[]): Pa
   const fields: Record<string, string> = {};
   // Label: value pairs, one per line or table cell ("Name | Jane Smith").
   for (const line of text.split("\n")) {
-    const m = line.match(/^\s*([A-Za-z][A-Za-z0-9 '\/()&.-]{1,40}?)\s*(?::|\||-)\s*(.{1,200}?)\s*$/);
+    const m = line.match(/^\s*([A-Za-z][A-Za-z0-9 '\/()&.?-]{1,48}?)\s*(?::|\||-)\s*(.{1,200}?)\s*$/);
     if (!m) continue;
-    const key = m[1].trim().toLowerCase().replace(/\s+/g, " "); const val = m[2].trim().replace(/\s*\|\s*$/, "");
+    const key = m[1].trim().toLowerCase().replace(/\?$/, "").replace(/\s+/g, " "); const val = m[2].trim().replace(/\s*\|\s*$/, "");
     if (!val || val === "|" || /^(from|to|sent|date|cc|subject)$/.test(key)) continue;
     if (!(key in fields)) fields[key] = val;
   }
@@ -174,6 +201,10 @@ function parse(subject: string, rawText: string, from: string, rules: Row[]): Pa
   else if (full && !EMAIL_RE.test(full) && !/\d{5,}/.test(full)) {
     const parts = full.replace(/\s+/g, " ").trim().split(" ");
     first = parts[0]; last = parts.length > 1 ? parts.slice(1).join(" ") : (lastLab ?? null); reasons.push("name:label");
+  }
+  if (!first) {
+    const bm0 = subject.match(/\[\s*([^\]]{2,60}?)\s*\]\s*$/);
+    if (bm0) { const parts = bm0[1].replace(/\s+/g, " ").trim().split(" "); first = parts[0]; last = parts.length > 1 ? parts.slice(1).join(" ") : null; reasons.push("name:subject_brackets"); }
   }
   if (!first) {
     const sm = subject.match(/(?:from|for|by|:)\s+([A-Z][a-zA-Z'-]+)(?:\s+([A-Z][a-zA-Z'-]+))?\s*$/) ?? subject.match(/^([A-Z][a-zA-Z'-]+)\s+([A-Z][a-zA-Z'-]+)\s+(?:has|is|wants|requested|started)/);
@@ -239,7 +270,14 @@ async function ingest(inc: Incoming): Promise<Row> {
   const recent = existing && (Date.now() - new Date(existing.created_at).getTime()) < reDays * 86400_000;
   const reuse = !!existing && recent && openStages.includes(String(existing.current_stage));
 
-  const intakeMeta = { kind: parsed.kind, email_id: stored.id, subject: un.subject, from: un.from, received_at: inc.received_at ?? new Date().toISOString(), plan: parsed.plan, fields: parsed.fields, forwarded: un.forwarded };
+  const f = parsed.fields;
+  const intakeMeta = {
+    kind: parsed.kind, email_id: stored.id, subject: un.subject, from: un.from, received_at: inc.received_at ?? new Date().toISOString(),
+    form: /location free trial/i.test(un.subject + un.text) ? "location_free_trial" : /free trial/i.test(un.subject) ? "free_trial" : null,
+    heard_about: f["how did you hear about us"] ?? f["how did you hear about us?"] ?? null,
+    postcode: f["postcode"] ?? null, gender: f["gender"] ?? null, birth: f["date of birth"] ?? null,
+    plan: parsed.plan, fields: parsed.fields, forwarded: un.forwarded,
+  };
   let leadId: string; let created = false;
   if (reuse) {
     leadId = String(existing!.id);
@@ -264,7 +302,9 @@ async function ingest(inc: Incoming): Promise<Row> {
 
   // The first touch, now, not at the next cron tick. Idempotent in the engine
   // (already-touched leads are skipped), and the cron sweep is the safety net.
-  if (created) background(sibling("gymiq-lead-engine", "first-touch", { lead_id: leadId }));
+  // due_at stays the human desk's call-back deadline; a free trial is answered
+  // now (force), an abandoned cart waits for the engine's due-time sweep.
+  if (created) background(sibling("gymiq-lead-engine", "first-touch", { lead_id: leadId, force: parsed.kind === "free_trial" }));
   return { ok: true, id: stored.id, lead_id: leadId, lead_created: created, reused: reuse, kind: parsed.kind, confidence: parsed.confidence };
 }
 
@@ -282,17 +322,65 @@ async function svixValid(raw: string, h: Headers): Promise<boolean> {
 }
 
 async function routeResend(req: Request, raw: string) {
-  if (!(await svixValid(raw, req.headers))) return J({ ok: false, error: INBOUND_SECRET ? "bad signature" : "RESEND_INBOUND_SECRET is not set" }, INBOUND_SECRET ? 401 : 503);
+  // With the signing secret stored, a bad signature is refused outright. Without
+  // it, nothing in the body is trusted: the email is re-fetched from Resend by id
+  // with our own API key below, which only succeeds for mail our account received.
+  if (INBOUND_SECRET && !(await svixValid(raw, req.headers))) return J({ ok: false, error: "bad signature" }, 401);
   const ev = JSON.parse(raw);
   if (ev.type !== "email.received") return J({ ok: true, ignored: ev.type });
   const id = String(ev.data?.email_id ?? "");
-  if (!id) return J({ ok: false, error: "no email_id" }, 400);
-  if (!RESEND_KEY) return J({ ok: false, error: "RESEND_API_KEY is not set" }, 503);
-  const r = await fetch(`https://api.resend.com/emails/receiving/${id}`, { headers: { Authorization: `Bearer ${RESEND_KEY}` } });
-  if (!r.ok) return J({ ok: false, error: `resend fetch ${r.status}` }, 502);
-  const m = await r.json();
-  const out = await ingest({ provider: "resend", provider_email_id: id, message_id: m.message_id ?? ev.data?.message_id ?? null, from: String(m.from ?? ev.data?.from ?? ""), to: (m.to ?? ev.data?.to ?? []) as string[], subject: String(m.subject ?? ev.data?.subject ?? ""), text: m.text ?? null, html: m.html ?? null, received_at: m.created_at ?? ev.created_at ?? null });
-  return J(out);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return J({ ok: false, error: "no email_id" }, 400);
+  const f = await fetchReceived(id);
+  if (f.status === 404) return J({ ok: false, error: "unknown email id" }, 404);
+  if (!f.m) {
+    // Keep it anyway, from what the webhook told us, and retry later. A
+    // forged webhook can only ever create a fetch_failed row: no lead and no
+    // message comes from it until Resend itself returns the email.
+    const d: Row = ev.data ?? {};
+    // One Telegram alert an hour at most, however many arrive.
+    const recentFail = await one(sb(`lead_intake_emails?gym_id=eq.${GYM_ID}&parse_status=eq.fetch_failed&created_at=gte.${new Date(Date.now() - 3600_000).toISOString()}&limit=1&select=id`));
+    const ins = await sb("lead_intake_emails", { method: "POST", headers: { Prefer: "return=representation,resolution=ignore-duplicates" }, body: JSON.stringify({
+      gym_id: GYM_ID, provider: "resend", provider_email_id: id, message_id: null,
+      from_addr: String(d.from ?? "").slice(0, 300) || null, to_addr: Array.isArray(d.to) ? d.to.map(String).slice(0, 10) : [],
+      subject: String(d.subject ?? "").slice(0, 300) || null, received_at: ev.created_at ?? new Date().toISOString(),
+      parse_status: "fetch_failed", error: `resend fetch ${f.status}`,
+    }) });
+    const stored = (await ins.json().catch(() => []))?.[0];
+    if (stored && !recentFail) background(telegram(`gymIQ lead intake: a club mailbox email arrived but could not be read back from Resend (HTTP ${f.status}${f.status === 401 ? ", the Resend key needs full access" : ""}).\nSubject: ${String(d.subject ?? "?").slice(0, 160)}\nIt is stored and will be retried every 5 minutes. The Glofox backstop also picks up free trials within about 5 minutes.`));
+    return J({ ok: true, stored: stored?.id ?? null, fetch_failed: f.status });
+  }
+  return J(await ingestResend(id, f.m, ev));
+}
+
+async function fetchReceived(id: string): Promise<{ status: number; m: Row | null }> {
+  if (!RESEND_KEY) return { status: 503, m: null };
+  try {
+    const r = await fetch(`https://api.resend.com/emails/receiving/${id}`, { headers: { Authorization: `Bearer ${RESEND_KEY}` } });
+    if (!r.ok) return { status: r.status, m: null };
+    return { status: r.status, m: await r.json() };
+  } catch { return { status: 0, m: null }; }
+}
+
+function ingestResend(id: string, m: Row, ev: Row = {}) {
+  return ingest({ provider: "resend", provider_email_id: id, message_id: m.message_id ?? ev.data?.message_id ?? null, from: String(m.from ?? ev.data?.from ?? ""), to: (m.to ?? ev.data?.to ?? []) as string[], subject: String(m.subject ?? ev.data?.subject ?? ""), text: m.text ?? null, html: m.html ?? null, received_at: m.created_at ?? ev.created_at ?? null });
+}
+
+// Retry every email whose body could not be fetched, oldest first.
+async function routeRefetch() {
+  const rows = await many(sb(`lead_intake_emails?gym_id=eq.${GYM_ID}&parse_status=eq.fetch_failed&provider=eq.resend&order=received_at.asc&limit=20&select=id,provider_email_id,received_at`));
+  const out: Row[] = [];
+  for (const e of rows) {
+    const f = await fetchReceived(String(e.provider_email_id));
+    if (!f.m) {
+      if (f.status === 404) await sb(`lead_intake_emails?id=eq.${e.id}`, { method: "PATCH", body: JSON.stringify({ parse_status: "error", error: "resend 404 on refetch" }) });
+      out.push({ id: e.id, status: f.status });
+      if (f.status === 401 || f.status === 403 || f.status === 503) break;   // the key, not the email
+      continue;
+    }
+    await sb(`lead_intake_emails?id=eq.${e.id}`, { method: "DELETE" });
+    out.push({ id: e.id, ...(await ingestResend(String(e.provider_email_id), f.m, { created_at: e.received_at })) });
+  }
+  return { ok: true, pending: rows.length, results: out };
 }
 
 async function routeHealth() {
@@ -300,7 +388,7 @@ async function routeHealth() {
   const rows = await many(sb(`lead_intake_emails?gym_id=eq.${GYM_ID}&received_at=gte.${since}&select=parse_status,kind,received_at&order=received_at.desc&limit=500`));
   const by: Record<string, number> = {};
   for (const r of rows) by[`${r.parse_status}/${r.kind ?? "?"}`] = (by[`${r.parse_status}/${r.kind ?? "?"}`] ?? 0) + 1;
-  return J({ ok: true, webhook: `${FN}/lead-intake?route=resend`, inbound_secret_set: !!INBOUND_SECRET, resend_key_set: !!RESEND_KEY, last_7_days: rows.length, by_status: by, last_received: rows[0]?.received_at ?? null });
+  return J({ ok: true, webhook: `${FN}/lead-intake?route=resend`, inbound_secret_set: !!INBOUND_SECRET, resend_key_set: !!RESEND_KEY, receiving_key_set: !!Deno.env.get("RESEND_RECEIVING_KEY"), last_7_days: rows.length, by_status: by, last_received: rows[0]?.received_at ?? null });
 }
 
 Deno.serve(async (req: Request) => {
@@ -313,6 +401,7 @@ Deno.serve(async (req: Request) => {
     if (req.method !== "POST") return J({ ok: false, error: "unknown route" }, 404);
     const b = await req.json().catch(() => ({}));
     if (route === "email") return J(await ingest({ provider: String(b.provider ?? "manual"), provider_email_id: b.provider_email_id ?? null, message_id: b.message_id ?? null, from: String(b.from ?? ""), to: Array.isArray(b.to) ? b.to : (b.to ? [String(b.to)] : []), subject: String(b.subject ?? ""), text: b.text ?? null, html: b.html ?? null, received_at: b.received_at ?? null }));
+    if (route === "refetch") return J(await routeRefetch());
     if (route === "parse-test") {
       const gym = await one(sb(`gyms?id=eq.${GYM_ID}&select=settings`));
       const text0 = (b.text && String(b.text).trim()) ? String(b.text) : htmlToText(String(b.html ?? ""));

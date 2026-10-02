@@ -1,4 +1,20 @@
-// gymIQ Lead Engine, v6 (23 Sep 2026)
+// gymIQ Lead Engine, v7 (2 Oct 2026)
+//
+// v7.1: staff alerts go to the Energie Gym Monitor bot via Vault, never for
+// simulated leads; the public demo key can only touch simulated leads.
+//
+// v7: the engine knows when a lead becomes a member, and never nags.
+//   * A lead who says they have joined is checked against Glofox, not believed:
+//     confirmed -> welcome, nurture stopped, onboarding hand-off; not visible yet
+//     -> warm acknowledgement, no selling, staff told to check.
+//   * glofox-leads-pull tells the engine (?route=outcome joined, by glofox) within
+//     15 minutes of a purchase; the same path as a staff "Joined" tap.
+//   * History spans every conversation this person has ever had with the club,
+//     including earlier lead rows for the same mobile and the GymGlitch import.
+//   * Openers honour due_at (abandoned carts wait an hour), skip anyone Glofox
+//     already shows as a member, and a suppressed opener is recorded once and
+//     not retried every five minutes.
+//
 //
 // v6: production wiring. The brain is unchanged; what changed is how messages
 // leave and arrive.
@@ -37,7 +53,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SB_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const TG_TOKEN = Deno.env.get("TELEGRAM_TOKEN") ?? "";
 const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const DESK_KEY = Deno.env.get("DESK_KEY") ?? "";
@@ -183,18 +198,24 @@ async function checkSlot(gym: Row, want: Date): Promise<Check> {
 
 // ---------------- notifications ----------------
 
-async function tgTo(chatId: number | string, text: string) {
-  if (!TG_TOKEN) return;
-  await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: text.slice(0, 4000) }),
-  }).catch(() => {});
-}
-async function alertStaff(gym: Row, text: string) {
-  const admins = await many(sb(`bot_roles?role=eq.admin&select=chat_id`));
-  for (const a of admins) await tgTo(a.chat_id, text);
+// Staff alerts go to the Energie Gym Monitor bot (@energie_hoddesdon_bot), the
+// one Paul reads for the club, never the personal bot. Token and chat id come
+// from Vault via gym_alert_telegram(). Demo (simulated) leads never alert.
+let _tg: { token: string; chat_id: string } | null = null;
+async function alertStaff(gym: Row, text: string, demo = false) {
+  if (demo) return;
+  if (!_tg) {
+    const r = await fetch(`${SB_URL}/rest/v1/rpc/gym_alert_telegram`, { method: "POST", headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" }, body: "{}" });
+    const j = await r.json().catch(() => ({}));
+    _tg = { token: String(j?.token ?? ""), chat_id: String(j?.chat_id ?? "") };
+  }
+  const send = async (chat: string) => {
+    if (!_tg?.token || !chat) return;
+    await fetch(`https://api.telegram.org/bot${_tg.token}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: chat, text: text.slice(0, 4000) }) }).catch(() => {});
+  };
+  await send(_tg.chat_id);
   const grp = (gym.settings as Row)?.staff_group_chat_id;
-  if (grp) await tgTo(String(grp), text);
+  if (grp) await send(String(grp));
 }
 
 // ---------------- lead state ----------------
@@ -244,7 +265,7 @@ function stateBlock(lead: Row, mem: Memory): string {
 }
 
 async function journey(lead_id: string, action: string, stage: string, from_stage: string | null, message?: string, metadata: Row = {}) {
-  await sb("lead_journey", { method: "POST", body: JSON.stringify({ lead_id, action, stage, from_stage, channel: "sim", message: message?.slice(0, 500), metadata }) });
+  await sb("lead_journey", { method: "POST", body: JSON.stringify({ lead_id, action, stage, from_stage, channel: "engine", message: message?.slice(0, 500), metadata }) });
 }
 async function setStage(lead: Row, to: string, action: string, msg?: string) {
   const from = String(lead.current_stage ?? "new");
@@ -281,14 +302,66 @@ async function sendToLead(_gym_id: string, lead: Row, conversation_id: string, b
 }
 
 // Every message the lead has exchanged with us, across every channel, oldest first.
+// The whole relationship, not just this lead row: every conversation tied to
+// this lead, to any earlier lead with the same mobile or email at this club,
+// and any conversation filed under the mobile itself (the GymGlitch import).
 async function historyFor(lead: Row, limit = 40): Promise<{ role: string; content: string }[]> {
-  const convs = await many(sb(`conversations?lead_id=eq.${lead.id}&select=id`));
+  const phone = String(lead.phone_e164 ?? lead.phone ?? "").trim();
+  const email = String(lead.email ?? "").trim().toLowerCase();
+  const ors: string[] = [`id.eq.${lead.id}`];
+  if (phone) ors.push(`phone_e164.eq.${encodeURIComponent(phone)}`);
+  if (email) ors.push(`email.eq.${encodeURIComponent(email)}`);
+  const kin = await many(sb(`leads?gym_id=eq.${lead.gym_id}&or=(${ors.join(",")})&select=id&limit=20`));
+  const leadIds = Array.from(new Set([String(lead.id), ...kin.map((k: Row) => String(k.id))]));
+  const convOrs = [`lead_id.in.(${leadIds.join(",")})`];
+  if (phone) convOrs.push(`phone.eq.${encodeURIComponent(phone)}`);
+  const convs = await many(sb(`conversations?gym_id=eq.${lead.gym_id}&or=(${convOrs.join(",")})&select=id&limit=50`));
   if (!convs.length) return [];
   const ids = convs.map((c: Row) => c.id).join(",");
   const rows = await many(sb(`messages?conversation_id=in.(${ids})&reply_category=is.null&order=created_at.desc&limit=${limit}&select=direction,content,content_type`));
   return rows.reverse()
     .filter((m: Row) => m.direction === "inbound" || m.direction === "outbound")
     .map((m: Row) => ({ role: m.direction === "inbound" ? "user" : "assistant", content: String(m.content) }));
+}
+
+// Has this person bought a membership? Asks glofox-leads-pull to compare the
+// lead with Glofox right now (it marks the lead joined itself when so), then
+// falls back to the twice-daily roster table. Returns the plan name when joined.
+async function glofoxJoined(lead: Row): Promise<{ joined: boolean; plan: string | null; how: string }> {
+  const gid = ((lead.metadata as Row | undefined)?.glofox as Row | undefined)?.id;
+  if (gid) {
+    try {
+      const r = await fetch(`${FN}/glofox-leads-pull?route=conversions`, { method: "POST", headers: { "Content-Type": "application/json", "x-desk-key": await internalKey() }, body: JSON.stringify({ lead_ids: [lead.id], notify_engine: false, force: true }) });
+      const j = await r.json().catch(() => ({}));
+      if (j?.joined >= 1) {
+        const fresh = await one(sb(`leads?id=eq.${lead.id}&select=metadata,current_stage,joined_at`));
+        const plan = fresh?.metadata?.glofox?.membership?.plan_name ?? null;
+        Object.assign(lead, { current_stage: fresh?.current_stage ?? lead.current_stage, joined_at: fresh?.joined_at ?? lead.joined_at, metadata: fresh?.metadata ?? lead.metadata });
+        return { joined: true, plan, how: "glofox_live" };
+      }
+    } catch { /* fall through to the roster */ }
+  }
+  const row = await one(sb(`lead_member_status?lead_id=eq.${lead.id}&select=is_currently_a_member,live_plan,roster_date`));
+  if (row?.is_currently_a_member === true) return { joined: true, plan: row.live_plan ?? null, how: `roster_${row.roster_date ?? ""}` };
+  return { joined: false, plan: null, how: gid ? "glofox_live" : "no_glofox_id" };
+}
+
+// Everything that happens when a lead becomes a member, apart from the words:
+// stage, close, stop nudges, queued follow-ups, onboarding hand-off, staff alert.
+async function markJoined(gym: Row, lead: Row, by: string, plan: string | null) {
+  const mem = memoryOf(lead);
+  mem.booking = null; mem.pending = null; mem.last_intent = "joined";
+  mem.facts = Array.from(new Set([...mem.facts, `joined the club (${by})`])).slice(0, 20);
+  await saveMemory(lead, mem);
+  if (lead.current_stage !== "joined") {
+    await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ converted_at: lead.converted_at ?? new Date().toISOString(), closed_at: lead.closed_at ?? new Date().toISOString(), metadata: { ...(lead.metadata ?? {}), needs_first_touch: false } }) });
+    await setStage(lead, "joined", "marked_joined", `${by}${plan ? `: ${plan}` : ""}`);
+  }
+  await sb(`lead_sequence_runs?lead_id=eq.${lead.id}&status=eq.pending`, { method: "PATCH", body: JSON.stringify({ status: "stopped", outcome: "joined", outcome_set_at: new Date().toISOString() }) });
+  await sb(`lead_followups?lead_id=eq.${lead.id}&status=in.(pending,ready)`, { method: "PATCH", body: JSON.stringify({ status: "skipped", skipped_reason: "joined" }) });
+  await journey(String(lead.id), "onboarding_handoff", "joined", null, "hand to onboarding flow: welcome call, day-12 induction check");
+  await alertStaff(gym, `gymIQ\nJOINED: ${lead.first_name ?? "?"}${plan ? ` (${plan})` : ""}, via ${by}. Nurture stopped, onboarding hand-off logged.`, isDemo(lead));
+  return mem;
 }
 
 // Any conversation for this lead to hang sim messages and bookings on; create one if none.
@@ -302,7 +375,7 @@ async function anyConversation(gym_id: string, lead: Row): Promise<any> {
 function firstTouch(lead: Row): string {
   const name = String(lead.first_name ?? "there");
   const opener = String(lead.source) === "abandoned_cart"
-    ? `Hi ${name}, it looks like you started joining ${CLUB} online but didn't finish. No problem at all, I've saved where you got to.`
+    ? `Hi ${name}, it looks like you started joining ${CLUB} online but didn't quite finish. No problem at all. If anything got in the way or you have a question, just reply here. And if you'd like to see the club before deciding, I can book you a free trial visit.`
     : `Hi ${name}, thanks for your interest in ${CLUB}! I've reserved a free trial visit for you.`;
   return `${opener}\n\nWould you like to come in for a look around? We have availability tomorrow morning, afternoon and evening. What works best for you?\n\n${CLUB}\nReply STOP to opt out.`;
 }
@@ -328,7 +401,7 @@ ${pricingLine(gym)}
 // ---------------- pass 1: understand ----------------
 
 interface Understanding {
-  intent: "answer" | "request_slot" | "confirm" | "decline" | "cancel_booking" | "ask_availability" | "bot_question" | "handover" | "optout" | "not_interested" | "small_talk";
+  intent: "answer" | "request_slot" | "confirm" | "decline" | "cancel_booking" | "ask_availability" | "bot_question" | "handover" | "optout" | "not_interested" | "joined" | "small_talk";
   slot_iso?: string | null;
   slot_precision?: "exact" | "daypart" | "date_only" | "time_only" | "none";
   question_topics?: string[];
@@ -361,6 +434,7 @@ INTENTS:
 PRIORITY: if the message asks to cancel, move or book the trial, that intent wins over everything except optout, even when they also mention an injury, a question or a complaint; put the rest in facts_learned, question_topics or objection.
 - "optout": asks not to be messaged again.
 - "not_interested": says no thanks, not interested, no longer looking.
+- "joined": says they have ALREADY signed up, joined, paid, bought a membership or become a member (online, in the club or in the app). Not someone asking how to join: that is "answer" with question_topics ["joining"].
 - "answer": a question about the club (price, hours, classes, facilities, parking, PT, joining) or a message that needs a reply and none of the above.
 - "small_talk": thanks, greetings, ok with nothing waiting.
 A message can carry a question AND a slot request; then intent is "request_slot" and question_topics lists the question.
@@ -433,16 +507,20 @@ function fallbackReply(res: Resolution, lead: Row): string {
     case "need_day": return `Which day suits you for ${fmtTime(res.slot!)}?`;
     case "nothing_pending": return `Happy to sort that. Which day suits you, and morning, afternoon or evening?`;
     case "declined": return `No problem. Which day and time would suit better?`;
+    case "joined_confirmed": return `Welcome to the club, ${n}! I can see your ${res.text ?? "membership"} on our system. The team will get you set up with the app and your first session. See you in there.`;
+    case "joined_unverified": return `Brilliant, welcome, ${n}! I can't see it on our system just yet, it can take a few minutes to come through. The team will double-check and get you set up, so you don't need to do anything else.`;
     default: return `Happy to help. Which day suits you for a free look around, and morning, afternoon or evening?`;
   }
 }
 
 interface Resolution {
-  kind: "proposed" | "proposed_reschedule" | "booked" | "rescheduled" | "cancel_proposed" | "cancelled" | "unavailable" | "need_time" | "need_day" | "nothing_pending" | "declined" | "answer" | "availability" | "bot" | "handover" | "optout" | "not_interested";
+  kind: "proposed" | "proposed_reschedule" | "booked" | "rescheduled" | "cancel_proposed" | "cancelled" | "unavailable" | "need_time" | "need_day" | "nothing_pending" | "declined" | "answer" | "availability" | "bot" | "handover" | "optout" | "not_interested" | "joined_confirmed" | "joined_unverified";
   slot?: Date; from?: Date; alternatives?: Date[]; reason?: string; text?: string;
 }
 function describe(res: Resolution, mem: Memory): string {
   switch (res.kind) {
+    case "joined_confirmed": return `They say they have joined and Glofox CONFIRMS IT: ${res.text ?? "an active membership"}. Welcome them warmly in two sentences, say the team will get them set up with the app and their first session, and that they can reply here with any question. No selling, no trial talk, no questions.`;
+    case "joined_unverified": return `They say they have joined but our system does NOT show a membership yet. Welcome them warmly, say it can take a few minutes to come through and the team will double-check and get them set up. Do not ask them to prove it, do not offer a trial, do not say it is confirmed. One short message.`;
     case "proposed": return `We can offer ${fmtSlot(res.slot!)} and it is free. NOTHING IS BOOKED YET. Ask the lead to confirm that time with a yes before it is booked. One short question.`;
     case "proposed_reschedule": return `The lead has a booking at ${fmtSlot(res.from!)}. The new time ${fmtSlot(res.slot!)} is free. NOTHING HAS CHANGED YET. Ask them to confirm the move with a yes.`;
     case "booked": return `The trial IS NOW BOOKED for ${fmtSlot(res.slot!)}. Confirm it as done, say to bring themselves, water and trainers and ask for the team at reception. Tours take about 20 minutes.`;
@@ -492,7 +570,7 @@ async function fanOut(gym: Row, lead: Row, slotIso: string, bookingId: string, w
   const headline = what === "booked" ? `BOOKED: ${lead.first_name}, free trial ${nice}.`
     : what === "rescheduled" ? `MOVED: ${lead.first_name}, free trial now ${nice} (was ${fmtSlot(fromIso!)}).`
     : `CANCELLED: ${lead.first_name}, free trial ${nice}. Slot released.`;
-  await alertStaff(gym, `gymIQ${isDemo(lead) ? " (SIM)" : ""}\n${headline}\nConfirmed by the lead in chat. Booking ${bookingId.slice(0, 8)}.`);
+  await alertStaff(gym, `gymIQ\n${headline}\nConfirmed by the lead in chat. Booking ${bookingId.slice(0, 8)}.`, isDemo(lead));
   if (!isDemo(lead)) {
     // Real lead: email + SMS to the team through dispatch, with the mark-outcome links.
     const links = what === "cancelled" ? "" : await markLinks(lead, bookingId);
@@ -553,7 +631,7 @@ async function routeLead(b: Row) {
   await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ current_stage: "contacted", contact_attempts: 1, last_contact_at: new Date().toISOString(), last_contact_channel: "sim" }) });
   await journey(lead.id, "first_touch", "contacted", "new", ft.slice(0, 200));
   await startNoReplySequence(gym_id, lead);
-  await alertStaff(gym, `gymIQ lead engine (SIM)\nNew lead: ${first_name} · ${source}${previous ? " (returning, history loaded)" : ""}\nFirst touch sent instantly. Watching for a reply.`);
+  await alertStaff(gym, `gymIQ lead engine (SIM)\nNew lead: ${first_name} · ${source}`, true);
   return J({ ok: true, lead_id: lead.id, conversation_id: conv.id, first_touch: ft, returning: !!previous });
 }
 
@@ -566,6 +644,30 @@ async function routeFirstTouch(b: Row) {
   if (!lead) return J({ ok: false, error: "unknown lead" }, 404);
   if (lead.first_touch_at && !b.force) return J({ ok: true, skipped: "already touched", at: lead.first_touch_at });
   if (["opted_out", "joined", "dead"].includes(String(lead.current_stage))) return J({ ok: true, skipped: `stage ${lead.current_stage}` });
+  if (lead.due_at && new Date(lead.due_at).getTime() > Date.now() && !b.force) return J({ ok: true, skipped: "not due yet", due_at: lead.due_at });
+  const noMore = async (why: string) => {
+    await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ metadata: { ...(lead.metadata ?? {}), needs_first_touch: false, first_touch_skipped: { at: new Date().toISOString(), why } } }) });
+  };
+
+  // Someone who started the join checkout and finished it after all gets a
+  // welcome from the conversion check, not a trial invite from here.
+  if (String(lead.source) === "abandoned_cart" && !isDemo(lead)) {
+    const chk = await glofoxJoined(lead);
+    if (chk.joined) {
+      await noMore(`joined before the opener (${chk.how})`);
+      await journey(String(lead.id), "first_touch_skipped", String(lead.current_stage), null, `joined before the opener: ${chk.plan ?? chk.how}`);
+      return J({ ok: true, skipped: "joined", plan: chk.plan });
+    }
+  }
+  // Nobody who already pays for a membership is offered a free trial.
+  if (!isDemo(lead)) {
+    const ms = await one(sb(`lead_member_status?lead_id=eq.${lead.id}&select=is_currently_a_member,live_plan`));
+    if (ms?.is_currently_a_member === true) {
+      await noMore(`current member (${ms.live_plan ?? "plan unknown"})`);
+      await journey(String(lead.id), "first_touch_skipped", String(lead.current_stage), null, `already a paying member: ${ms.live_plan ?? ""}`);
+      return J({ ok: true, skipped: "current member" });
+    }
+  }
 
   // Memory of a returning lead: same mobile, same club, an earlier record.
   const phone = String(lead.phone_e164 ?? lead.phone ?? "");
@@ -578,13 +680,17 @@ async function routeFirstTouch(b: Row) {
   const ft = firstTouch(lead);
   const r = await sendToLead(gym_id, lead, conv.id, ft, { purpose: "first_touch", template: "trial_invite" });
   if (!r.sent) {
+    // Suppressed (test mode, not live, opted out) or no channel could carry it.
+    // Record it once and take the lead out of the queue; it is not retried every
+    // five minutes, and the human desk still has it with its due_at.
+    await noMore(String(r.reason ?? "no channel").slice(0, 200));
     await journey(String(lead.id), "first_touch_suppressed", String(lead.current_stage), null, String(r.reason ?? "").slice(0, 200));
     return J({ ok: true, sent: false, reason: r.reason, attempts: r.attempts });
   }
   await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ current_stage: "contacted", metadata: { ...(lead.metadata ?? {}), needs_first_touch: false } }) });
   await journey(String(lead.id), "first_touch", "contacted", String(lead.current_stage), `${r.channel}${r.mode ? " " + r.mode : ""}`);
   await startNoReplySequence(gym_id, lead);
-  await alertStaff(gym, `gymIQ\nNew lead: ${lead.first_name ?? "?"} · ${lead.source}${previous ? " (returning, history loaded)" : ""}\nFirst touch sent by ${r.channel}. Watching for a reply.`);
+  await alertStaff(gym, `gymIQ\nNew lead: ${lead.first_name ?? "?"} · ${lead.source}${previous ? " (returning, history loaded)" : ""}\nFirst touch sent by ${r.channel}. Watching for a reply.`, isDemo(lead));
   return J({ ok: true, sent: true, channel: r.channel, mode: r.mode });
 }
 
@@ -596,10 +702,13 @@ async function startNoReplySequence(gym_id: string, lead: Row) {
   await sb("lead_sequence_runs", { method: "POST", body: JSON.stringify({ sequence_id: seq.id, lead_id: lead.id, gym_id, status: "pending", current_step: 0, trigger: "no_reply", next_send_at: new Date(Date.now() + waitMs).toISOString(), contacted_at: new Date().toISOString() }) });
 }
 
-// Ingested leads that have not had their opener yet (glofox-leads-pull sets needs_first_touch).
+// Ingested leads that have not had their opener yet (lead-intake and
+// glofox-leads-pull set needs_first_touch and a due_at: now for a free trial,
+// an hour later for an abandoned cart).
 async function routeFirstTouchDue() {
   const gym = await gymRow(); const gym_id = String(gym.id);
-  const due = await many(sb(`leads?gym_id=eq.${gym_id}&metadata->>needs_first_touch=eq.true&first_touch_at=is.null&current_stage=eq.new&order=created_at.asc&limit=10&select=id,first_name`));
+  const now = new Date().toISOString();
+  const due = await many(sb(`leads?gym_id=eq.${gym_id}&metadata->>needs_first_touch=eq.true&first_touch_at=is.null&current_stage=eq.new&or=(due_at.is.null,due_at.lte.${now})&order=created_at.asc&limit=10&select=id,first_name`));
   const out: unknown[] = [];
   for (const l of due) {
     const r = await routeFirstTouch({ lead_id: l.id });
@@ -674,10 +783,27 @@ async function routeReply(b: Row) {
     await setStage(lead, "opted_out", "optout", text); res = { kind: "optout" }; action = "optout";
   } else if (u.intent === "handover") {
     await setStage(lead, "handover", "human_handover", u.note ?? text); res = { kind: "handover" }; action = "handover";
-    await alertStaff(gym, `gymIQ lead engine (SIM)\nHANDOVER: ${lead.first_name} needs a human.\nReason: ${u.note ?? text.slice(0, 120)}${mem.booking ? `\nHas a trial booked ${fmtSlot(mem.booking.slot_iso)}.` : ""}`);
+    await alertStaff(gym, `gymIQ\nHANDOVER: ${lead.first_name} needs a human.\nReason: ${u.note ?? text.slice(0, 120)}${mem.booking ? `\nHas a trial booked ${fmtSlot(mem.booking.slot_iso)}.` : ""}`, isDemo(lead));
   } else if (u.intent === "not_interested") {
     if (!hasBooking) await setStage(lead, "cold", "not_interested", text);
     res = { kind: "not_interested" };
+  } else if (u.intent === "joined") {
+    // They say they have joined. Glofox is the authority, not the message.
+    const chk = await glofoxJoined(lead);
+    if (chk.joined) {
+      const m2 = await markJoined(gym, lead, `lead said so, confirmed by ${chk.how}`, chk.plan);
+      Object.assign(mem, m2);
+      res = { kind: "joined_confirmed", text: chk.plan ?? undefined }; action = "joined";
+    } else {
+      // Not on the system yet. Believe them enough to stop selling, not enough to close.
+      mem.pending = null;
+      mem.facts = uniq([...mem.facts, "says they have joined (not yet seen in glofox)"]);
+      await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ metadata: { ...(lead.metadata ?? {}), claimed_joined_at: new Date().toISOString() } }) });
+      await sb(`lead_sequence_runs?lead_id=eq.${lead.id}&status=eq.pending`, { method: "PATCH", body: JSON.stringify({ status: "stopped", outcome: "claimed_joined", outcome_set_at: new Date().toISOString() }) });
+      await journey(String(lead.id), "joined_claim_unverified", String(lead.current_stage), null, `${text.slice(0, 160)} (checked: ${chk.how})`);
+      await alertStaff(gym, `gymIQ\nSAYS JOINED: ${lead.first_name ?? "?"} says they have signed up but Glofox does not show it yet. Please check and mark Joined if so.`, isDemo(lead));
+      res = { kind: "joined_unverified" }; action = "joined_claim";
+    }
   } else if (u.intent === "bot_question") {
     res = { kind: "bot" };
   } else if (u.intent === "ask_availability") {
@@ -820,17 +946,24 @@ async function routeOutcome(b: Row) {
     if (conv) await sendToLead(gym_id, lead, conv.id, `Hi ${lead.first_name}, it was great to have you in today! How did you find it? If anything would make joining an easy yes, tell me and I'll see what we can do.`, { purpose: "after_visit" });
     await journey(lead.id, "experience_followup_sent", "showed", null, "keep-warm sequence starts; join nudge tomorrow");
   } else {
-    await setStage(lead, "joined", "marked_joined", "staff marked joined");
-    await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ converted_at: new Date().toISOString() }) });
-    if (conv) await sendToLead(gym_id, lead, conv.id, `Welcome to the club, ${lead.first_name}! You've made a great choice. The team will get you set up with the app and your first sessions. See you in there.`, { purpose: "welcome" });
-    await journey(lead.id, "onboarding_handoff", "joined", null, "hand to onboarding flow: welcome call, day-12 induction check");
+    // Joined: by staff (email link, desk), by Glofox (conversion check, nightly
+    // reconcile) or by the lead's own word confirmed in Glofox. One path.
+    const plan = String(b.plan ?? (((lead.metadata as Row | undefined)?.glofox as Row | undefined)?.membership as Row | undefined)?.plan_name ?? "");
+    const m2 = await markJoined(gym, lead, String(b.by ?? "staff"), plan || null);
+    Object.assign(mem, m2);
+    const welcome = ((gym.settings as Row)?.lead_engine as Row | undefined)?.welcome_on_join !== false;
+    if (conv && welcome && !(lead.metadata as Row | undefined)?.welcome_sent_at) {
+      const r = await sendToLead(gym_id, lead, conv.id, `Welcome to the club, ${lead.first_name}! You've made a great choice. The team will get you set up with the app and your first sessions. See you in there.`, { purpose: "welcome" });
+      if (r.sent) await sb(`leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ metadata: { ...(lead.metadata ?? {}), welcome_sent_at: new Date().toISOString() } }) });
+    }
+    return J({ ok: true, stage: lead.current_stage, memory: mem });
   }
   if (!isDemo(lead)) {
     // The rule-based follow-ups (attended +4h, +7d if not joined, no-show +2h) queue here; gymiq-dispatch sends them.
     const ev = outcome === "showed" ? "attended" : outcome === "no_show" ? "no_show" : null;
     if (ev) await fetch(`${SB_URL}/rest/v1/rpc/lead_followups_enqueue`, { method: "POST", headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ p_gym: gym_id, p_lead: lead.id, p_booking: bookingId, p_event: ev }) }).catch(() => null);
   }
-  await alertStaff(gym, `gymIQ${isDemo(lead) ? " (SIM)" : ""}\nOUTCOME: ${lead.first_name} marked ${outcome.replace("_", "-")}${b.by ? " via " + b.by : ""}. Follow-up sent.`);
+  await alertStaff(gym, `gymIQ\nOUTCOME: ${lead.first_name} marked ${outcome.replace("_", "-")}${b.by ? " via " + b.by : ""}. Follow-up queued.`, isDemo(lead));
   return J({ ok: true, stage: lead.current_stage, memory: mem });
 }
 
@@ -892,8 +1025,9 @@ async function routeTick() {
 async function routeBoard() {
   const gym = await gymRow(); const gym_id = String(gym.id);
   const leads = await many(sb(`leads?gym_id=eq.${gym_id}&metadata->>demo=eq.true&order=created_at.desc&limit=40&select=id,first_name,source,current_stage,score,contact_attempts,created_at,phone,memory`));
-  const events = await many(sb(`lead_journey?order=created_at.desc&limit=40&select=lead_id,action,stage,from_stage,message,created_at`));
-  const bookings = await many(sb(`bookings?gym_id=eq.${gym_id}&order=created_at.desc&limit=20&select=id,lead_id,slot_at,status,rescheduled_from,created_at`));
+  const ids = leads.map((l: Row) => l.id).join(",");
+  const events = ids ? await many(sb(`lead_journey?lead_id=in.(${ids})&order=created_at.desc&limit=40&select=lead_id,action,stage,from_stage,message,created_at`)) : [];
+  const bookings = ids ? await many(sb(`bookings?lead_id=in.(${ids})&order=created_at.desc&limit=20&select=id,lead_id,slot_at,status,rescheduled_from,created_at`)) : [];
   return J({ ok: true, leads, events, bookings });
 }
 
@@ -967,6 +1101,18 @@ Deno.serve(async (req: Request) => {
   const who = await authed(req);
   if (!who) return J({ ok: false, error: "forbidden" }, 403);
   try {
+    // The demo key is public (it ships in the demo page). It may only ever touch
+    // simulated leads: never read a real person's data, never message one.
+    if (who === "demo") {
+      const b0 = req.method === "POST" ? await req.clone().json().catch(() => ({})) : {};
+      const leadId = String(url.searchParams.get("lead_id") ?? (b0 as Row).lead_id ?? "");
+      if (["first-touch", "first-touch-due", "outcome", "tick", "inbound"].includes(route)) return J({ ok: false, error: "forbidden" }, 403);
+      if (leadId) {
+        const l = await one(sb(`leads?id=eq.${encodeURIComponent(leadId)}&select=metadata`));
+        if (!l || (l.metadata as Row | undefined)?.demo !== true) return J({ ok: false, error: "forbidden" }, 403);
+      }
+      if (route === "reply" && !leadId) return J({ ok: false, error: "lead_id required" }, 400);
+    }
     if (req.method === "GET" && route === "board") return await routeBoard();
     if (req.method === "GET" && route === "messages") return await routeMessages(url.searchParams.get("lead_id") ?? "");
     if (req.method === "GET" && route === "state") return await routeState(url.searchParams.get("lead_id") ?? "");
