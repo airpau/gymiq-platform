@@ -3,6 +3,15 @@
 
 ---
 
+## Start of every session (do this first)
+
+1. Run `git pull --ff-only` (if there are unsaved changes, skip the pull and say so).
+2. Read `HANDOVER.md` if it exists.
+3. Run `git status` and `git log -5`.
+4. Tell Paul in a few plain lines where things stand, then wait for his instruction.
+
+Paul switches between Claude, Codex and other tools, including from his phone. `HANDOVER.md` is how they stay in step. Before you stop, update it: what was asked, what is done, what is half done, the exact next step, and what must not be touched.
+
 ## CRITICAL — READ THIS FIRST
 
 GymIQ is **one Next.js 15 + Supabase app** under `unified/`. The old Express + Prisma monorepo (`apps/`, `packages/`) was salvaged and deleted on 2026-05-16. If you find anything referencing those paths in code, comments, or docs, that's a stale reference — flag it.
